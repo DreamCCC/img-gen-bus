@@ -37,16 +37,49 @@ def play_url(news_id: str, tries: int = 6) -> str:
     return obj["data"]["url"]
 
 
+def get(url: str) -> bytes:
+    with urllib.request.urlopen(urllib.request.Request(url, headers=HEADERS), timeout=60) as r:
+        return r.read()
+
+
+def local_hls(url: str, dest: Path) -> None:
+    """Static ffmpeg builds can segfault resolving https hosts; download the playlist ourselves and mux from disk."""
+    tmp = dest.with_suffix(".hls")
+    tmp.mkdir(exist_ok=True)
+    text = get(url).decode()
+    if "#EXT-X-STREAM-INF" in text:
+        url = urllib.parse.urljoin(url, [ln for ln in text.splitlines() if ln and not ln.startswith("#")][-1])
+        text = get(url).decode()
+    out, n = [], 0
+    for ln in text.splitlines():
+        if ln.startswith("#EXT-X-KEY") and 'URI="' in ln:
+            uri = ln.split('URI="')[1].split('"')[0]
+            (tmp / "key.bin").write_bytes(get(urllib.parse.urljoin(url, uri)))
+            ln = ln.replace(uri, "key.bin")
+        elif ln and not ln.startswith("#"):
+            name = f"{n:04d}.ts"
+            (tmp / name).write_bytes(get(urllib.parse.urljoin(url, ln)))
+            ln, n = name, n + 1
+        out.append(ln)
+    (tmp / "list.m3u8").write_text("\n".join(out) + "\n")
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-protocol_whitelist", "file,crypto", "-allowed_extensions", "ALL",
+                    "-i", str(tmp / "list.m3u8"), "-c", "copy", "-bsf:a", "aac_adtstoasc", str(dest)], check=True)
+    for f in tmp.iterdir():
+        f.unlink()
+    tmp.rmdir()
+
+
 def fetch(news_id: str, dest: Path) -> Path:
     if dest.exists() and dest.stat().st_size > 0:
         return dest
     dest.parent.mkdir(parents=True, exist_ok=True)
     hdr = "".join(f"{k}: {v}\r\n" for k, v in HEADERS.items())
-    subprocess.run(
-        ["ffmpeg", "-y", "-loglevel", "error", "-headers", hdr, "-i", play_url(news_id),
-         "-c", "copy", "-bsf:a", "aac_adtstoasc", str(dest)],
-        check=True,
-    )
+    url = play_url(news_id)
+    r = subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-headers", hdr, "-i", url,
+                        "-c", "copy", "-bsf:a", "aac_adtstoasc", str(dest)])
+    if r.returncode != 0:
+        dest.unlink(missing_ok=True)
+        local_hls(url, dest)
     return dest
 
 
