@@ -17,6 +17,8 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
+from court import device
+
 
 def floor_mask(frame: np.ndarray) -> np.ndarray:
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -77,7 +79,7 @@ def main() -> None:
         if not ok or i / fps > a.end:
             break
         res = model.track(frame, persist=True, classes=[0], conf=0.25, imgsz=a.imgsz,
-                          tracker="botsort.yaml", verbose=False, device="mps")[0]
+                          tracker="botsort.yaml", verbose=False, device=device())[0]
         mask = floor_mask(frame)
         dets = []
         if res.boxes.id is not None:

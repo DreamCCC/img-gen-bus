@@ -24,7 +24,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, str(Path(__file__).parent))
-from court import RIM, Cam  # noqa: E402
+from court import RIM, Cam, device  # noqa: E402
 import fx  # noqa: E402
 
 FONTS = Path(__file__).resolve().parent.parent / "assets/fonts"
@@ -1081,7 +1081,7 @@ def extra_masks(r: Renderer):
     r.M.extra.mkdir(exist_ok=True)
     for f, k in need:
         img = cv2.imread(str(r.base / r.edl["orig"] / f"{f:04d}.jpg"))
-        res = model.predict(img, classes=[0], conf=0.2, imgsz=1280, retina_masks=True, verbose=False, device="mps")[0]
+        res = model.predict(img, classes=[0], conf=0.2, imgsz=1280, retina_masks=True, verbose=False, device=device())[0]
         foot = r.cam.to_img(f, [r.P.uv(k, f)])[0]
         best, bm = 1e9, None
         for b, m in zip(res.boxes.xyxy.cpu().numpy(), res.masks.data.cpu().numpy()):
@@ -1134,7 +1134,7 @@ def hq_masks(r: Renderer):
             continue
         img = cv2.imread(str(r.base / r.edl["orig"] / f"{f:04d}.jpg"))
         H, W = img.shape[:2]
-        res = model(img, bboxes=[list(map(float, b)) for _, b in ok], verbose=False, device="mps")[0]
+        res = model(img, bboxes=[list(map(float, b)) for _, b in ok], verbose=False, device=device())[0]
         for (k, b), mm in zip(ok, res.masks.data.cpu().numpy()):
             m = (mm > 0.5).astype(np.uint8)
             x1, y1, x2, y2 = b

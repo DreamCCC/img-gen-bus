@@ -14,6 +14,8 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
+from court import device
+
 
 def iou(a, b) -> float:
     x1, y1 = max(a[0], b[0]), max(a[1], b[1])
@@ -48,7 +50,7 @@ def main() -> None:
         want = [d for d in tracks[i] if d["id"] in ids]
         if want:
             res = model.predict(frame, classes=[0], conf=0.2, imgsz=1280, retina_masks=True,
-                                verbose=False, device="mps")[0]
+                                verbose=False, device=device())[0]
             boxes = res.boxes.xyxy.cpu().numpy() if res.masks is not None else []
             saved = {}
             for d in want:

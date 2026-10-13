@@ -17,6 +17,8 @@ from __future__ import annotations
 import cv2
 import numpy as np
 
+from court import device
+
 HALF = np.float32([(0, -25), (47, -25), (47, 25), (0, 25)])   # 半场边线
 CONE = (170, 225, 255)
 
@@ -256,7 +258,7 @@ def ghost_prep(r) -> None:
         if h.get("pos") or h.get("neg"):              # 两人重叠时框不够，用正/负点指认
             pts = [*h.get("pos", []), *h.get("neg", [])]
             kw = {"points": [pts], "labels": [[1] * len(h.get("pos", [])) + [0] * len(h.get("neg", []))]}
-        m = (model(img, **kw, verbose=False, device="mps")[0].masks.data[0].cpu().numpy() > 0.5)
+        m = (model(img, **kw, verbose=False, device=device())[0].masks.data[0].cpu().numpy() > 0.5)
         x1, y1, x2, y2 = b.astype(int)
         m[:max(0, y1)], m[y2 + 1:], m[:, :max(0, x1)], m[:, x2 + 1:] = 0, 0, 0, 0
         m = m.astype(np.uint8)

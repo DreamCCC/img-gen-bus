@@ -12,6 +12,13 @@ import numpy as np
 RIM = np.array([5.25, 0.0])
 
 
+def device() -> str:
+    import torch
+    if torch.cuda.is_available():
+        return "cuda"
+    return "mps" if torch.backends.mps.is_available() else "cpu"
+
+
 class Cam:
     def __init__(self, path: Path):
         d = json.load(open(path))

@@ -33,13 +33,16 @@ def duration(p: str) -> float:
 
 
 def asr(p: Path, lang: str) -> str:
-    for i in range(5):
-        r = dashscope.MultiModalConversation.call(
-            model="qwen3-asr-flash",
-            messages=[{"role": "user", "content": [{"audio": f"file://{p.resolve()}"}]}],
-            asr_options={"language": lang, "enable_itn": True})
-        if r.status_code == 200:
-            return r.output.choices[0].message.content[0]["text"]
+    for i in range(6):
+        try:
+            r = dashscope.MultiModalConversation.call(
+                model="qwen3-asr-flash",
+                messages=[{"role": "user", "content": [{"audio": f"file://{p.resolve()}"}]}],
+                asr_options={"language": lang, "enable_itn": True})
+            if r.status_code == 200:
+                return r.output.choices[0].message.content[0]["text"]
+        except Exception:
+            pass
         time.sleep(3 * (i + 1))
     return "[ASR 失败]"
 
@@ -52,7 +55,7 @@ def main() -> None:
     ap.add_argument("--lang", default="en")
     ap.add_argument("--from", dest="t0", type=float, default=0)
     ap.add_argument("--to", dest="t1", type=float, default=0)
-    ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--workers", type=int, default=4)
     a = ap.parse_args()
     t1 = a.t1 or duration(a.src)
     starts = []
