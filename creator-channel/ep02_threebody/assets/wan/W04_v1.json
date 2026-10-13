@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "电影级镜头，异星冰封荒原，暴风雪横扫大地，冰层在脚下龟裂，天空昏暗，三颗遥远微弱的小星悬在天上，地面上结满冰霜的黑色岩石，镜头贴地向前推进。极寒、死寂，真实摄影，IMAX质感，无文字，无人物。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "16:9",
+  "duration": 3,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": null,
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "74811b4e-4383-4ecc-8eea-577fcae471ab"
+}

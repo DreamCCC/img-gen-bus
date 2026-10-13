@@ -1,0 +1,15 @@
+{
+ "model": "wan2.7-i2v-2026-04-25",
+ "prompt": "女歌手在舞台中央边唱边跳80年代偶像式的简单舞步，口型与歌声同步，向观众挥手、转身，裙摆和长发随舞步飘动，舞台灯光随节拍闪烁变换颜色，镜球旋转。固定全景机位。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 15,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/C_stage_wide.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "82085b6f-51eb-4829-b6d2-8263e7754b81"
+}

@@ -1,0 +1,2803 @@
+{
+"fps": 30,
+"dur": 242.0,
+"beats": [
+0.064,
+0.447,
+0.906,
+1.353,
+1.805,
+2.223,
+2.641,
+3.088,
+3.541,
+4.005,
+4.464,
+4.928,
+5.381,
+5.851,
+6.304,
+6.763,
+7.227,
+7.686,
+8.144,
+8.615,
+9.067,
+9.532,
+9.99,
+10.455,
+10.913,
+11.378,
+11.836,
+12.307,
+12.759,
+13.224,
+13.682,
+14.147,
+14.605,
+15.07,
+15.528,
+15.993,
+16.451,
+16.916,
+17.369,
+17.827,
+18.292,
+18.75,
+19.209,
+19.673,
+20.126,
+20.584,
+21.043,
+21.507,
+21.966,
+22.43,
+22.889,
+23.353,
+23.806,
+24.271,
+24.729,
+25.194,
+25.652,
+26.117,
+26.575,
+27.04,
+27.492,
+27.957,
+28.415,
+28.886,
+29.338,
+29.803,
+30.261,
+30.72,
+31.179,
+31.643,
+32.102,
+32.572,
+33.025,
+33.483,
+33.942,
+34.406,
+34.859,
+35.323,
+35.782,
+36.252,
+36.699,
+37.164,
+37.622,
+38.081,
+38.539,
+39.01,
+39.462,
+39.933,
+40.385,
+40.85,
+41.302,
+41.767,
+42.225,
+42.69,
+43.148,
+43.619,
+44.071,
+44.536,
+44.994,
+45.447,
+45.923,
+46.376,
+46.829,
+47.287,
+47.752,
+48.21,
+48.675,
+49.133,
+49.586,
+50.056,
+50.509,
+50.974,
+51.432,
+51.897,
+52.355,
+52.82,
+53.272,
+53.731,
+54.19,
+54.66,
+55.113,
+55.577,
+56.03,
+56.5,
+56.953,
+57.417,
+57.87,
+58.334,
+58.793,
+59.263,
+59.71,
+60.175,
+60.633,
+61.098,
+61.556,
+62.02,
+62.473,
+62.943,
+63.39,
+63.855,
+64.308,
+64.772,
+65.231,
+65.695,
+66.148,
+66.612,
+67.071,
+67.535,
+67.988,
+68.452,
+68.911,
+69.375,
+69.828,
+70.293,
+70.751,
+71.216,
+71.668,
+72.133,
+72.586,
+73.05,
+73.509,
+73.973,
+74.432,
+74.89,
+75.349,
+75.813,
+76.266,
+76.725,
+77.189,
+77.648,
+78.106,
+78.565,
+79.018,
+79.482,
+79.94,
+80.405,
+80.863,
+81.322,
+81.781,
+82.245,
+82.698,
+83.162,
+83.615,
+84.085,
+84.544,
+85.008,
+85.461,
+85.92,
+86.378,
+86.843,
+87.295,
+87.76,
+88.218,
+88.677,
+89.136,
+89.594,
+90.053,
+90.517,
+90.97,
+91.434,
+91.899,
+92.357,
+92.81,
+93.275,
+93.733,
+94.192,
+94.65,
+95.115,
+95.568,
+96.026,
+96.485,
+96.949,
+97.408,
+97.866,
+98.331,
+98.795,
+99.248,
+99.706,
+100.165,
+100.624,
+101.088,
+101.547,
+102.005,
+102.47,
+102.922,
+103.381,
+103.84,
+104.298,
+104.763,
+105.221,
+105.68,
+106.133,
+106.603,
+107.061,
+107.514,
+107.979,
+108.431,
+108.896,
+109.349,
+109.813,
+110.272,
+110.742,
+111.189,
+111.653,
+112.106,
+112.565,
+113.029,
+113.488,
+113.952,
+114.416,
+114.869,
+115.328,
+115.78,
+116.239,
+116.698,
+117.156,
+117.615,
+118.073,
+118.532,
+118.991,
+119.443,
+119.908,
+120.378,
+120.825,
+121.289,
+121.754,
+122.212,
+122.671,
+123.124,
+123.588,
+124.047,
+124.511,
+124.964,
+125.428,
+125.881,
+126.346,
+126.798,
+127.257,
+127.721,
+128.18,
+128.633,
+129.097,
+129.556,
+130.02,
+130.467,
+130.932,
+131.39,
+131.855,
+132.307,
+132.772,
+133.224,
+133.689,
+134.142,
+134.606,
+135.065,
+135.523,
+135.988,
+136.446,
+136.899,
+137.363,
+137.816,
+138.275,
+138.739,
+139.198,
+139.651,
+140.121,
+140.574,
+141.032,
+141.491,
+141.949,
+142.408,
+142.867,
+143.331,
+143.795,
+144.248,
+144.707,
+145.16,
+145.624,
+146.077,
+146.541,
+146.994,
+147.458,
+147.917,
+148.376,
+148.828,
+149.293,
+149.745,
+150.21,
+150.668,
+151.127,
+151.586,
+152.05,
+152.497,
+152.961,
+153.414,
+153.879,
+154.337,
+154.796,
+155.254,
+155.713,
+156.172,
+156.63,
+157.089,
+157.547,
+158.006,
+158.47,
+158.929,
+159.388,
+159.84,
+160.305,
+160.758,
+161.216,
+161.675,
+162.139,
+162.598,
+163.056,
+163.509,
+163.974,
+164.432,
+164.891,
+165.349,
+165.814,
+166.278,
+166.737,
+167.189,
+167.654,
+168.101,
+168.571,
+169.03,
+169.482,
+169.941,
+170.394,
+170.852,
+171.317,
+171.77,
+172.222,
+172.698,
+173.151,
+173.604,
+174.057,
+174.515,
+174.974,
+175.433,
+175.891,
+176.35,
+176.803,
+177.273,
+177.731,
+178.184,
+178.643,
+179.107,
+179.56,
+180.019,
+180.483,
+180.936,
+181.4,
+181.853,
+182.311,
+182.77,
+183.229,
+183.681,
+184.146,
+184.604,
+185.063,
+185.516,
+185.98,
+186.433,
+186.897,
+187.35,
+187.809,
+188.267,
+188.726,
+189.185,
+189.643,
+190.102,
+190.56,
+191.013,
+191.478,
+191.936,
+192.395,
+192.853,
+193.312,
+193.765,
+194.229,
+194.682,
+195.146,
+195.605,
+196.063,
+196.516,
+196.981,
+197.433,
+197.892,
+198.345,
+198.803,
+199.262,
+199.726,
+200.179,
+200.638,
+201.096,
+201.555,
+202.008,
+202.472,
+202.931,
+203.389,
+203.842,
+204.301,
+204.759,
+205.218,
+205.671,
+206.135,
+206.594,
+207.052,
+207.505,
+207.97,
+208.422,
+208.875,
+209.34,
+209.798,
+210.251,
+210.715,
+211.168,
+211.632,
+212.085,
+212.544,
+212.997,
+213.461,
+213.914,
+214.378,
+214.831,
+215.29,
+215.748,
+216.207,
+216.66,
+217.124,
+217.577,
+218.041,
+218.494,
+218.953,
+219.411,
+219.87,
+220.323,
+220.787,
+221.24,
+221.704,
+222.157,
+222.616,
+223.074,
+223.533,
+223.985,
+224.45,
+224.908,
+225.367,
+225.82,
+226.284,
+226.737,
+227.201,
+227.654,
+228.113,
+228.566,
+229.024,
+229.477,
+229.947,
+230.4,
+230.859,
+231.311,
+231.776,
+232.229,
+232.693,
+233.146,
+233.604,
+234.063,
+234.522,
+234.974,
+235.433,
+235.892,
+236.35
+],
+"shots": [
+{
+"t0": 0,
+"t1": 0.9,
+"look": "tv89",
+"src": {
+"kind": "scene",
+"name": "snow",
+"args": {}
+}
+},
+{
+"t0": 0.9,
+"t1": 3.541,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/tokyo_night_1987.mp4",
+"start": 290.0,
+"fit": "cover"
+}
+},
+{
+"t0": 3.541,
+"t1": 7.227,
+"look": "tv89",
+"src": {
+"kind": "scene",
+"name": "skyline",
+"args": {}
+}
+},
+{
+"t0": 7.227,
+"t1": 10.913,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/I3.mp4",
+"start": 0.0
+}
+},
+{
+"t0": 10.913,
+"t1": 14.605,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/smooth/I4.mp4",
+"start": 0.0
+}
+},
+{
+"t0": 14.605,
+"t1": 17.72,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "title",
+"args": {
+"path": "look/src/cover_night.png"
+}
+}
+},
+{
+"t0": 17.72,
+"t1": 19.673,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/V1.mp4",
+"start": 0.32
+}
+},
+{
+"t0": 19.673,
+"t1": 21.51,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/tokyo_night_1987.mp4",
+"start": 200.0,
+"fit": "cover"
+}
+},
+{
+"t0": 21.51,
+"t1": 25.19,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 44.5,
+"fit": "cover"
+}
+},
+{
+"t0": 25.19,
+"t1": 28.89,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 2081.5,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+]
+}
+},
+{
+"t0": 28.886,
+"t1": 30.261,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 40.8,
+"fit": "cover"
+}
+},
+{
+"t0": 30.261,
+"t1": 31.643,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/ski_1987_trailer.mp4",
+"start": 56.5,
+"fit": "cover"
+}
+},
+{
+"t0": 31.643,
+"t1": 32.68,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 15.8,
+"fit": "cover"
+}
+},
+{
+"t0": 32.68,
+"t1": 34.406,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/disco_nyny.mp4",
+"start": 479.0,
+"fit": "cover",
+"crop": [
+0.125,
+0,
+0.75,
+1
+]
+}
+},
+{
+"t0": 34.406,
+"t1": 36.25,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/smooth/P1.mp4",
+"start": 1.906
+}
+},
+{
+"t0": 36.25,
+"t1": 40.39,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "mirrorball",
+"args": {
+"speed": 1.0
+}
+}
+},
+{
+"t0": 40.39,
+"t1": 43.62,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/office_80s.mp4",
+"start": 40.0,
+"fit": "cover"
+}
+},
+{
+"t0": 43.62,
+"t1": 47.29,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/P4.mp4",
+"start": 0.22
+}
+},
+{
+"t0": 47.29,
+"t1": 48.5,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "bigtext",
+"args": {
+"text": "みんなで歌って!",
+"sub": "大家一起唱"
+}
+}
+},
+{
+"t0": 48.5,
+"t1": 51.432,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/N1.mp4",
+"start": 0.2
+}
+},
+{
+"t0": 51.432,
+"t1": 52.36,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/tahosuru_op.mp4",
+"start": 8.75,
+"fit": "cover"
+}
+},
+{
+"t0": 52.36,
+"t1": 55.113,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/N3.mp4",
+"start": 4.06
+}
+},
+{
+"t0": 55.113,
+"t1": 56.03,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/disco_nyny.mp4",
+"start": 34.9,
+"fit": "cover",
+"crop": [
+0.125,
+0,
+0.75,
+1
+]
+}
+},
+{
+"t0": 56.03,
+"t1": 58.334,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/N1.mp4",
+"start": 7.73
+}
+},
+{
+"t0": 58.334,
+"t1": 59.26,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5669.2,
+"fit": "cover"
+}
+},
+{
+"t0": 59.26,
+"t1": 61.098,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 5723.8,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+]
+}
+},
+{
+"t0": 61.098,
+"t1": 63.39,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/ski_1987_trailer.mp4",
+"start": 50.7,
+"fit": "cover"
+}
+},
+{
+"t0": 63.39,
+"t1": 66.148,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/smooth/N2.mp4",
+"start": 0.59
+}
+},
+{
+"t0": 66.148,
+"t1": 67.07,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/nami_1991_promo.mp4",
+"start": 41.75,
+"fit": "cover",
+"crop": [
+0.131,
+0,
+0.742,
+1
+]
+}
+},
+{
+"t0": 67.07,
+"t1": 69.828,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/smooth/N4.mp4",
+"start": 4.27
+}
+},
+{
+"t0": 69.828,
+"t1": 70.75,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 80.9,
+"fit": "cover"
+}
+},
+{
+"t0": 70.75,
+"t1": 73.05,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/smooth/N2.mp4",
+"start": 7.95
+}
+},
+{
+"t0": 73.05,
+"t1": 73.97,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 5742.5,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+]
+}
+},
+{
+"t0": 73.973,
+"t1": 74.89,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/disco_nyny.mp4",
+"start": 425.0,
+"fit": "cover",
+"crop": [
+0.125,
+0,
+0.75,
+1
+]
+}
+},
+{
+"t0": 74.89,
+"t1": 75.349,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 55.0,
+"fit": "cover"
+}
+},
+{
+"t0": 75.349,
+"t1": 76.266,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 6.7,
+"fit": "cover"
+}
+},
+{
+"t0": 76.266,
+"t1": 77.18,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/aishiatte_op.mp4",
+"start": 5.8,
+"fit": "cover",
+"crop": [
+0.078,
+0,
+0.844,
+1
+]
+}
+},
+{
+"t0": 77.18,
+"t1": 79.018,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 4018.5,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+]
+}
+},
+{
+"t0": 79.018,
+"t1": 80.86,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "board",
+"args": {}
+}
+},
+{
+"t0": 80.86,
+"t1": 84.54,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "ledger",
+"args": {}
+}
+},
+{
+"t0": 84.54,
+"t1": 88.22,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "nikkei",
+"args": {}
+}
+},
+{
+"t0": 88.22,
+"t1": 91.9,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 2937.0,
+"fit": "cover"
+}
+},
+{
+"t0": 91.9,
+"t1": 94.19,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 33.2,
+"fit": "cover"
+}
+},
+{
+"t0": 94.19,
+"t1": 96.026,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/regain_cm.mp4",
+"start": 16.3,
+"fit": "cover"
+}
+},
+{
+"t0": 96.026,
+"t1": 98.8,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/office_80s.mp4",
+"start": 161.0,
+"fit": "cover"
+}
+},
+{
+"t0": 98.8,
+"t1": 100.624,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 45.8,
+"fit": "cover"
+}
+},
+{
+"t0": 100.624,
+"t1": 102.92,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 198.7,
+"fit": "cover"
+}
+},
+{
+"t0": 102.92,
+"t1": 107.1,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/W8.mp4",
+"start": 0.0
+}
+},
+{
+"t0": 107.1,
+"t1": 109.813,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/D1.mp4",
+"start": 0.3
+}
+},
+{
+"t0": 109.813,
+"t1": 110.74,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 463.8,
+"fit": "cover"
+}
+},
+{
+"t0": 110.74,
+"t1": 113.488,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/smooth/D3.mp4",
+"start": 3.94
+}
+},
+{
+"t0": 113.488,
+"t1": 114.42,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 4693.7,
+"fit": "cover"
+}
+},
+{
+"t0": 114.42,
+"t1": 117.156,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/D1.mp4",
+"start": 7.62
+}
+},
+{
+"t0": 117.156,
+"t1": 118.07,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5686.0,
+"fit": "cover"
+}
+},
+{
+"t0": 118.07,
+"t1": 119.908,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/nami_1991_promo.mp4",
+"start": 84.85,
+"fit": "cover",
+"crop": [
+0.131,
+0,
+0.742,
+1
+]
+}
+},
+{
+"t0": 119.908,
+"t1": 121.75,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/regain_cm.mp4",
+"start": 186.9,
+"fit": "cover"
+}
+},
+{
+"t0": 121.75,
+"t1": 124.511,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/D4.mp4",
+"start": 0.45
+}
+},
+{
+"t0": 124.511,
+"t1": 125.43,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/nami_1991_promo.mp4",
+"start": 75.95,
+"fit": "cover",
+"crop": [
+0.131,
+0,
+0.742,
+1
+]
+}
+},
+{
+"t0": 125.43,
+"t1": 128.18,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/smooth/D2.mp4",
+"start": 4.13
+}
+},
+{
+"t0": 128.18,
+"t1": 129.1,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5696.2,
+"fit": "cover"
+}
+},
+{
+"t0": 129.1,
+"t1": 131.855,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/D4.mp4",
+"start": 7.8
+}
+},
+{
+"t0": 131.855,
+"t1": 132.77,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/nami_1991_promo.mp4",
+"start": 71.45,
+"fit": "cover",
+"crop": [
+0.131,
+0,
+0.742,
+1
+]
+}
+},
+{
+"t0": 132.772,
+"t1": 133.689,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5701.6,
+"fit": "cover"
+}
+},
+{
+"t0": 133.689,
+"t1": 134.606,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5663.3,
+"fit": "cover"
+}
+},
+{
+"t0": 134.606,
+"t1": 135.523,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 4761.5,
+"fit": "cover"
+}
+},
+{
+"t0": 135.523,
+"t1": 136.34,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/regain_cm.mp4",
+"start": 150.0,
+"fit": "cover"
+}
+},
+{
+"t0": 136.34,
+"t1": 140.12,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "bubbles",
+"args": {
+"textures": [
+"mina/frames/stage_mcu.png",
+"look/src/anime_pool.png",
+"mina/frames/P4_roof.png",
+"mina/frames/D_beach_wide.png",
+"mina/frames/W8_car.png",
+"look/src/anime_ginza.png",
+"mina/frames/P1_fan.png"
+]
+}
+}
+},
+{
+"t0": 140.12,
+"t1": 143.8,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/B2.mp4",
+"start": 0.0
+}
+},
+{
+"t0": 143.795,
+"t1": 144.248,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 601.2,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+]
+}
+},
+{
+"t0": 144.248,
+"t1": 145.16,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 19.4,
+"fit": "cover"
+}
+},
+{
+"t0": 145.16,
+"t1": 145.624,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5696.2,
+"fit": "cover"
+}
+},
+{
+"t0": 145.624,
+"t1": 146.08,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 27.2,
+"fit": "cover"
+}
+},
+{
+"t0": 146.08,
+"t1": 151.13,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "mirrorball",
+"args": {
+"speed": 0.4,
+"warm": true
+}
+}
+},
+{
+"t0": 151.13,
+"t1": 153.41,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/B5.mp4",
+"start": 0.0
+}
+},
+{
+"t0": 153.41,
+"t1": 158.93,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "boombox",
+"args": {}
+}
+},
+{
+"t0": 158.93,
+"t1": 162.6,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/B7.mp4",
+"start": 0.33
+}
+},
+{
+"t0": 162.6,
+"t1": 164.7,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "bigtext",
+"args": {
+"text": "一緒に歌おう!",
+"sub": "一起唱吧"
+}
+}
+},
+{
+"t0": 164.7,
+"t1": 168.101,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/S1.mp4",
+"start": 0.0
+}
+},
+{
+"t0": 168.101,
+"t1": 170.852,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/S2.mp4",
+"start": 0.0
+}
+},
+{
+"t0": 170.852,
+"t1": 180.22,
+"look": "film89",
+"src": {
+"kind": "grid",
+"cells": [
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 601.2,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 463.8,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 19.4,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 4693.7,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "wan/F1.mp4",
+"start": 0.0
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5686.0,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5696.2,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/nami_1991_promo.mp4",
+"start": 75.95,
+"fit": "cover",
+"crop": [
+0.131,
+0,
+0.742,
+1
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 27.2,
+"fit": "cover",
+"loop": 3.0
+}
+],
+"reveal": [
+170.852,
+172.698,
+171.317,
+173.151,
+179.62,
+173.604,
+171.77,
+174.057,
+172.222
+],
+"labels": [
+"私をスキーに連れてって (1987)",
+"彼女が水着にきがえたら (1989)",
+"君の瞳をタイホする! (1988)",
+"彼女が水着にきがえたら (1989)",
+"MINA",
+"彼女が水着にきがえたら (1989)",
+"彼女が水着にきがえたら (1989)",
+"波の数だけ抱きしめて (1991)",
+"君の瞳をタイホする! (1988)"
+]
+}
+},
+{
+"t0": 180.22,
+"t1": 183.681,
+"look": "film89",
+"src": {
+"kind": "grid",
+"cells": [
+{
+"kind": "video",
+"path": "footage/raw/nami_1991_promo.mp4",
+"start": 71.45,
+"fit": "cover",
+"crop": [
+0.131,
+0,
+0.742,
+1
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 40.8,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_trailer.mp4",
+"start": 56.5,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 15.8,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "wan/F1.mp4",
+"start": 0.32
+},
+{
+"kind": "video",
+"path": "footage/raw/disco_nyny.mp4",
+"start": 34.9,
+"fit": "cover",
+"crop": [
+0.125,
+0,
+0.75,
+1
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5669.2,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/nami_1991_promo.mp4",
+"start": 41.75,
+"fit": "cover",
+"crop": [
+0.131,
+0,
+0.742,
+1
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 80.9,
+"fit": "cover",
+"loop": 3.0
+}
+],
+"labels": [
+"波の数だけ抱きしめて (1991)",
+"バブルへGO!! タイムマシンはドラム式 (2007)",
+"私をスキーに連れてって (1987)",
+"君の瞳をタイホする! (1988)",
+"MINA",
+"新宿 New York New York ディスコ映像 (1980年代)",
+"彼女が水着にきがえたら (1989)",
+"波の数だけ抱きしめて (1991)",
+"バブルへGO!! タイムマシンはドラム式 (2007)"
+]
+}
+},
+{
+"t0": 183.681,
+"t1": 187.35,
+"look": "film89",
+"src": {
+"kind": "grid",
+"cells": [
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 5742.5,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 6.7,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/aishiatte_op.mp4",
+"start": 5.8,
+"fit": "cover",
+"crop": [
+0.078,
+0,
+0.844,
+1
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 5618.5,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "wan/F1.mp4",
+"start": 3.781
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 1637.0,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 11.3,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/disco_nyny.mp4",
+"start": 367.0,
+"fit": "cover",
+"crop": [
+0.125,
+0,
+0.75,
+1
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 5702.3,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+}
+],
+"labels": [
+"私をスキーに連れてって (1987)",
+"君の瞳をタイホする! (1988)",
+"愛しあってるかい! (1989)",
+"私をスキーに連れてって (1987)",
+"MINA",
+"彼女が水着にきがえたら (1989)",
+"君の瞳をタイホする! (1988)",
+"新宿 New York New York ディスコ映像 (1980年代)",
+"私をスキーに連れてって (1987)"
+]
+}
+},
+{
+"t0": 187.35,
+"t1": 191.013,
+"look": "film89",
+"src": {
+"kind": "grid",
+"cells": [
+{
+"kind": "video",
+"path": "footage/raw/disco_nyny.mp4",
+"start": 185.0,
+"fit": "cover",
+"crop": [
+0.125,
+0,
+0.75,
+1
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5701.6,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 4018.5,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_trailer.mp4",
+"start": 28.9,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "wan/F1.mp4",
+"start": 7.45
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5663.3,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 4761.5,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/regain_cm.mp4",
+"start": 150.0,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 5723.8,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+}
+],
+"labels": [
+"新宿 New York New York ディスコ映像 (1980年代)",
+"彼女が水着にきがえたら (1989)",
+"私をスキーに連れてって (1987)",
+"私をスキーに連れてって (1987)",
+"MINA",
+"彼女が水着にきがえたら (1989)",
+"彼女が水着にきがえたら (1989)",
+"三共 リゲイン CM (1989–91)",
+"私をスキーに連れてって (1987)"
+]
+}
+},
+{
+"t0": 191.013,
+"t1": 191.48,
+"look": "film89",
+"src": {
+"kind": "grid",
+"cells": [
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_trailer.mp4",
+"start": 50.7,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 2081.5,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 2060.6,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/tokyo_night_1987.mp4",
+"start": 290.0,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "wan/F1.mp4",
+"start": 11.113
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 353.5,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/tokyo_night_1987.mp4",
+"start": 350.0,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 44.5,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/regain_cm.mp4",
+"start": 16.3,
+"fit": "cover",
+"loop": 3.0
+}
+],
+"labels": [
+"私をスキーに連れてって (1987)",
+"私をスキーに連れてって (1987)",
+"私をスキーに連れてって (1987)",
+"Tokyo at Night (1987)",
+"MINA",
+"彼女が水着にきがえたら (1989)",
+"Tokyo at Night (1987)",
+"バブルへGO!! タイムマシンはドラム式 (2007)",
+"三共 リゲイン CM (1989–91)"
+]
+}
+},
+{
+"t0": 191.478,
+"t1": 192.395,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 5618.5,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+]
+}
+},
+{
+"t0": 192.395,
+"t1": 193.312,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 79.9,
+"fit": "cover"
+}
+},
+{
+"t0": 193.312,
+"t1": 194.229,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 1637.0,
+"fit": "cover"
+}
+},
+{
+"t0": 194.229,
+"t1": 195.15,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 11.3,
+"fit": "cover"
+}
+},
+{
+"t0": 195.15,
+"t1": 198.803,
+"look": "film89",
+"src": {
+"kind": "grid",
+"cells": [
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 601.2,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 19.4,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5696.2,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 27.2,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "wan/smooth/F2.mp4",
+"start": 0.65
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 4693.7,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5686.0,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/nami_1991_promo.mp4",
+"start": 75.95,
+"fit": "cover",
+"crop": [
+0.131,
+0,
+0.742,
+1
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/nami_1991_promo.mp4",
+"start": 71.45,
+"fit": "cover",
+"crop": [
+0.131,
+0,
+0.742,
+1
+],
+"loop": 3.0
+}
+],
+"labels": [
+"私をスキーに連れてって (1987)",
+"君の瞳をタイホする! (1988)",
+"彼女が水着にきがえたら (1989)",
+"君の瞳をタイホする! (1988)",
+"MINA",
+"彼女が水着にきがえたら (1989)",
+"彼女が水着にきがえたら (1989)",
+"波の数だけ抱きしめて (1991)",
+"波の数だけ抱きしめて (1991)"
+]
+}
+},
+{
+"t0": 198.803,
+"t1": 202.472,
+"look": "film89",
+"src": {
+"kind": "grid",
+"cells": [
+{
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 40.8,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_trailer.mp4",
+"start": 56.5,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 15.8,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/tahosuru_op.mp4",
+"start": 8.75,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "wan/smooth/F2.mp4",
+"start": 4.303
+},
+{
+"kind": "video",
+"path": "footage/raw/mizugi_1989_full.mp4",
+"start": 5669.2,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/nami_1991_promo.mp4",
+"start": 41.75,
+"fit": "cover",
+"crop": [
+0.131,
+0,
+0.742,
+1
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 80.9,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 5742.5,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+}
+],
+"labels": [
+"バブルへGO!! タイムマシンはドラム式 (2007)",
+"私をスキーに連れてって (1987)",
+"君の瞳をタイホする! (1988)",
+"君の瞳をタイホする! (1988)",
+"MINA",
+"彼女が水着にきがえたら (1989)",
+"波の数だけ抱きしめて (1991)",
+"バブルへGO!! タイムマシンはドラム式 (2007)",
+"私をスキーに連れてって (1987)"
+]
+}
+},
+{
+"t0": 202.472,
+"t1": 206.135,
+"look": "film89",
+"src": {
+"kind": "grid",
+"cells": [
+{
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 6.7,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/aishiatte_op.mp4",
+"start": 5.8,
+"fit": "cover",
+"crop": [
+0.078,
+0,
+0.844,
+1
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 5618.5,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/bubblego_trailer.mp4",
+"start": 79.9,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "wan/smooth/F2.mp4",
+"start": 7.972
+},
+{
+"kind": "video",
+"path": "footage/raw/tahosuru_ed.mp4",
+"start": 11.3,
+"fit": "cover",
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/disco_nyny.mp4",
+"start": 367.0,
+"fit": "cover",
+"crop": [
+0.125,
+0,
+0.75,
+1
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 5702.3,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+],
+"loop": 3.0
+},
+{
+"kind": "video",
+"path": "footage/raw/disco_nyny.mp4",
+"start": 185.0,
+"fit": "cover",
+"crop": [
+0.125,
+0,
+0.75,
+1
+],
+"loop": 3.0
+}
+],
+"labels": [
+"君の瞳をタイホする! (1988)",
+"愛しあってるかい! (1989)",
+"私をスキーに連れてって (1987)",
+"バブルへGO!! タイムマシンはドラム式 (2007)",
+"MINA",
+"君の瞳をタイホする! (1988)",
+"新宿 New York New York ディスコ映像 (1980年代)",
+"私をスキーに連れてって (1987)",
+"新宿 New York New York ディスコ映像 (1980年代)"
+]
+}
+},
+{
+"t0": 206.135,
+"t1": 207.052,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/ski_1987_trailer.mp4",
+"start": 56.5,
+"fit": "cover"
+}
+},
+{
+"t0": 207.052,
+"t1": 207.97,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/disco_nyny.mp4",
+"start": 367.0,
+"fit": "cover",
+"crop": [
+0.125,
+0,
+0.75,
+1
+]
+}
+},
+{
+"t0": 207.97,
+"t1": 208.875,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/ski_1987_full.mp4",
+"start": 5702.3,
+"fit": "cover",
+"crop": [
+0.09,
+0.04,
+0.8,
+0.8
+]
+}
+},
+{
+"t0": 208.875,
+"t1": 209.52,
+"look": "tv89",
+"src": {
+"kind": "video",
+"path": "footage/raw/disco_nyny.mp4",
+"start": 185.0,
+"fit": "cover",
+"crop": [
+0.125,
+0,
+0.75,
+1
+]
+}
+},
+{
+"t0": 209.52,
+"t1": 220.79,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "bubbles",
+"args": {
+"textures": [
+"mina/frames/F_gold_mcu.png",
+"mina/frames/D_pool_mcu.png",
+"mina/frames/W8_car.png",
+"mina/frames/stage_mcu.png",
+"mina/frames/B2_clouds.png",
+"mina/frames/P4_roof.png",
+"look/src/cover_night.png"
+],
+"n": 8,
+"seed": 5
+}
+}
+},
+{
+"t0": 220.79,
+"t1": 227.654,
+"look": "film89",
+"src": {
+"kind": "video",
+"path": "wan/smooth/O2.mp4",
+"start": 0.0
+}
+},
+{
+"t0": 227.654,
+"t1": 240.9,
+"look": "film89",
+"src": {
+"kind": "scene",
+"name": "cover",
+"args": {
+"path": "look/src/cover_night.png",
+"credits": [
+"■原曲",
+"Baby",
+"Justin Bieber feat. Ludacris (2010)",
+"作詞・作曲　J. Bieber / C. Stewart / T. Nash /",
+"C. Milian / C. Bridges",
+"",
+"■日本語詞・中国語訳",
+"（制作者）",
+"",
+"■歌唱・編曲",
+"Suno AI（AI 生成）",
+"",
+"■映像",
+"万相 Wan / Qwen-Image（AI 生成）",
+"代码动画",
+"",
+"■引用映像（各 1–3 秒）",
+"愛しあってるかい! (1989)",
+"バブルへGO!! タイムマシンはドラム式 (2007)",
+"新宿 New York New York ディスコ映像 (1980年代)",
+"彼女が水着にきがえたら (1989)",
+"波の数だけ抱きしめて (1991)",
+"80年代 日本のオフィス映像",
+"三共 リゲイン CM (1989–91)",
+"私をスキーに連れてって (1987)",
+"君の瞳をタイホする! (1988)",
+"Tokyo at Night (1987)",
+"",
+"■本作品は AI 生成コンテンツを含みます",
+"本视频含 AI 生成内容",
+"",
+"TOKYO 1989"
+]
+}
+}
+},
+{
+"t0": 240.9,
+"t1": 242.0,
+"look": "tv89",
+"src": {
+"kind": "scene",
+"name": "black",
+"args": {}
+}
+}
+],
+"overlays": [
+{
+"t0": 0.9,
+"t1": 7.227,
+"name": "osd",
+"args": {
+"text": "▶ PLAY",
+"date": "1989.12.29 FRI",
+"clock": "PM 11:58"
+}
+},
+{
+"t0": 21.97,
+"t1": 23.81,
+"name": "yen",
+"args": {
+"y": 420
+}
+},
+{
+"t0": 25.65,
+"t1": 28.66,
+"name": "prop",
+"args": {
+"title": "ショルダーフォン",
+"lines": [
+"1985年　登場",
+"重さ　約3kg"
+]
+}
+},
+{
+"t0": 40.39,
+"t1": 43.62,
+"name": "clock",
+"args": {
+"h0": 21.0,
+"h1": 29.0
+}
+},
+{
+"t0": 48.5,
+"t1": 48.8,
+"name": "flash",
+"args": {}
+},
+{
+"t0": 48.5,
+"t1": 49.88,
+"name": "hearts",
+"args": {
+"times": [
+48.5,
+48.96,
+49.42
+],
+"seed": 0
+}
+},
+{
+"t0": 52.36,
+"t1": 53.74,
+"name": "hearts",
+"args": {
+"times": [
+52.36,
+52.82,
+53.28
+],
+"seed": 1
+}
+},
+{
+"t0": 56.03,
+"t1": 57.41,
+"name": "hearts",
+"args": {
+"times": [
+56.03,
+56.49,
+56.95
+],
+"seed": 2
+}
+},
+{
+"t0": 63.39,
+"t1": 64.77,
+"name": "hearts",
+"args": {
+"times": [
+63.39,
+63.85,
+64.31
+],
+"seed": 4
+}
+},
+{
+"t0": 67.07,
+"t1": 68.45,
+"name": "hearts",
+"args": {
+"times": [
+67.07,
+67.53,
+67.99
+],
+"seed": 5
+}
+},
+{
+"t0": 70.75,
+"t1": 72.13,
+"name": "hearts",
+"args": {
+"times": [
+70.75,
+71.21,
+71.67
+],
+"seed": 6
+}
+},
+{
+"t0": 73.97,
+"t1": 77.18,
+"name": "confetti",
+"args": {
+"seed": 3
+}
+},
+{
+"t0": 88.22,
+"t1": 91.9,
+"name": "card_bags",
+"args": {}
+},
+{
+"t0": 98.8,
+"t1": 102.92,
+"name": "money",
+"args": {
+"n": 70
+}
+},
+{
+"t0": 107.1,
+"t1": 113.1,
+"name": "rank",
+"args": {}
+},
+{
+"t0": 107.1,
+"t1": 108.48,
+"name": "hearts",
+"args": {
+"times": [
+107.1,
+107.56,
+108.02
+],
+"seed": 10
+}
+},
+{
+"t0": 110.74,
+"t1": 112.12,
+"name": "hearts",
+"args": {
+"times": [
+110.74,
+111.2,
+111.66
+],
+"seed": 11
+}
+},
+{
+"t0": 114.42,
+"t1": 115.8,
+"name": "hearts",
+"args": {
+"times": [
+114.42,
+114.88,
+115.34
+],
+"seed": 12
+}
+},
+{
+"t0": 121.75,
+"t1": 123.13,
+"name": "hearts",
+"args": {
+"times": [
+121.75,
+122.21,
+122.67
+],
+"seed": 14
+}
+},
+{
+"t0": 125.43,
+"t1": 126.81,
+"name": "hearts",
+"args": {
+"times": [
+125.43,
+125.89,
+126.35
+],
+"seed": 15
+}
+},
+{
+"t0": 129.1,
+"t1": 130.48,
+"name": "hearts",
+"args": {
+"times": [
+129.1,
+129.56,
+130.02
+],
+"seed": 16
+}
+},
+{
+"t0": 132.77,
+"t1": 136.34,
+"name": "confetti",
+"args": {
+"seed": 7
+}
+},
+{
+"t0": 160.758,
+"t1": 162.6,
+"name": "bigcue",
+"args": {
+"text": "準備OK?",
+"y": 200
+}
+},
+{
+"t0": 164.7,
+"t1": 165.0,
+"name": "flash",
+"args": {}
+},
+{
+"t0": 176.54,
+"t1": 180.22,
+"name": "countdown",
+"args": {
+"t_end": 180.22
+}
+},
+{
+"t0": 180.22,
+"t1": 182.22,
+"name": "bigcue",
+"args": {
+"text": "みんなで!",
+"y": 150
+}
+},
+{
+"t0": 206.14,
+"t1": 209.52,
+"name": "confetti",
+"args": {
+"n": 300,
+"seed": 11
+}
+},
+{
+"t0": 183.56,
+"t1": 183.86,
+"name": "flash",
+"args": {}
+},
+{
+"t0": 187.69,
+"t1": 187.99,
+"name": "flash",
+"args": {}
+},
+{
+"t0": 198.68,
+"t1": 198.98,
+"name": "flash",
+"args": {}
+},
+{
+"t0": 202.35,
+"t1": 202.65,
+"name": "flash",
+"args": {}
+},
+{
+"t0": 191.36,
+"t1": 191.66,
+"name": "flash",
+"args": {}
+},
+{
+"t0": 206.02,
+"t1": 206.32,
+"name": "flash",
+"args": {}
+},
+{
+"t0": 240.9,
+"t1": 242.0,
+"name": "osd",
+"args": {
+"text": "■ STOP",
+"date": "",
+"clock": "",
+"tracking": 0
+}
+}
+]
+}

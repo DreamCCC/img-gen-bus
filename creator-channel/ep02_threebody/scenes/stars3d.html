@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">
+{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}
+</script>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+
+// 样张：t 秒 → 模拟时间 t*speed。?run=A|B
+const W = 1920, H = 1080;
+const Q = new URLSearchParams(location.search);
+const SPEED = parseFloat(Q.get('speed') || '1');
+const RUN = Q.get('run') || 'A';
+window.FPS = 30;
+window.DURATION = parseFloat(Q.get('dur') || '60');
+
+const D = await (await fetch('/scenes/data/opening.json')).json();
+const ARR = D[RUN];
+const TEMP = [new THREE.Color('#ff4a26'), new THREE.Color('#ffb52e'), new THREE.Color('#5c9dff')];
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H, false);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, W / H, 0.01, 5000);
+
+const NOISE = `
+vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}
+vec4 mod289(vec4 x){return x-floor(x*(1./289.))*289.;}
+vec4 permute(vec4 x){return mod289(((x*34.)+1.)*x);}
+vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+float snoise(vec3 v){
+  const vec2 C=vec2(1./6.,1./3.);const vec4 D=vec4(0.,.5,1.,2.);
+  vec3 i=floor(v+dot(v,C.yyy));vec3 x0=v-i+dot(i,C.xxx);
+  vec3 g=step(x0.yzx,x0.xyz);vec3 l=1.-g;vec3 i1=min(g.xyz,l.zxy);vec3 i2=max(g.xyz,l.zxy);
+  vec3 x1=x0-i1+C.xxx;vec3 x2=x0-i2+C.yyy;vec3 x3=x0-D.yyy;i=mod289(i);
+  vec4 p=permute(permute(permute(i.z+vec4(0.,i1.z,i2.z,1.))+i.y+vec4(0.,i1.y,i2.y,1.))+i.x+vec4(0.,i1.x,i2.x,1.));
+  float n_=.142857142857;vec3 ns=n_*D.wyz-D.xzx;vec4 j=p-49.*floor(p*ns.z*ns.z);
+  vec4 x_=floor(j*ns.z);vec4 y_=floor(j-7.*x_);vec4 x=x_*ns.x+ns.yyyy;vec4 y=y_*ns.x+ns.yyyy;vec4 h=1.-abs(x)-abs(y);
+  vec4 b0=vec4(x.xy,y.xy);vec4 b1=vec4(x.zw,y.zw);vec4 s0=floor(b0)*2.+1.;vec4 s1=floor(b1)*2.+1.;vec4 sh=-step(h,vec4(0.));
+  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+  vec3 p0=vec3(a0.xy,h.x);vec3 p1=vec3(a0.zw,h.y);vec3 p2=vec3(a1.xy,h.z);vec3 p3=vec3(a1.zw,h.w);
+  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
+  vec4 m=max(.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.);m=m*m;
+  return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));}
+float fbm(vec3 p){float s=0.,a=.5;for(int i=0;i<5;i++){s+=a*snoise(p);p*=2.03;a*=.5;}return s;}
+`;
+
+// 银河 + 星云：大球内壁上的程序噪声
+{
+  const mat = new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false,
+    vertexShader: `varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader: NOISE + `
+      varying vec3 vP;
+      void main(){
+        vec3 n = vP;
+        vec3 axis = normalize(vec3(0.35, 1.0, -0.25));
+        float band = exp(-pow(dot(n, axis) * 3.2, 2.0));
+        float cloud = fbm(n * 3.0) * 0.5 + 0.5;
+        float dust = smoothstep(0.45, 0.8, fbm(n * 6.0 + 4.0) * 0.5 + 0.5);
+        vec3 col = vec3(0.012, 0.016, 0.03);
+        col += band * cloud * vec3(0.10, 0.085, 0.12) * (1.0 - 0.75 * dust);
+        col += band * pow(cloud, 3.0) * vec3(0.10, 0.05, 0.12) * 0.8;
+        col += pow(max(0.0, fbm(n * 2.0 + 9.0)), 2.0) * vec3(0.02, 0.05, 0.09);
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+  });
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(2000, 64, 32), mat));
+}
+{
+  let s = 99;
+  const r = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const n = 7000, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+  const axis = new THREE.Vector3(0.35, 1.0, -0.25).normalize();
+  for (let i = 0; i < n; i++) {
+    let v;
+    do { const u = r() * 2 - 1, th = r() * Math.PI * 2, q = Math.sqrt(1 - u * u); v = new THREE.Vector3(q * Math.cos(th), u, q * Math.sin(th)); }
+    while (r() > 0.35 + 0.65 * Math.exp(-Math.pow(v.dot(axis) * 3.2, 2)));
+    pos.set(v.multiplyScalar(1500).toArray(), i * 3);
+    const b = 0.25 + Math.pow(r(), 9) * 3.5, t = r();
+    const c = t < 0.15 ? [1, 0.75, 0.55] : t < 0.3 ? [0.7, 0.82, 1] : [1, 0.97, 0.92];
+    col.set(c.map((x) => x * b), i * 3);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size: 1.7, sizeAttenuation: false, vertexColors: true, depthWrite: false })));
+}
+
+function glowTexture(rays) {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const g = c.getContext('2d');
+  const gr = g.createRadialGradient(256, 256, 0, 256, 256, 256);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.08, 'rgba(255,255,255,0.75)');
+  gr.addColorStop(0.2, 'rgba(255,255,255,0.22)'); gr.addColorStop(0.5, 'rgba(255,255,255,0.05)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 512, 512);
+  if (rays) {
+    g.globalCompositeOperation = 'lighter';
+    for (let k = 0; k < 4; k++) {
+      g.save(); g.translate(256, 256); g.rotate(k * Math.PI / 4);
+      const lg = g.createLinearGradient(-256, 0, 256, 0);
+      lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.5, `rgba(255,255,255,${k % 2 ? 0.18 : 0.4})`); lg.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = lg; g.fillRect(-256, -1.5, 512, 3); g.restore();
+    }
+  }
+  return new THREE.CanvasTexture(c);
+}
+const GLOW = glowTexture(false), RAYS = glowTexture(true);
+
+const R_STAR = 0.04;
+const TRAIL_N = 260;
+const stars = TEMP.map((c, j) => {
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uT: { value: 0 }, uC: { value: c }, uSeed: { value: j * 17.3 } },
+    vertexShader: `varying vec3 vN; varying vec3 vP; varying vec3 vV;
+      void main(){ vP = position; vN = normalize(normalMatrix*normal); vec4 mv = modelViewMatrix*vec4(position,1.); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader: NOISE + `
+      uniform float uT; uniform vec3 uC; uniform float uSeed;
+      varying vec3 vN; varying vec3 vP; varying vec3 vV;
+      void main(){
+        vec3 p = normalize(vP);
+        float gran = fbm(p * 4.0 + vec3(uSeed, uT * 0.15, -uT * 0.1));
+        float big = fbm(p * 2.2 + vec3(-uT * 0.05, uSeed, 0.0));
+        float spots = smoothstep(0.42, 0.62, big);
+        float mu = clamp(dot(vN, vV), 0.0, 1.0);
+        float limb = pow(mu, 0.55);
+        vec3 dark = uC * uC * 0.5;
+        vec3 bright = mix(uC, vec3(1.0), 0.2) * 1.05;
+        vec3 col = mix(dark, bright, smoothstep(-0.45, 0.55, gran)) * (1.0 - 0.5 * spots);
+        col *= 0.3 + 0.8 * limb;
+        col += uC * pow(1.0 - mu, 2.5) * 0.7;
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+  });
+  const body = new THREE.Mesh(new THREE.SphereGeometry(R_STAR, 96, 64), mat);
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, color: c, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.55 }));
+  glow.scale.setScalar(R_STAR * 7);
+  const rays = new THREE.Sprite(new THREE.SpriteMaterial({ map: RAYS, color: c.clone().lerp(new THREE.Color('#fff'), 0.3), blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.22 }));
+  rays.scale.setScalar(R_STAR * 26);
+  const geo = new LineGeometry();
+  geo.setPositions(new Float32Array((TRAIL_N + 1) * 3));
+  geo.setColors(new Float32Array((TRAIL_N + 1) * 3));
+  const lm = new LineMaterial({ linewidth: 2.6, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, worldUnits: false });
+  lm.resolution.set(W, H);
+  const trail = new Line2(geo, lm);
+  scene.add(trail, glow, rays, body);
+  return { body, glow, rays, geo, trail, c, mat };
+});
+
+function sample(arr, s) {
+  const f = Math.min(Math.max(s * D.rate, 0), arr.length - 1.001), i = Math.floor(f), u = f - i;
+  const a = arr[i], b = arr[i + 1];
+  return a.map((x, k) => x + (b[k] - x) * u);
+}
+const v3 = (p, j) => new THREE.Vector3(p[2 * j], 0, -p[2 * j + 1]);
+
+function frame(s) {
+  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  for (let k = 0; k <= 24; k++) {
+    const p = sample(ARR, s - k * 0.25);
+    for (let j = 0; j < 3; j++) {
+      x0 = Math.min(x0, p[2 * j]); x1 = Math.max(x1, p[2 * j]);
+      z0 = Math.min(z0, -p[2 * j + 1]); z1 = Math.max(z1, -p[2 * j + 1]);
+    }
+  }
+  return { cx: (x0 + x1) / 2, cz: (z0 + z1) / 2, span: Math.max(1.15, (x1 - x0) / (W / H) * 1.1, (z1 - z0) * 1.5) };
+}
+
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(1);
+composer.setSize(W, H);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), 0.5, 0.45, 0.85));
+composer.addPass(new OutputPass());
+
+window.renderFrame = async (t) => {
+  const s = t * SPEED;
+  const p = sample(ARR, s);
+  const f = frame(s);
+  const dist = f.span * 1.9 + 0.8, elev = 0.62, yaw = 0.35 + t * 0.012;
+  const target = new THREE.Vector3(f.cx, 0, f.cz);
+  camera.position.set(f.cx + Math.sin(yaw) * Math.cos(elev) * dist, Math.sin(elev) * dist, f.cz + Math.cos(yaw) * Math.cos(elev) * dist);
+  camera.lookAt(target);
+  const k = Math.max(1, dist / 2.6);
+  const step = 1 / D.rate, nk = Math.max(1, Math.min(TRAIL_N, Math.floor(s / step)));
+  stars.forEach((S, j) => {
+    const P = v3(p, j);
+    // 星体不能重叠：离最近那颗的距离不到两倍半径时按比例缩小
+    const dmin = Math.min(...[0, 1, 2].filter((i) => i !== j).map((i) => P.distanceTo(v3(p, i))));
+    const r = Math.min(1, 0.46 * dmin / R_STAR);
+    S.body.position.copy(P); S.glow.position.copy(P); S.rays.position.copy(P);
+    S.body.scale.setScalar(r); S.glow.scale.setScalar(R_STAR * 12 * k); S.rays.scale.setScalar(R_STAR * 22 * k);
+    S.rays.material.rotation = 0.2 + j * 0.4;
+    S.mat.uniforms.uT.value = t;
+    const ps = S.geo.attributes.instanceStart.data, cs = S.geo.attributes.instanceColorStart.data;
+    const pts = [], cols = [];
+    const ts = step * Math.max(1, dist / 3);
+    for (let i = TRAIL_N; i >= 0; i--) {
+      const q = sample(ARR, Math.max(0, s - Math.min(i, nk) * ts));
+      pts.push(q[2 * j], 0, -q[2 * j + 1]);
+      const a = i > nk ? 0 : Math.pow(1 - i / TRAIL_N, 1.5) * 1.1;
+      cols.push(S.c.r * a, S.c.g * a, S.c.b * a);
+    }
+    for (let i = 0; i < TRAIL_N; i++) { ps.array.set(pts.slice(3 * i, 3 * i + 6), 6 * i); cs.array.set(cols.slice(3 * i, 3 * i + 6), 6 * i); }
+    ps.needsUpdate = cs.needsUpdate = true;
+    S.geo.computeBoundingSphere();
+  });
+  composer.render();
+};
+window.ready = Promise.resolve();
+</script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">
+{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}
+</script>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+
+// 样张：t 秒 → 模拟时间 t*speed。?shot=establish|system  ?run=A|B
+const W = 1920, H = 1080;
+const Q = new URLSearchParams(location.search);
+const SPEED = parseFloat(Q.get('speed') || '1');
+const RUN = Q.get('run') || 'A';
+const SHOT = Q.get('shot') || 'system';
+window.FPS = 30;
+window.DURATION = parseFloat(Q.get('dur') || '60');
+
+const D = await (await fetch('/scenes/data/opening.json')).json();
+const ARR = D[RUN];
+const TINT = [new THREE.Color('#ff5a2a'), new THREE.Color('#ffc46a'), new THREE.Color('#6fa8ff')];
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H, false);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, W / H, 0.005, 6000);
+
+const NOISE = `
+vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}
+vec4 mod289(vec4 x){return x-floor(x*(1./289.))*289.;}
+vec4 permute(vec4 x){return mod289(((x*34.)+1.)*x);}
+vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+float snoise(vec3 v){
+  const vec2 C=vec2(1./6.,1./3.);const vec4 D=vec4(0.,.5,1.,2.);
+  vec3 i=floor(v+dot(v,C.yyy));vec3 x0=v-i+dot(i,C.xxx);
+  vec3 g=step(x0.yzx,x0.xyz);vec3 l=1.-g;vec3 i1=min(g.xyz,l.zxy);vec3 i2=max(g.xyz,l.zxy);
+  vec3 x1=x0-i1+C.xxx;vec3 x2=x0-i2+C.yyy;vec3 x3=x0-D.yyy;i=mod289(i);
+  vec4 p=permute(permute(permute(i.z+vec4(0.,i1.z,i2.z,1.))+i.y+vec4(0.,i1.y,i2.y,1.))+i.x+vec4(0.,i1.x,i2.x,1.));
+  float n_=.142857142857;vec3 ns=n_*D.wyz-D.xzx;vec4 j=p-49.*floor(p*ns.z*ns.z);
+  vec4 x_=floor(j*ns.z);vec4 y_=floor(j-7.*x_);vec4 x=x_*ns.x+ns.yyyy;vec4 y=y_*ns.x+ns.yyyy;vec4 h=1.-abs(x)-abs(y);
+  vec4 b0=vec4(x.xy,y.xy);vec4 b1=vec4(x.zw,y.zw);vec4 s0=floor(b0)*2.+1.;vec4 s1=floor(b1)*2.+1.;vec4 sh=-step(h,vec4(0.));
+  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+  vec3 p0=vec3(a0.xy,h.x);vec3 p1=vec3(a0.zw,h.y);vec3 p2=vec3(a1.xy,h.z);vec3 p3=vec3(a1.zw,h.w);
+  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
+  vec4 m=max(.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.);m=m*m;
+  return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));}
+float fbm(vec3 p){float s=0.,a=.5;for(int i=0;i<6;i++){s+=a*snoise(p);p*=2.03;a*=.5;}return s;}
+`;
+
+const U = { uS: { value: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()] }, uC: { value: TINT }, uT: { value: 0 } };
+
+// 背景：深色星云 + 银河带
+{
+  const mat = new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false,
+    vertexShader: `varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader: NOISE + `
+      varying vec3 vP;
+      void main(){
+        vec3 n = vP;
+        vec3 axis = normalize(vec3(0.5, 1.0, -0.15));
+        float band = exp(-pow(dot(n, axis) * 2.6, 2.0));
+        float cloud = fbm(n * 2.6) * 0.5 + 0.5;
+        float dust = smoothstep(0.42, 0.75, fbm(n * 5.5 + 4.0) * 0.5 + 0.5);
+        vec3 col = vec3(0.004, 0.006, 0.012);
+        col += band * pow(cloud, 1.6) * vec3(0.06, 0.055, 0.075) * (1.0 - 0.85 * dust);
+        col += band * pow(cloud, 4.0) * vec3(0.10, 0.045, 0.03) * 0.9;
+        col += pow(max(0.0, fbm(n * 1.7 + 9.0)), 2.2) * vec3(0.0, 0.03, 0.06);
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+  });
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(4000, 64, 32), mat));
+}
+{
+  let s = 99;
+  const r = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const n = 9000, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+  const axis = new THREE.Vector3(0.5, 1.0, -0.15).normalize();
+  for (let i = 0; i < n; i++) {
+    let v;
+    do { const u = r() * 2 - 1, th = r() * Math.PI * 2, q = Math.sqrt(1 - u * u); v = new THREE.Vector3(q * Math.cos(th), u, q * Math.sin(th)); }
+    while (r() > 0.25 + 0.75 * Math.exp(-Math.pow(v.dot(axis) * 2.6, 2)));
+    pos.set(v.multiplyScalar(3000).toArray(), i * 3);
+    const b = 0.18 + Math.pow(r(), 10) * 3.0, t = r();
+    const c = t < 0.15 ? [1, 0.72, 0.5] : t < 0.3 ? [0.65, 0.8, 1] : [1, 0.96, 0.9];
+    col.set(c.map((x) => x * b), i * 3);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size: 1.5, sizeAttenuation: false, vertexColors: true, depthWrite: false })));
+}
+
+// 星际尘埃：被三颗星照亮，离哪颗近就染哪颗的颜色
+{
+  let s = 5;
+  const r = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const n = 14000, pos = new Float32Array(n * 3), sz = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const R = 0.4 + Math.pow(r(), 0.7) * 9, th = r() * Math.PI * 2;
+    pos.set([R * Math.cos(th), (r() - 0.5) * (0.25 + R * 0.18), R * Math.sin(th)], i * 3);
+    sz[i] = 0.5 + r() * 1.5;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('size', new THREE.BufferAttribute(sz, 1));
+  const mat = new THREE.ShaderMaterial({
+    uniforms: U, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `attribute float size; uniform vec3 uS[3]; uniform vec3 uC[3]; varying vec3 vCol;
+      void main(){
+        vec3 c = vec3(0.0);
+        for (int i = 0; i < 3; i++) { float d = distance(position, uS[i]); c += uC[i] * 0.05 / (d * d + 0.08); }
+        vCol = min(c, vec3(1.2)) * 0.5;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = size * clamp(6.0 / -mv.z, 0.6, 3.5);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `varying vec3 vCol; void main(){ float d = length(gl_PointCoord - 0.5); gl_FragColor = vec4(vCol * smoothstep(0.5, 0.0, d), 1.0); }`,
+  });
+  scene.add(new THREE.Points(g, mat));
+}
+
+// 三体星球：被三颗太阳从不同方向照亮，带大气边缘光
+const planet = (() => {
+  // 只建朝向三颗星那一侧的一片球面，网格够密，才能在地平线上显出山脊
+  const geo = new THREE.SphereGeometry(1, 1400, 300, Math.PI * 7 / 6, Math.PI * 2 / 3, 0, 0.3);
+  const mat = new THREE.ShaderMaterial({
+    uniforms: U,
+    vertexShader: NOISE + `varying vec3 vW; varying vec3 vO; varying float vH;
+      float ridge(vec3 p){ float s = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { s += a * (1.0 - abs(snoise(p))); p *= 2.1; a *= 0.5; } return s; }
+      void main(){
+        vec3 p = normalize(position);
+        float h = pow(ridge(p * 22.0), 1.7) * 0.008 + fbm(p * 9.0) * 0.003;
+        vH = h;
+        vO = p;
+        vec4 w = modelMatrix * vec4(p * (1.0 + h), 1.0);
+        vW = w.xyz;
+        gl_Position = projectionMatrix * viewMatrix * w;
+      }`,
+    fragmentShader: NOISE + `
+      uniform vec3 uS[3]; uniform vec3 uC[3];
+      varying vec3 vW; varying vec3 vO; varying float vH;
+      void main(){
+        vec3 N = normalize(cross(dFdx(vW), dFdy(vW)));
+        vec3 V = normalize(cameraPosition - vW);
+        if (dot(N, V) < 0.0) N = -N;
+        float g = fbm(vO * 120.0);
+        vec3 alb = mix(vec3(0.10, 0.085, 0.075), vec3(0.30, 0.25, 0.20), smoothstep(0.0, 0.012, vH)) * (0.8 + 0.4 * g);
+        vec3 col = vec3(0.0), fogc = vec3(0.006, 0.006, 0.01);
+        float rimv = pow(1.0 - max(dot(N, V), 0.0), 3.0);
+        for (int i = 0; i < 3; i++) {
+          vec3 L = normalize(uS[i] - vW);
+          col += alb * uC[i] * pow(max(dot(N, L), 0.0), 1.3) * 1.5;
+          float back = pow(max(dot(-V, -L), 0.0), 6.0);
+          col += uC[i] * rimv * back * 0.35;
+          fogc += uC[i] * pow(max(dot(-V, -L), 0.0), 10.0) * 0.08;
+        }
+        float dist = length(cameraPosition - vW);
+        col = mix(col, fogc, 1.0 - exp(-dist * 0.9));
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+  });
+  mat.extensions = { derivatives: true };
+  const m = new THREE.Mesh(geo, mat);
+  scene.add(m);
+  // 地平线辉光：一块面向镜头的渐变板，放在山脊后面、三颗星前面
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 256;
+  const g = c.getContext('2d');
+  const hz = g.createLinearGradient(0, 0, 1024, 0);
+  hz.addColorStop(0, 'rgba(255,90,40,0.0)'); hz.addColorStop(0.3, 'rgba(255,120,60,1)');
+  hz.addColorStop(0.5, 'rgba(255,190,120,1)'); hz.addColorStop(0.7, 'rgba(110,160,255,1)'); hz.addColorStop(1, 'rgba(110,160,255,0)');
+  g.fillStyle = hz; g.fillRect(0, 0, 1024, 256);
+  g.globalCompositeOperation = 'destination-in';
+  const vt = g.createLinearGradient(0, 0, 0, 256);
+  vt.addColorStop(0, 'rgba(0,0,0,0)'); vt.addColorStop(0.75, 'rgba(0,0,0,0.5)'); vt.addColorStop(1, 'rgba(0,0,0,1)');
+  g.fillStyle = vt; g.fillRect(0, 0, 1024, 256);
+  const glowPlane = new THREE.Mesh(new THREE.PlaneGeometry(9, 1.1), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.35 }));
+  glowPlane.visible = false;
+  scene.add(glowPlane);
+  m.userData.glowPlane = glowPlane;
+  return m;
+})();
+
+const R_STAR = 0.04;
+const TRAIL_N = 260;
+function glowTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(256, 256, 0, 256, 256, 256);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.05, 'rgba(255,255,255,0.6)');
+  gr.addColorStop(0.15, 'rgba(255,255,255,0.18)'); gr.addColorStop(0.45, 'rgba(255,255,255,0.04)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 512, 512);
+  return new THREE.CanvasTexture(c);
+}
+const GLOW = glowTexture();
+const stars = TINT.map((c, j) => {
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uT: U.uT, uCol: { value: c }, uSeed: { value: j * 17.3 } },
+    vertexShader: `varying vec3 vN; varying vec3 vP; varying vec3 vV;
+      void main(){ vP = position; vN = normalize(normalMatrix*normal); vec4 mv = modelViewMatrix*vec4(position,1.); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader: NOISE + `
+      uniform float uT; uniform vec3 uCol; uniform float uSeed;
+      varying vec3 vN; varying vec3 vP; varying vec3 vV;
+      void main(){
+        vec3 p = normalize(vP);
+        float g = fbm(p * 5.0 + vec3(uSeed, uT * 0.2, -uT * 0.12));
+        float mu = clamp(dot(vN, vV), 0.0, 1.0);
+        vec3 core = mix(uCol, vec3(1.0), 0.65);
+        vec3 col = mix(uCol * 1.2, core * 2.2, smoothstep(-0.4, 0.6, g)) * (0.45 + 0.75 * pow(mu, 0.6));
+        gl_FragColor = vec4(col * 2.2, 1.0);
+      }`,
+  });
+  const body = new THREE.Mesh(new THREE.SphereGeometry(R_STAR, 96, 64), mat);
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, color: c.clone().multiplyScalar(1.6), blending: THREE.AdditiveBlending, depthWrite: false }));
+  const geo = new LineGeometry();
+  geo.setPositions(new Float32Array((TRAIL_N + 1) * 3));
+  geo.setColors(new Float32Array((TRAIL_N + 1) * 3));
+  const lm = new LineMaterial({ linewidth: 1.6, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, worldUnits: false });
+  lm.resolution.set(W, H);
+  const trail = new Line2(geo, lm);
+  scene.add(trail, glow, body);
+  return { body, glow, geo, trail, c };
+});
+
+function sample(arr, s) {
+  const f = Math.min(Math.max(s * D.rate, 0), arr.length - 1.001), i = Math.floor(f), u = f - i;
+  const a = arr[i], b = arr[i + 1];
+  return a.map((x, k) => x + (b[k] - x) * u);
+}
+const v3 = (p, j) => new THREE.Vector3(p[2 * j], 0, -p[2 * j + 1]);
+
+function frame(s) {
+  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  for (let k = 0; k <= 24; k++) {
+    const p = sample(ARR, s - k * 0.25);
+    for (let j = 0; j < 3; j++) {
+      x0 = Math.min(x0, p[2 * j]); x1 = Math.max(x1, p[2 * j]);
+      z0 = Math.min(z0, -p[2 * j + 1]); z1 = Math.max(z1, -p[2 * j + 1]);
+    }
+  }
+  return { cx: (x0 + x1) / 2, cz: (z0 + z1) / 2, span: Math.max(1.15, (x1 - x0) / (W / H) * 1.1, (z1 - z0) * 1.5) };
+}
+
+// 横向镜头光晕（变形宽银幕镜头的拉丝）
+const Anamorphic = {
+  uniforms: { tDiffuse: { value: null }, uAmt: { value: 0.55 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float uAmt; varying vec2 vUv;
+    void main(){
+      vec4 base = texture2D(tDiffuse, vUv);
+      vec3 s = vec3(0.0);
+      for (int i = -24; i <= 24; i++) {
+        float o = float(i) / 24.0;
+        vec3 c = texture2D(tDiffuse, vUv + vec2(o * 0.35, 0.0)).rgb;
+        s += max(c - 1.4, 0.0) * exp(-abs(o) * 4.0);
+      }
+      gl_FragColor = vec4(base.rgb + s / 24.0 * vec3(0.45, 0.65, 1.25) * uAmt, base.a);
+    }`,
+};
+// 调色 + 暗角 + 颗粒 + 轻微色散（在色调映射之后）
+const Grade = {
+  uniforms: { tDiffuse: { value: null }, uT: { value: 0 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float uT; varying vec2 vUv;
+    float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+    void main(){
+      vec2 d = vUv - 0.5;
+      float ca = 0.0018 * length(d) * 2.0;
+      vec3 c = vec3(texture2D(tDiffuse, vUv + d * ca).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv - d * ca).b);
+      float l = dot(c, vec3(0.299, 0.587, 0.114));
+      c = mix(c, c * vec3(0.92, 1.0, 1.1), smoothstep(0.5, 0.0, l));
+      c = mix(c, c * vec3(1.06, 1.0, 0.92), smoothstep(0.4, 1.0, l));
+      c *= 1.0 - 0.55 * pow(length(d * vec2(1.0, 0.8)) * 1.35, 2.2);
+      c += (h(vUv * 1000.0 + uT) - 0.5) * 0.035;
+      gl_FragColor = vec4(c, 1.0);
+    }`,
+};
+
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(1);
+composer.setSize(W, H);
+composer.addPass(new RenderPass(scene, camera));
+const ana = new ShaderPass(Anamorphic);
+composer.addPass(ana);
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), 0.9, 0.75, 0.75));
+composer.addPass(new OutputPass());
+const grade = new ShaderPass(Grade);
+composer.addPass(grade);
+
+window.renderFrame = async (t) => {
+  const s = t * SPEED;
+  const p = sample(ARR, s);
+  const P = [0, 1, 2].map((j) => v3(p, j));
+  P.forEach((v, j) => U.uS.value[j].copy(v));
+  U.uT.value = t;
+  grade.uniforms.uT.value = t;
+  const f = frame(s);
+  const target = new THREE.Vector3(f.cx, 0, f.cz);
+  let k = 1;
+  if (SHOT === 'establish') {
+    // 贴着星球地平线仰望三颗太阳
+    planet.visible = true;
+    planet.scale.setScalar(3.2);
+    planet.position.set(0.3, -3.245, 6.6);
+    camera.fov = 30; camera.updateProjectionMatrix();
+    camera.position.set(0.3 + t * 0.012, 0.0, 6.6 - t * 0.02);
+    camera.lookAt(0, -0.45, 0);
+    const gp = planet.userData.glowPlane;
+    gp.visible = true;
+    gp.position.set(camera.position.x - 0.15, -0.36, camera.position.z - 3.2);
+    gp.lookAt(camera.position.x, -0.36, camera.position.z);
+    k = 2.2;
+  } else {
+    planet.visible = false;
+    planet.userData.glowPlane.visible = false;
+    const dist = f.span * 1.9 + 0.8, elev = 0.42, yaw = 0.55 + t * 0.01;
+    camera.fov = 32; camera.updateProjectionMatrix();
+    camera.position.set(f.cx + Math.sin(yaw) * Math.cos(elev) * dist, Math.sin(elev) * dist, f.cz + Math.cos(yaw) * Math.cos(elev) * dist);
+    camera.lookAt(target);
+    k = Math.max(1, dist / 2.6);
+  }
+  const step = 1 / D.rate, nk = Math.max(1, Math.min(TRAIL_N, Math.floor(s / step)));
+  stars.forEach((S, j) => {
+    const dmin = Math.min(...[0, 1, 2].filter((i) => i !== j).map((i) => P[j].distanceTo(P[i])));
+    S.body.position.copy(P[j]); S.glow.position.copy(P[j]);
+    S.body.scale.setScalar(Math.min(1, 0.46 * dmin / R_STAR));
+    S.glow.scale.setScalar(R_STAR * 16 * k);
+    S.trail.visible = SHOT !== 'establish';
+    const ps = S.geo.attributes.instanceStart.data, cs = S.geo.attributes.instanceColorStart.data;
+    const pts = [], cols = [];
+    for (let i = TRAIL_N; i >= 0; i--) {
+      const q = sample(ARR, Math.max(0, s - Math.min(i, nk) * step * Math.max(1, k)));
+      pts.push(q[2 * j], 0, -q[2 * j + 1]);
+      const a = i > nk ? 0 : Math.pow(1 - i / TRAIL_N, 1.6) * 0.7;
+      cols.push(S.c.r * a, S.c.g * a, S.c.b * a);
+    }
+    for (let i = 0; i < TRAIL_N; i++) { ps.array.set(pts.slice(3 * i, 3 * i + 6), 6 * i); cs.array.set(cols.slice(3 * i, 3 * i + 6), 6 * i); }
+    ps.needsUpdate = cs.needsUpdate = true;
+    S.geo.computeBoundingSphere();
+  });
+  composer.render();
+};
+window.ready = Promise.resolve();
+</script>
+</body>
+</html>

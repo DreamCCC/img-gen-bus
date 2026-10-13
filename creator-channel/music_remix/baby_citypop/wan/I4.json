@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "长发女子背对镜头沿着霓虹街道向前走了几步，然后停下，转过头回眸看向镜头，露出自信的微笑，长发随转头甩动，两侧霓虹闪烁。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 5,
+  "watermark": false,
+  "prompt_extend": true,
+  "audio": false
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/I4_back.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "9d8cd190-b87d-4295-8338-24ad8f75d939"
+}

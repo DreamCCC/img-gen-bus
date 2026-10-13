@@ -1,0 +1,15 @@
+{
+ "model": "wan2.7-i2v-2026-04-25",
+ "prompt": "女歌手在夏日海滩上边唱边随节奏转圈、向镜头挥手，口型与歌声同步，海风吹起长发，海浪拍岸，敞篷车停在沙滩边。固定全景机位。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 15,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/D_beach_wide.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "7c810e86-9bfd-415a-8ba3-d0c7a47db3df"
+}

@@ -1,0 +1,80 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:"WenKai";src:url(../assets/fonts/LXGWWenKai-Regular.ttf)}
+@font-face{font-family:"NSerif";src:url(../assets/fonts/NotoSerifSC-Regular.otf);font-weight:400}
+@font-face{font-family:"NSerif";src:url(../assets/fonts/NotoSerifSC-Bold.otf);font-weight:700}
+@font-face{font-family:"NSans";src:url(../assets/fonts/NotoSansSC-Regular.otf);font-weight:400}
+@font-face{font-family:"NSans";src:url(../assets/fonts/NotoSansSC-Bold.otf);font-weight:700}
+@font-face{font-family:"Barlow";src:url(../assets/fonts/BarlowCondensed-SemiBold.ttf)}
+@font-face{font-family:"Plex";src:url(../assets/fonts/IBMPlexMono-Regular.ttf)}
+body{margin:0;background:#000}
+</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script src="lib_b.js"></script>
+<script>
+// 《一个数字：4.8%》B 站封面三版（缩到手机首页小图也要认得出“高考”）
+// t=0 数字对撞；t=1 扩招那天；t=2 放在 1998 年你多半考不上
+window.FPS = 1;
+window.DURATION = 3;
+window.ready = libReady({});
+const Y = '#ffd23f';
+
+function pill(s, x, y, size, bg, fg, align = 'left') {
+  const w = measure(s, size, F.sans, 700) + size * 0.8, h = size * 1.45, x0 = align === 'center' ? x - w / 2 : x;
+  ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(x0, y, w, h, size * 0.2); ctx.fill();
+  text(s, x0 + w / 2, y + h * 0.72, { size, weight: 700, color: fg, align: 'center' });
+}
+
+function v1() {
+  ctx.fillStyle = C.warmDark; ctx.fillRect(0, 0, 960, 780);
+  ctx.fillStyle = C.bg; ctx.fillRect(960, 0, 960, 780);
+  ctx.fillStyle = '#111'; ctx.fillRect(0, 780, W, 300);
+  pill('高考录取率', 960, 40, 110, '#111', Y, 'center');
+  text('1977 年', 610, 330, { size: 72, weight: 700, color: '#efe4cc', align: 'center' });
+  text('4.8%', 610, 670, { size: 310, font: F.num, color: C.amber, align: 'center' });
+  text('2021 年', 1310, 330, { size: 72, weight: 700, color: C.ink, align: 'center' });
+  text('92.9%', 1310, 670, { size: 255, font: F.num, color: C.ink, align: 'center' });
+  text('反而更难考了？', 960, 980, { size: 150, weight: 700, color: Y, align: 'center' });
+  grain(0, 0.05);
+}
+
+function v2() {
+  ctx.drawImage(TEX.deskCool, 0, 0);
+  paper(TEX.paperCool, 1000, 170, 660, 600, 0.05, (w) => {
+    text('1999 年 6 月 2 日 · 教育部', 60, 90, { size: 32, font: F.mono, weight: 700, color: C.coolInk });
+    const st = { size: 60, weight: 700, font: F.serif, color: C.coolInk };
+    text('“今年要比去年', 60, 230, st);
+    text('增加 100 万人。”', 60, 330, st);
+    const x1 = 60 + measure('增加 ', 60, F.serif, 700), w1 = measure('100 万', 60, F.serif, 700);
+    handEllipse(x1 + w1 / 2 + 22, 310, w1 / 2 + 30, 56, 0.5, 1, { color: C.pen, lw: 7, seed: 5 });
+    text('“这绝对不可能。”', 60, 520, { ...st, size: 64, color: C.pen });
+  }, { shadow: 0.6 });
+  pill('高考扩招', 260, 150, 120, Y, '#111');
+  text('那天，', 270, 520, { size: 150, weight: 700, color: '#fff' });
+  text('他当场', 270, 700, { size: 150, weight: 700, color: '#fff' });
+  text('跳了起来', 270, 880, { size: 150, weight: 700, color: Y });
+  grain(0, 0.06);
+}
+
+function v3() {
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  pill('高考扩招', 260, 60, 96, '#111', Y);
+  const s = 140, dx = 140, x0 = (W - dx * 10) / 2 + dx / 2, y = 470, me = 6;
+  for (let i = 0; i < 10; i++) {
+    if (i === me) { ctx.fillStyle = Y; ctx.beginPath(); ctx.arc(x0 + i * dx, y, s * 0.55, 0, Math.PI * 2); ctx.fill(); }
+    person(x0 + i * dx, y, s, i === 0 ? C.ink : i === me ? '#8a847a' : C.mute);
+  }
+  text('有位置', x0, y + 150, { size: 50, weight: 700, color: C.ink, align: 'center' });
+  text('你', x0 + me * dx, y - 130, { size: 80, weight: 700, color: '#111', align: 'center' });
+  text('放在 1998 年', 960, 800, { size: 110, weight: 700, color: C.ink, align: 'center' });
+  const line = '你多半上不了大学', lw = measure(line, 150, F.sans, 700);
+  ctx.fillStyle = Y; ctx.fillRect(960 - lw / 2 - 30, 880, lw + 60, 150);
+  text(line, 960, 1000, { size: 150, weight: 700, color: '#111', align: 'center' });
+}
+
+window.renderFrame = async (t) => {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.clearRect(0, 0, W, H);
+  [v1, v2, v3][Math.min(2, Math.floor(t))]();
+};
+</script></body></html>

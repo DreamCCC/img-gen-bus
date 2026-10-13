@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "傍晚的东京写字楼，成群的白色纸飞机从打开的窗户里接连飞出，在晚霞中盘旋着飞向城市上空，越飞越高越飞越远，晚霞的光在玻璃幕墙上流动。镜头缓慢向上仰拍跟随纸飞机。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 4,
+  "watermark": false,
+  "prompt_extend": true,
+  "audio": false
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/look/src/paper_planes.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "36d4f756-5886-4f9a-a7c0-9c540e63620d"
+}

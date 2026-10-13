@@ -1,0 +1,536 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:"WenKai";src:url(../assets/fonts/LXGWWenKai-Regular.ttf)}
+@font-face{font-family:"NSerif";src:url(../assets/fonts/NotoSerifSC-Regular.otf);font-weight:400}
+@font-face{font-family:"NSerif";src:url(../assets/fonts/NotoSerifSC-Bold.otf);font-weight:700}
+@font-face{font-family:"NSans";src:url(../assets/fonts/NotoSansSC-Regular.otf);font-weight:400}
+@font-face{font-family:"NSans";src:url(../assets/fonts/NotoSansSC-Bold.otf);font-weight:700}
+@font-face{font-family:"Barlow";src:url(../assets/fonts/BarlowCondensed-SemiBold.ttf)}
+@font-face{font-family:"Plex";src:url(../assets/fonts/IBMPlexMono-Regular.ttf)}
+body{margin:0;background:#000}
+</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script src="lib_b.js"></script>
+<script src="b_later.js"></script>
+<script>
+// 《一个数字：4.8%》B 站横版：冷开场 + 第一章在本文件，第二章到片尾在 b_later.js。时间全部来自 film_b.json（tools/timeline_b.py 生成）
+window.FPS = 30;
+let TL, VO = {}, SUBS = [], SHOTS = [];
+const S = (id) => VO[id].t, E = (id) => VO[id].t + VO[id].dur, Wd = (id, w) => VO[id].words[w];
+const M = () => TL.marks;
+
+window.ready = (async () => {
+  TL = await (await fetch('film_b.json')).json();
+  TL.vo.forEach((v) => { VO[v.id] = v; });
+  SUBS = TL.vo.flatMap((v) => subChunks(v).map((c) => ({ ...c, id: v.id })));
+  window.DURATION = TL.duration;
+  await libReady({
+    loud: '../assets/gen/ch1/loudspeaker.png', lamp: '../assets/gen/ch1/lamp.png', room: '../assets/gen/ch1/classroom.png',
+    factory: '../assets/gen/ch3/factory.png', dorm: '../assets/gen/ch3/dorm.png', jobfair: '../assets/gen/ch3/jobfair.png', gate: '../assets/gen/ch3/gate.png',
+  });
+  const m = M(), ch1End = m.ch1 + 2.4;
+  SHOTS = [
+    { a: 0, b: S('H04') - 0.2, f: shScript },
+    { a: S('H04') - 0.2, b: S('H06') - 0.15, f: shGrowth },
+    { a: S('H06') - 0.15, b: S('H07') - 0.2, f: shTen, light: true },
+    { a: S('H07') - 0.2, b: S('H08') - 0.2, f: shTimes, light: true },
+    { a: S('H08') - 0.2, b: S('H09'), f: shNumbers, light: true },
+    { a: S('H09'), b: S('H10'), f: shFraction, light: true },
+    { a: S('H10'), b: m.title, f: shTimeline, light: true },
+    { a: m.title, b: m.ch1, f: shTitle, nosub: true },
+    { a: m.ch1, b: ch1End, f: shCh1, nosub: true },
+    { a: ch1End, b: S('A02') - 0.3, f: shLoud },
+    { a: S('A02') - 0.3, b: S('A04') - 0.2, f: shCalendar },
+    { a: S('A04') - 0.2, b: S('A05') - 0.4, f: shLamp },
+    { a: S('A05') - 0.4, b: S('A06') - 0.2, f: shDoc },
+    { a: S('A06') - 0.2, b: S('A08') - 0.3, f: shLedger },
+    { a: S('A08') - 0.3, b: S('A09') - 0.2, f: shRoom },
+    { a: S('A09') - 0.2, b: S('A11') - 0.3, f: shCard },
+    { a: S('A11') - 0.3, b: S('A14') - 0.2, f: shGrid100 },
+    { a: S('A14') - 0.2, b: S('A15') - 0.4, f: shStack },
+    { a: S('A15') - 0.4, b: S('A16') - 0.3, f: sh1978 },
+    { a: S('A16') - 0.3, b: m.ch2, f: shAsk, nosub: true },
+    ...laterShots(),
+  ];
+})();
+
+// ================= 冷开场 =================
+// 剧本卡：开场演前半场；第三章回来时 phase=2，划掉 100 万、补上后半场
+function scriptCard(t, lt, sh, phase = 1) {
+  const E1 = { ink: C.coolInk, gray: '#4a535c' };
+  // 开场先贴近场景标题，台词出现时拉开；第三章回来时只做缓推
+  const u = phase === 1 ? easeIO(prog(t, 1.2, S('H02') + 0.3)) : 1;
+  const z = phase === 1 ? lerp(1.75, 1.04, u) + 0.03 * prog(t, S('H02'), sh.b) : lerp(1.0, 1.07, easeIO(prog(lt, 0, sh.b - sh.a)));
+  const fx = lerp(860, 960, u), fy = lerp(185, 430, u), tx = lerp(900, 960, u), ty = lerp(380, 430, u);
+  const tj = Wd('H03', '一下子跳了起来'), jt = t - tj;
+  const jx = jt > 0 && jt < 0.4 ? (hash(Math.floor(t * 24), 1) - 0.5) * 16 * (1 - jt / 0.4) : 0;
+  const jy = jt > 0 && jt < 0.4 ? (hash(Math.floor(t * 24), 2) - 0.5) * 10 * (1 - jt / 0.4) : 0;
+  ctx.fillStyle = C.coolDesk; ctx.fillRect(0, 0, W, H);
+  camera(z, fx, fy, () => {
+    ctx.drawImage(TEX.deskCool, 0, 0);
+    paper(TEX.paperCool, 400 + jx, 60 + jy, 1120, 900, 0.012, (w) => {
+      const L = 120, Cx = w / 2;
+      const head = '内景 · 教育部部长办公室 · 1999 年 6 月 2 日 上午';
+      const hs = phase === 1 ? typed(head, t, 0.15, 16) : head;
+      text(hs, L, 120, { size: 30, font: F.mono, weight: 700, color: E1.ink });
+      if (phase === 1 && hs.length < [...head].length && step12(t) % 6 < 4) {
+        ctx.fillStyle = E1.ink; ctx.fillRect(L + measure(hs, 30, F.mono, 700) + 4, 92, 3, 34);
+      }
+      const ka = phase === 1 ? ap(t, Wd('H01', '纪宝成') - 0.2) : 1;
+      text('发展规划司司长纪宝成被叫进办公室。', L, 186, { size: 28, font: F.serif, color: E1.gray, alpha: ka });
+      const who = (s, y, a) => text(s, Cx, y, { size: 28, font: F.mono, color: E1.ink, align: 'center', spacing: 2, alpha: a });
+      const say = (s, y, a) => text(s, Cx, y, { size: 34, font: F.serif, color: E1.ink, align: 'center', alpha: a });
+      const k1 = phase === 1 ? ap(t, S('H02') - 0.1) : 1;
+      who('陈至立（时任教育部部长）', 268, k1);
+      say('国务院决定，今年要进一步扩大招生，', 322, k1);
+      say('要比去年增加 100 万人。', 372, k1);
+      const full = '要比去年增加 100 万人。', fw = measure(full, 34, F.serif), pre = measure('要比去年增加 ', 34, F.serif), wd = measure('100 万', 34, F.serif);
+      const x0 = Cx - fw / 2 + pre;
+      if (phase === 1) handLine(x0 - 4, 384, x0 + wd + 4, 386, t, ap(t, Wd('H02', '一百万人'), 0.4), { color: C.pen, lw: 4, seed: 141, bow: 2 });
+      const k2 = phase === 1 ? ap(t, tj - 0.15, 0.3) : 1, k3 = phase === 1 ? ap(t, Wd('H03', '这绝对不可能') - 0.1, 0.3) : 1;
+      who('纪宝成（时任发展规划司司长）', 466, k2);
+      text('（一下子跳了起来）', Cx, 512, { size: 28, font: F.serif, color: E1.gray, align: 'center', alpha: k2 });
+      say('这绝对不可能。', 568, k3);
+      if (phase === 2) {
+        const ps = sh.strike;
+        handLine(x0 - 8, 361, x0 + wd + 8, 359, t, ap(t, ps, 0.5), { color: C.pen, lw: 5, seed: 31, bow: 3 });
+        handArrow(Cx + fw / 2 + 14, 360, Cx + fw / 2 + 58, 360, t, prog(t, ps + 0.5, ps + 0.8), { color: C.pen, lw: 4, seed: 33, bow: 0 });
+        text('50 万', Cx + fw / 2 + 72, 374, { size: 46, font: F.hand, color: C.pen, alpha: ap(t, ps + 0.7, 0.4) });
+        who('陈至立', 662, ap(t, sh.ask - 0.1)); say('你觉得最多能扩招多少？', 716, ap(t, sh.ask - 0.1));
+        who('纪宝成', 800, ap(t, sh.answer - 0.1)); say('最多 50 万人。', 854, ap(t, sh.answer - 0.1));
+      }
+      text('据纪宝成回忆文章整理（教育部官网）', w - 60, 870, { size: 20, font: F.sans, color: '#7d868f', align: 'right' });
+    });
+  }, tx, ty);
+  grain(t, 0.08);
+  sourceTag('画面为根据当事人回忆重新排版，不是原始文件');
+}
+function shScript(t, lt, sh) { scriptCard(t, lt, sh, 1); }
+
+// 全国普通高校本专科招生（万人），来源：历年全国教育事业发展统计公报
+// 2021 年公报的 1001.3 万含五年制高职转入专科 45.2 万，其他年份不含，这里统一扣掉
+const ENR = [108.4, 159.7, 220.6, 268.3, 320.5, 382.2, 447.3, 504.5, 546.1, 565.9, 607.7, 639.5, 661.8,
+  681.5, 688.8, 699.8, 721.4, 737.8, 748.6, 761.5, 791.0, 914.9, 967.5, 956.1, 1014.5, 1042.2];
+function shGrowth(t, lt) {
+  ctx.fillStyle = '#121820'; ctx.fillRect(0, 0, W, H);
+  const x0 = 250, step = 57, bw = 40, base = 840, sc = 0.6;
+  const t5 = S('H05'), tk = Wd('H05', '一千多万');
+  text('全国普通高校本专科招生（万人）', 250, 150, { size: 30, color: 'rgba(200,215,230,0.7)', alpha: ap(lt, 0, 0.4) });
+  ENR.forEach((v, i) => {
+    const yr = 1998 + i, x = x0 + i * step;
+    let g;
+    if (i === 0) g = ap(lt, 0, 0.3);
+    else if (i === 1) g = ap(lt, 0.3, 0.6);
+    else g = easeOut(clamp((t - t5 - 0.2) * 3 - (i - 2) * 0.35));
+    if (g <= 0) return;
+    const h = v * sc * g;
+    ctx.fillStyle = i === 1 ? '#e8eef3' : i === 0 ? 'rgba(200,215,230,0.55)' : 'rgba(200,215,230,0.32)';
+    ctx.fillRect(x, base - h, bw, h);
+    if (i === 0 || i === 1 || yr % 5 === 3) text(String(yr), x + bw / 2, base + 40, { size: 24, font: F.num, color: 'rgba(200,215,230,0.6)', align: 'center', alpha: g });
+  });
+  const k1 = ap(lt, 0.6, 0.4);
+  text('108 万', x0 + bw / 2, base - ENR[0] * sc - 18, { size: 28, font: F.num, color: 'rgba(200,215,230,0.8)', align: 'center', alpha: k1 });
+  text('+51 万', x0 + step + bw / 2, base - ENR[1] * sc - 18, { size: 34, font: F.num, color: '#e8eef3', align: 'center', alpha: k1 });
+  const xl = x0 + 25 * step + bw / 2, kl = ap(t, tk - 0.1, 0.4);
+  text('1042 万', xl, base - ENR[25] * sc - 22, { size: 44, font: F.num, color: '#e8eef3', align: 'right', alpha: kl });
+  sourceTag('资料：历年全国教育事业发展统计公报（2019 年起含职业本科；均不含五年制高职转入）', 'rgba(200,215,230,0.4)');
+}
+
+function shTen(t, lt) {
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  const s = 150, dx = 165, x0 = (W - dx * 10) / 2 + dx / 2, y = 500;
+  const tf = Wd('H06', '十个有九个'), p = ap(t, tf - 0.1, 0.6);
+  text('按 1998 年的招生规模', 960, 250, { size: 40, weight: 700, color: C.ink, align: 'center', alpha: ap(lt, 0.1, 0.4) });
+  for (let i = 0; i < 10; i++) {
+    const k = ap(lt, 0.1 + i * 0.04, 0.3), x = x0 + i * dx;
+    ctx.save(); ctx.globalAlpha = k; person(x, y, s, C.mute);
+    ctx.globalAlpha = k * (i === 0 ? 1 : 1 - p); person(x, y, s, C.ink); ctx.restore();
+  }
+  text('有位置', x0, y + 150, { size: 36, weight: 700, color: C.ink, align: 'center', alpha: p });
+  if (p > 0) {
+    handBracket(x0 + dx - 60, x0 + 9 * dx + 60, y + 110, t, p, { color: '#9a9488', lw: 4 });
+    text('没有位置', x0 + 5 * dx, y + 180, { size: 36, weight: 700, color: '#8a847a', align: 'center', alpha: ap(t, tf + 0.3) });
+  }
+  text('1998 年招生 108 万 ÷ 2023 年招生 1042 万 ≈ 10%', 960, 860, { size: 28, color: '#777', align: 'center', alpha: ap(t, tf + 0.6) });
+  sourceTag('资料：历年全国教育事业发展统计公报', 'rgba(31,35,40,0.5)');
+}
+
+function shTimes(t, lt, sh) {
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  const sc = lerp(1.18, 1, easeOut(clamp(lt / 0.5))), k = ap(lt, 0, 0.3);
+  ctx.save(); ctx.translate(960, 500); ctx.scale(sc, sc);
+  text('×9.6', 0, 110, { size: 330, font: F.num, color: C.ink, align: 'center', alpha: k });
+  ctx.restore();
+  text('招生人数：1998 年 108 万 → 2023 年 1042 万', 960, 700, { size: 32, color: '#666', align: 'center', alpha: ap(lt, 0.4) });
+  sourceTag('资料：历年全国教育事业发展统计公报', 'rgba(31,35,40,0.5)');
+}
+
+function searchBox(x, y, w, s, caret) {
+  ctx.save(); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#cfc9bb'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(x, y, w, 84, 42); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = '#999'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x + 48, y + 38, 14, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + 58, y + 48); ctx.lineTo(x + 70, y + 60); ctx.stroke(); ctx.restore();
+  text(s, x + 92, y + 54, { size: 36, color: C.ink });
+  if (caret) { const cw = measure(s, 36); ctx.fillStyle = C.ink; ctx.fillRect(x + 96 + cw, y + 22, 3, 42); }
+}
+// 左：1977 暖色卡；右：今天的搜索结果
+function numberPanels(t, lift) {
+  const y = lerp(0, -170, lift);
+  const ts = S('H08'), tn = Wd('H08', '百分之九十多'), tl = Wd('H08', '一九七七年只有');
+  const kl = ap(t, tl - 0.2, 0.4);
+  if (kl > 0) {
+    ctx.save(); ctx.globalAlpha = kl;
+    paper(TEX.paperWarm, 160 - 40 * (1 - kl), 200 + y, 700, 560, -0.015, (w) => {
+      text('1977 年', w / 2, 120, { size: 40, weight: 700, font: F.serif, color: C.warmInk, align: 'center' });
+      text('4.8%', w / 2, 370, { size: 230, font: F.num, color: '#9a5a1e', align: 'center' });
+      text('高考录取率', w / 2, 450, { size: 30, font: F.serif, color: '#6b5f50', align: 'center' });
+    }, { shadow: 0.25 });
+    ctx.restore();
+  }
+  const qs = typed('高考录取率', t, ts + 0.1, 10);
+  searchBox(1060, 220 + y, 700, qs, step12(t) % 12 < 7 && t < tn);
+  const k = ap(t, tn - 0.15, 0.4);
+  text('90% 多', 1410, 560 + y, { size: 230, font: F.num, color: C.ink, align: 'center', alpha: k });
+  text('今天 · 网上常见的说法', 1410, 640 + y, { size: 30, color: '#666', align: 'center', alpha: k });
+}
+function shNumbers(t) {
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  numberPanels(t, 0);
+  sourceTag('“90% 多”的常见算法：当年录取总数 ÷ 高考报名总数', 'rgba(31,35,40,0.5)');
+}
+
+function shFraction(t, lt) {
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  numberPanels(t, easeIO(prog(lt, 0.15, 0.9)));
+  if (lt < 0.25) { ctx.fillStyle = `rgba(255,255,255,${1 - lt / 0.25})`; ctx.fillRect(0, 0, W, H); }
+  const row = (x, num, den, denRed, t0) => {
+    const k1 = ap(t, t0, 0.4), k2 = ap(t, t0 + 0.5, 0.4);
+    ctx.fillStyle = C.ink; ctx.fillRect(x - 300 * k1, 640, 600 * k1, 4);
+    text(num, x, 610, { size: 34, weight: 700, color: C.ink, align: 'center', alpha: k1 });
+    text(den, x, 700, { size: 34, weight: 700, color: denRed ? C.red : C.ink, align: 'center', alpha: k2 });
+  };
+  row(510, '录取 27.3 万人（所有大学）', '报名 570 万人', false, S('H09') + 0.8);
+  row(1410, '录取总数（含专科、单招）', '报名总数（含没进考场的人）', true, Wd('H09', '分子分母'));
+  const tn = Wd('H09', '根本不是一回事');
+  if (t > tn) {
+    const p = ap(t, tn, 0.5);
+    handLine(920, 630, 1000, 630, t, p, { color: C.pen, lw: 6, seed: 71, bow: 0 });
+    handLine(920, 660, 1000, 660, t, p, { color: C.pen, lw: 6, seed: 72, bow: 0 });
+    handLine(990, 600, 930, 690, t, clamp(p * 1.5 - 0.5), { color: C.pen, lw: 6, seed: 73, bow: 0 });
+  }
+  sourceTag('“90% 多”的常见算法：当年录取总数 ÷ 高考报名总数', 'rgba(31,35,40,0.5)');
+}
+
+const TLX = (y) => 200 + (y - 1977) / (2026 - 1977) * 1520;
+function shTimeline(t, lt) {
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  const y0 = 560, k = ap(lt, 0, 0.4);
+  ctx.save(); ctx.globalAlpha = k; ctx.fillStyle = C.mute; ctx.fillRect(200, y0 - 2, 1520, 4);
+  for (let y = 1980; y <= 2020; y += 5) {
+    ctx.fillStyle = '#b8b2a5'; ctx.fillRect(TLX(y) - 1, y0 - 10, 2, 20);
+    text(String(y), TLX(y), y0 + 50, { size: 26, font: F.num, color: '#9a9488', align: 'center' });
+  }
+  ctx.restore();
+  const ta = S('H10') + 0.2, tb = ta + 2.4, u = easeIO(prog(t, ta, tb)), x = lerp(TLX(1977), TLX(2026), u);
+  ctx.fillStyle = C.ink; ctx.fillRect(200, y0 - 4, x - 200, 8);
+  ctx.beginPath(); ctx.arc(x, y0, 14, 0, Math.PI * 2); ctx.fill();
+  text('1977', TLX(1977), y0 - 50, { size: 40, font: F.num, color: C.ink, align: 'center', alpha: ap(t, ta - 0.2) });
+  text('今天', TLX(2026), y0 - 50, { size: 34, weight: 700, color: C.ink, align: 'center', alpha: ap(t, tb - 0.4) });
+  const th = Wd('H10', '被藏了好几年的分母');
+  if (t > th - 0.1) {
+    const p = ap(t, th - 0.1, 0.6), xa = TLX(1980), xb = TLX(1989);
+    const gr = ctx.createLinearGradient(xa, 0, xb, 0); gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(0.7, 'rgba(0,0,0,1)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    const [mc, mg] = off(W, 120); mg.fillStyle = hatch('rgba(210,65,42,0.9)', 9, 3); mg.fillRect(xa, 0, (xb - xa) * p, 90);
+    mg.globalCompositeOperation = 'destination-in'; mg.fillStyle = gr; mg.fillRect(0, 0, W, 120);
+    ctx.save(); ctx.globalAlpha = p; ctx.drawImage(mc, 0, y0 + 80); ctx.restore();
+    text('被藏起来的分母', xa, y0 + 220, { size: 32, font: F.hand, color: C.red, alpha: ap(t, th + 0.3) });
+  }
+}
+
+function shTitle(t, lt) {
+  ctx.fillStyle = '#14110e'; ctx.fillRect(0, 0, W, H);
+  const sc = lerp(1.05, 1, easeOut(clamp(lt / 0.6)));
+  ctx.save(); ctx.translate(960, 540); ctx.scale(sc, sc); ctx.translate(-960, -540);
+  text('一 个 数 字', 960, 400, { size: 44, font: F.serif, color: 'rgba(236,225,200,0.8)', align: 'center', spacing: 8 });
+  text('4.8%', 960, 680, { size: 280, font: F.num, color: C.amber, align: 'center' });
+  text('1977 年高考录取率', 960, 790, { size: 48, weight: 700, color: 'rgba(236,225,200,0.85)', align: 'center', spacing: 4 });
+  ctx.restore();
+  if (lt < 0.12) { ctx.fillStyle = `rgba(255,240,210,${0.6 * (1 - lt / 0.12)})`; ctx.fillRect(0, 0, W, H); }
+  grain(t, 0.1);
+}
+
+function shCh1(t, lt) {
+  ctx.fillStyle = C.warmDark; ctx.fillRect(0, 0, W, H);
+  // 背景：1977 年 12 月的淡月历
+  ctx.save(); ctx.globalAlpha = 0.08 * ap(lt, 0, 0.8);
+  for (let d = 0; d < 31; d++) { const c = (d + 4) % 7, r = Math.floor((d + 4) / 7); text(String(d + 1), 1080 + c * 110, 300 + r * 110, { size: 64, font: F.num, color: C.amber, align: 'center' }); }
+  ctx.restore();
+  const k = ap(lt, 0.1, 0.6), k2 = ap(lt, 0.4, 0.6);
+  text('第 一 章', 180, 400, { size: 34, color: 'rgba(236,225,200,0.7)', spacing: 6, alpha: k });
+  text('1977 年冬天', 170, 560, { size: 120, weight: 700, font: F.serif, color: '#efe4cc', alpha: k });
+  ctx.fillStyle = `rgba(240,192,106,${k2})`; ctx.fillRect(180, 610, 140 * k2, 6);
+  grain(t, 0.12);
+  black(1 - clamp(lt / 0.15));
+}
+
+// ================= 第一章 =================
+function aiTag() { sourceTag('示意画面 · AI 生成', 'rgba(255,255,255,0.6)'); }
+function shLoud(t, lt, sh) {
+  cover(IMG.loud, lerp(1.0, 1.1, easeIO(prog(lt, 0, sh.b - sh.a))), 0.42, 0.42);
+  grade('rgba(255,180,90,0.08)', 0.5);
+  const tn = Wd('A01', '高考恢复了') - 0.25, p = easeOut(prog(t, tn, tn + 0.45));
+  if (p > 0) paper(TEX.paperNews, lerp(2000, 1200, p), 430, 600, 420, 0.05, (w) => {
+    text('1977年10月21日', 40, 66, { size: 26, font: F.serif, color: '#6b5f50' });
+    ctx.fillStyle = '#3a332c'; ctx.fillRect(40, 86, w - 80, 3);
+    text('高等学校招生', 40, 186, { size: 80, weight: 700, font: F.serif, color: '#2a241f' });
+    text('进行重大改革', 40, 284, { size: 80, weight: 700, font: F.serif, color: '#2a241f' });
+    const r = rng(9); for (let i = 0; i < 3; i++) { ctx.fillStyle = 'rgba(60,52,44,0.22)'; ctx.fillRect(40, 320 + i * 26, (w - 80) * (0.7 + r() * 0.3), 9); }
+  }, { shadow: 0.6 });
+  grain(t, 0.12);
+  aiTag();
+  black(1 - clamp(lt / 0.4));
+}
+
+const CAL = { x0: 190, dw: 20, y: 470 };
+const dayIdx = (m, d) => (m === 10 ? d - 15 : m === 11 ? 17 + d - 1 : 47 + d - 1);
+const calX = (m, d) => CAL.x0 + dayIdx(m, d) * CAL.dw + CAL.dw / 2;
+function shCalendar(t, lt, sh) {
+  const z = lerp(1.0, 1.05, easeIO(prog(lt, 0, sh.b - sh.a)));
+  camera(z, 960, 540, () => {
+    ctx.drawImage(TEX.deskWarm, 0, 0);
+    paper(TEX.paperWarm, 130, 300, 1660, 420, -0.006, () => {});
+    // 月份与日格
+    const months = [[10, 15, 31, '十月'], [11, 1, 30, '十一月'], [12, 1, 31, '十二月']];
+    for (const [m, d0, d1, name] of months) {
+      const xa = calX(m, d0) - CAL.dw / 2, xb = calX(m, d1) + CAL.dw / 2;
+      text(name, (xa + xb) / 2, CAL.y - 70, { size: 32, weight: 700, font: F.serif, color: C.warmInk, align: 'center' });
+      ctx.fillStyle = 'rgba(43,37,32,0.5)'; ctx.fillRect(xa, CAL.y - 50, 2, 150);
+      for (let d = d0; d <= d1; d++) {
+        const x = calX(m, d);
+        ctx.fillStyle = 'rgba(43,37,32,0.28)'; ctx.fillRect(x - CAL.dw / 2 + 2, CAL.y - 20, CAL.dw - 4, 60);
+        if (d === 1 || d % 10 === 0) text(String(d), x, CAL.y + 74, { size: 20, font: F.num, color: '#6b5f50', align: 'center' });
+      }
+    }
+    // 10.21 消息
+    const x21 = calX(10, 21), k = ap(lt, 0.2, 0.4);
+    ctx.save(); ctx.globalAlpha = k; ctx.fillStyle = C.warmInk; ctx.fillRect(x21 - CAL.dw / 2 + 2, CAL.y - 20, CAL.dw - 4, 60); ctx.restore();
+    text('10.21 消息公布', x21 - 10, CAL.y + 140, { size: 30, weight: 700, font: F.serif, color: C.warmInk, alpha: k });
+    // 考试日期：最早吉林 11.28，最晚江苏 12.23–24
+    const te = Wd('A02', '最早的'), tw = Wd('A02', '最晚的');
+    const xs = calX(11, 28), xe = calX(12, 24), pe = easeIO(prog(t, te + 0.3, tw + 0.8));
+    if (t > te) {
+      ctx.save(); ctx.fillStyle = hatch('rgba(200,69,47,0.85)', 7, 2.5);
+      ctx.fillRect(xs - CAL.dw / 2 + 2, CAL.y - 20, (xe - xs + CAL.dw - 4) * pe + 1, 60); ctx.restore();
+      text('最早 11.28 吉林', xs - 10, CAL.y - 120, { size: 28, font: F.hand, color: C.pen, alpha: ap(t, te + 0.2) });
+    }
+    if (t > tw) text('最晚 12.24 江苏', xe + 10, CAL.y - 120, { size: 28, font: F.hand, color: C.pen, align: 'right', alpha: ap(t, tw + 0.6) });
+    text('各省自己出题、自己定日子', 960, 250, { size: 36, font: F.hand, color: '#efe4cc', align: 'center', alpha: ap(t, Wd('A02', '各省自己出题')) });
+    // 一个多月
+    const tm = Wd('A03', '也就一个多月') - 0.4, pm = prog(t, tm, tm + 0.8);
+    if (pm > 0) {
+      const xm = calX(12, 5);
+      handArrow(x21, CAL.y + 190, xm, CAL.y + 190, t, pm, { color: C.pen, lw: 5, seed: 91, bow: 26 });
+      text('一个多月', (x21 + xm) / 2, CAL.y + 270, { size: 60, font: F.hand, color: C.pen, align: 'center', alpha: ap(t, tm + 0.6) });
+    }
+  });
+  grain(t, 0.12);
+  sourceTag('资料：刘海峰、袁浪华《从准考证看70年高考制度的变迁》；人民日报 1977-10-21');
+}
+
+function shLamp(t, lt, sh) {
+  cover(IMG.lamp, lerp(1.0, 1.12, easeIO(prog(lt, 0, sh.b - sh.a))), 0.55, 0.62);
+  grade(null, 0.55); grain(t, 0.13); aiTag();
+}
+
+function shDoc(t, lt, sh) {
+  const z = lerp(1.0, 1.045, easeIO(prog(lt, 0, sh.b - sh.a)));
+  camera(z, 860, 560, () => {
+    ctx.drawImage(TEX.deskWarm, 0, 0);
+    paper(TEX.paperNews, 1180, 120, 640, 780, 0.07, (w) => {
+      text('1977年10月21日', 50, 74, { size: 26, color: '#6b5f50', font: F.serif });
+      ctx.fillStyle = '#3a332c'; ctx.fillRect(50, 96, w - 100, 3);
+      text('高等学校招生', 50, 200, { size: 92, weight: 700, font: F.serif, color: '#2a241f' });
+      text('进行重大改革', 50, 310, { size: 92, weight: 700, font: F.serif, color: '#2a241f' });
+      const r = rng(5);
+      for (let col = 0; col < 3; col++) for (let i = 0; i < 13; i++) {
+        ctx.fillStyle = `rgba(60,52,44,${0.18 + r() * 0.1})`;
+        ctx.fillRect(50 + col * 186, 370 + i * 30, 160 * (i % 5 === 4 ? 0.55 : 0.9 + r() * 0.1), 9);
+      }
+    }, { shadow: 0.55 });
+    paper(TEX.paperWarm, 230, 110, 1020, 840, -0.022, (w) => {
+      text('关于一九七七年高等学校招生工作的意见', w / 2, 112, { size: 40, weight: 700, font: F.serif, color: C.warmInk, align: 'center' });
+      text('（节选）', w / 2, 162, { size: 26, font: F.serif, color: '#6b5f50', align: 'center' });
+      text('四、招生经费和学生待遇', 90, 248, { size: 31, weight: 700, font: F.serif, color: C.warmInk });
+      const p1 = paragraph('参加统一考试者缴报名费五角，用于招生工作所需的费用。赴考的往返路费、体检费和食宿费等，均由本人自理。', 90, 318, w - 180, { color: C.warmInk });
+      paragraph('国家职工入学时工龄满五年的，在校学习期间，工资由原单位照发，毕业后一般回原单位。其他学生从今年开始，一律实行人民助学金制度，具体办法由教育部、财政部另订。', 90, p1.end + 24, w - 180, { color: C.warmInk });
+      const b = locate(p1, '缴报名费五角'), tc = Wd('A05', '五毛钱') - 0.3;
+      if (b) {
+        handEllipse((b.x0 + b.x1) / 2, b.cy, (b.x1 - b.x0) / 2 + 12, b.h * 0.7, t, easeOut(prog(t, tc, tc + 0.7)), { color: C.pen, lw: 4.5, seed: 4 });
+        handArrow(b.x1 + 40, b.cy - 70, b.x1 + 4, b.cy - 26, t, prog(t, tc + 0.7, tc + 1.1), { color: C.pen, lw: 4, seed: 8 });
+        text('五毛钱', b.x1 + 46, b.cy - 74, { size: 46, font: F.hand, color: C.pen, alpha: ap(t, tc + 1.0, 0.4) });
+      }
+    });
+  });
+  grain(t, 0.13);
+  sourceTag('资料：教育部《关于1977年高等学校招生工作的意见》 · 画面为重新排版');
+}
+
+function shLedger(t, lt) {
+  ctx.drawImage(TEX.deskWarm, 0, 0);
+  paper(TEX.paperWarm, 210, 100, 1500, 780, -0.01, (w, h) => {
+    const k1 = ap(t, S('A06'), 0.4), k2 = ap(t, S('A06') + 0.9, 0.4);
+    text('考上', w * 0.25, 150, { size: 72, weight: 700, font: F.serif, color: C.warmInk, align: 'center', alpha: k1 });
+    text('考不上', w * 0.75, 150, { size: 72, weight: 700, font: F.serif, color: C.warmInk, align: 'center', alpha: k2 });
+    ctx.fillStyle = `rgba(43,37,32,${0.4 * k1})`; ctx.fillRect(w / 2 - 1, 80, 2, h - 140);
+    ctx.fillRect(80, 200, (w - 160) * k1, 2);
+    const items = [['户口跟着转走', '户口跟着转走'], ['在学校有助学金', '在学校有助学金'], ['毕业国家分配工作', '毕业国家分配工作']];
+    items.forEach(([s, wkey], i) => {
+      const tw = Wd('A07', wkey) - 0.1, y = 320 + i * 120;
+      text(s, 160, y, { size: 44, font: F.serif, color: C.warmInk, alpha: ap(t, tw, 0.35) });
+      handCheck(100, y - 18, 34, t, prog(t, tw + 0.15, tw + 0.5), { color: C.pen, lw: 4.5, seed: 100 + i * 7 });
+    });
+    const tr = Wd('A07', '第二天接着回去干活') - 0.1;
+    text('第二天接着回去干活', w * 0.75, 320, { size: 44, font: F.serif, color: C.warmInk, align: 'center', alpha: ap(t, tr, 0.35) });
+  }, { shadow: 0.5 });
+  grain(t, 0.12);
+}
+
+function shRoom(t, lt, sh) {
+  cover(IMG.room, lerp(1.1, 1.0, easeIO(prog(lt, 0, sh.b - sh.a))), 0.5, 0.5);
+  const g = ctx.createLinearGradient(0, 0, 1100, 0); g.addColorStop(0, 'rgba(20,14,8,0.82)'); g.addColorStop(1, 'rgba(20,14,8,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  grade('rgba(255,180,90,0.06)', 0.45);
+  const k = ap(lt, 0.4, 0.5);
+  text('1977 年报名', 130, 470, { size: 38, color: 'rgba(240,228,204,0.85)', alpha: k });
+  text('570 万人', 120, 670, { size: 200, font: F.num, color: '#f3e7cf', alpha: k });
+  const ta = Wd('A08', '年龄从十几岁'), pa = prog(t, ta, ta + 0.8);
+  if (pa > 0) {
+    handLine(140, 740, 140 + 520 * easeOut(pa), 740, t, 1, { color: C.amber, lw: 4, seed: 111, bow: 0 });
+    text('十几岁', 130, 800, { size: 34, font: F.hand, color: C.amber, alpha: ap(t, ta) });
+    text('三十多岁', 670, 800, { size: 34, font: F.hand, color: C.amber, align: 'right', alpha: ap(t, ta + 0.6) });
+  }
+  grain(t, 0.12); aiTag();
+}
+
+function shCard(t, lt) {
+  ctx.drawImage(TEX.deskWarm, 0, 0);
+  paper(TEX.paperCard, 200, 170, 940, 560, -0.025, (w, h) => {
+    ctx.fillStyle = 'rgba(200,69,47,0.55)'; ctx.fillRect(0, 96, w, 2);
+    for (let i = 0; i < 6; i++) { ctx.fillStyle = 'rgba(80,110,160,0.18)'; ctx.fillRect(0, 170 + i * 70, w, 1.5); }
+    text('北大中文系 · 77 级', 50, 70, { size: 34, weight: 700, font: F.serif, color: C.warmInk });
+    text('同学对他的称呼：', 60, 210, { size: 32, font: F.mono, color: '#5a5040' });
+    text('老叶', 360, 212, { size: 48, font: F.hand, color: C.warmInk, alpha: ap(t, Wd('A09', '老叶') - 0.2) });
+    text('考试那年：', 60, 350, { size: 32, font: F.mono, color: '#5a5040' });
+    const t31 = Wd('A09', '三十一岁') - 0.2;
+    text('31 岁', 250, 352, { size: 56, font: F.hand, color: C.warmInk, alpha: ap(t, t31) });
+    handEllipse(306, 334, 90, 40, t, easeOut(prog(t, t31 + 0.3, t31 + 0.9)), { color: C.pen, lw: 4, seed: 121 });
+    text('资料：《南方人物周刊》（北大新闻网转载），同学查建英回忆', 60, h - 40, { size: 22, font: F.sans, color: '#8a7f6c' });
+  }, { shadow: 0.5 });
+  const tq = S('A10') - 0.3, p = easeOut(prog(t, tq, tq + 0.5));
+  if (p > 0) paper(TEX.paperWarm, lerp(1960, 1010, p), 400, 780, 340, 0.035, (w) => {
+    text('“我们都特尊敬他。”', w / 2, 170, { size: 64, weight: 700, font: F.serif, color: C.warmInk, align: 'center' });
+    text('—— 查建英，老叶的同班同学', w - 60, 260, { size: 30, font: F.serif, color: '#6b5f50', align: 'right' });
+  }, { shadow: 0.6 });
+  grain(t, 0.12);
+  sourceTag('资料：《南方人物周刊》2007-06-01，北京大学新闻网转载');
+}
+
+function shGrid100(t, lt) {
+  ctx.fillStyle = C.warmDark; ctx.fillRect(0, 0, W, H);
+  const v = ctx.createRadialGradient(W * 0.6, H * 0.45, 100, W * 0.6, H * 0.5, H);
+  v.addColorStop(0, 'rgba(255,200,130,0.07)'); v.addColorStop(1, 'rgba(0,0,0,0.4)'); ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  const gx = 1020, gy = 190, cell = 68, s = 64;
+  const plan = 21 / 570 * 100, total = 27.3 / 570 * 100;
+  const lit = easeOut(prog(t, S('A11') + 0.2, S('A11') + 1.4)) * total;
+  const tp = Wd('A12', '原计划只招二十万'), ta = Wd('A12', '又加了六万多');
+  const split = ap(t, ta - 0.2, 0.5);
+  // 门口堵着的人：A13 时其余 95 格亮起
+  const tc = S('A13'), crowd = ap(t, tc + 0.2, 0.8);
+  const base = `rgba(236,225,200,${lerp(0.12, 0.36, crowd)})`;
+  dotGrid(gx, gy, 10, 10, cell, s, base, [
+    { to: lerp(lit, Math.min(lit, plan), split), fill: C.amber },
+    { to: lit, fill: split > 0 ? hatch('rgba(240,192,106,0.95)', 7, 2.4) : C.amber },
+  ]);
+  const k = ap(lt, 0.2, 0.6);
+  text('4.8%', 180, 470, { size: 250, font: F.num, color: C.amber, alpha: k });
+  text('1977 年 · 570 万人报考 · 录取 27.3 万', 186, 545, { size: 34, color: 'rgba(236,225,200,0.85)', alpha: k });
+  text('一个小人 = 1%', 186, 600, { size: 26, color: 'rgba(236,225,200,0.5)', alpha: k });
+  if (t > tp) {
+    handArrow(gx + 6 * cell + 10, gy - 50, gx + 4 * cell + 40, gy + 2, t, prog(t, tp, tp + 0.5), { color: C.amber, lw: 3.5, seed: 12 });
+    text('原计划只招 20 万出头，', gx + 6 * cell + 24, gy - 92, { size: 34, font: F.hand, color: C.amber, alpha: ap(t, tp + 0.3) });
+    text('后来又加了 6 万多（斜线）', gx + 6 * cell + 24, gy - 46, { size: 34, font: F.hand, color: C.amber, alpha: ap(t, ta) });
+  }
+  if (crowd > 0) {
+    const tw = Wd('A13', '门口堵的人');
+    text('门口堵着的 95 个', gx + 5 * cell, gy + 10 * cell + 70, { size: 38, font: F.hand, color: '#efe4cc', align: 'center', alpha: ap(t, tw - 0.2) });
+  }
+  grain(t, 0.12);
+  sourceTag('资料：教育部、新华社 · 1 格 ≈ 5.7 万人', 'rgba(236,225,200,0.45)');
+}
+
+function shStack(t, lt) {
+  ctx.fillStyle = C.warmDark; ctx.fillRect(0, 0, W, H);
+  const x0 = 260, dx = 118, y0 = 700, tm = Wd('A14', '十几届的人'), u = easeIO(prog(t, tm, tm + 1.4));
+  const k = ap(lt, 0.1, 0.5);
+  ctx.fillStyle = `rgba(236,225,200,${0.35 * k})`; ctx.fillRect(x0 - 40, y0 + 30, dx * 11 + 80, 3);
+  // 12 届各 3 个小人，汇合成 1977 年位置上 6×6 的一堆；每届错开一点出发
+  const xEnd = x0 + 11 * dx;
+  for (let i = 0; i <= 11; i++) {
+    const yr = 1966 + i, xs = x0 + i * dx, ui = easeIO(clamp(u * 1.4 - (11 - i) * 0.035));
+    text(String(yr), xs, y0 + 80, { size: 26, font: F.num, color: 'rgba(236,225,200,0.55)', align: 'center', alpha: k * (1 - u * 0.5) });
+    for (let j = 0; j < 3; j++) {
+      const n = i * 3 + j, bx = xEnd - 2.5 * 44 + (n % 6) * 44, by = y0 - Math.floor(n / 6) * 46;
+      person(lerp(xs, bx, ui), lerp(y0 - j * 46, by, ui), 40, C.amber);
+    }
+  }
+  handBracket(x0, x0 + 11 * dx, 330, t, ap(lt, 0.3, 0.8), { color: C.amber, lw: 4 });
+  text('停考 11 年', x0 + 5.5 * dx, 290, { size: 48, font: F.hand, color: C.amber, align: 'center', alpha: ap(lt, 0.7) });
+  text('1977', x0 + 11 * dx, y0 + 140, { size: 30, font: F.num, color: C.amber, align: 'center', alpha: ap(t, tm + 1.0) });
+  text('攒到同一年来考', x0 + 11 * dx - 40, 220, { size: 40, font: F.hand, color: '#efe4cc', align: 'right', alpha: ap(t, tm + 1.2) });
+  grain(t, 0.12);
+}
+
+function sh1978(t, lt) {
+  ctx.drawImage(TEX.deskWarm, 0, 0);
+  paper(TEX.paperWarm, 180, 140, 1560, 720, 0.006, (w) => {
+    text('1978 年', 80, 110, { size: 48, weight: 700, font: F.serif, color: C.warmInk });
+    const x0 = 260, sw = 300, ys = [300, 500];
+    ['春', '夏', '秋', '冬'].forEach((s, i) => {
+      ctx.fillStyle = i % 2 ? 'rgba(43,37,32,0.06)' : 'rgba(43,37,32,0.11)'; ctx.fillRect(x0 + i * sw, 180, sw, 440);
+      text(s, x0 + i * sw + sw / 2, 168, { size: 34, font: F.serif, color: '#6b5f50', align: 'center' });
+    });
+    const rows = [['77 级', Wd('A15', '七七级'), x0 + sw * 0.5, '春天入学'], ['78 级', Wd('A15', '七八级'), x0 + sw * 2.5, '秋天入学']];
+    rows.forEach(([name, tw, x, lab], i) => {
+      const y = ys[i], k = ap(t, tw - 0.2, 0.4);
+      text(name, 80, y + 14, { size: 40, weight: 700, font: F.serif, color: C.warmInk, alpha: k });
+      handLine(x0, y, x0 + (x - x0) * easeOut(prog(t, tw - 0.2, tw + 0.4)), y, t, 1, { color: 'rgba(43,37,32,0.5)', lw: 3, bow: 0, seed: 130 + i });
+      ctx.save(); ctx.globalAlpha = k; ctx.fillStyle = C.pen; ctx.beginPath(); ctx.arc(x, y, 16, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      text(lab, x, y - 34, { size: 34, font: F.hand, color: C.pen, align: 'center', alpha: ap(t, tw + 0.2) });
+    });
+    const tb = Wd('A15', '只差半年') - 0.2;
+    handBracket(x0 + sw * 0.5, x0 + sw * 2.5, 600, t, ap(t, tb, 0.7), { color: C.warmInk, lw: 4 });
+    text('只差半年', x0 + sw * 1.5, 580, { size: 44, font: F.hand, color: C.warmInk, align: 'center', alpha: ap(t, tb + 0.5) });
+  }, { shadow: 0.5 });
+  grain(t, 0.12);
+  sourceTag('资料：《关于1977年高等学校招生工作的意见》、维基百科“77、78 级”');
+}
+
+function shAsk(t, lt, sh) {
+  ctx.fillStyle = C.warmDark; ctx.fillRect(0, 0, W, H);
+  const k = ap(lt, 0.2, 0.6);
+  text('你家要是有 77、78 级的长辈，', 960, 470, { size: 60, font: F.hand, color: '#efe4cc', align: 'center', alpha: k });
+  text('可以回去问问他们：', 960, 570, { size: 60, font: F.hand, color: '#efe4cc', align: 'center', alpha: ap(lt, 0.8, 0.6) });
+  text('那一个多月是怎么复习的？', 960, 670, { size: 60, font: F.hand, color: C.amber, align: 'center', alpha: ap(lt, 1.6, 0.6) });
+  grain(t, 0.12);
+  black(prog(t, sh.b - 0.6, sh.b));
+}
+
+window.renderFrame = async (t) => {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  ctx.clearRect(0, 0, W, H);
+  const sh = SHOTS.find((s) => t >= s.a && t < s.b) || SHOTS[SHOTS.length - 1];
+  sh.f(t, t - sh.a, sh);
+  if (!sh.nosub) { const c = SUBS.find((c) => t >= c.a && t < c.b); if (c) subtitle(c.s, { light: sh.light }); }
+};
+</script></body></html>

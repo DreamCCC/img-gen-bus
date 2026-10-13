@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "天文台圆顶的缝隙缓缓变宽，满天星光闪烁，老式望远镜极其缓慢地转动、抬起对准星空，镜头缓慢上摇。神秘、庄重，写实摄影，画面中没有人物。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 5,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/ep02_threebody/assets/wan/keyframes/W08_first.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "63a9e0b3-3cd4-47bf-b94c-d1ebd74dcbcc"
+}

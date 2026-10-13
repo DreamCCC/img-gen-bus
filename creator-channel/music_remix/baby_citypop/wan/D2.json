@@ -1,0 +1,15 @@
+{
+ "model": "wan2.7-i2v-2026-04-25",
+ "prompt": "女歌手在夏日海滩上边走边唱，口型与歌声同步，踩着节拍轻快地走向镜头，西装外套下摆和长发被海风吹起，海浪轻轻拍岸。镜头跟随后退。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 15,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/D_beach_wide.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "0c7b2667-0d7c-43f7-8051-647dfe936326"
+}

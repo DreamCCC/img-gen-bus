@@ -1,0 +1,8 @@
+<!doctype html><html><body style="margin:0;background:#000"><canvas id="c" width="1920" height="1080"></canvas>
+<script>
+const c=document.getElementById('c'),g=c.getContext('2d');
+window.DURATION=2; window.ready=Promise.resolve(); window.FPS=30;
+window.renderFrame=(t)=>{g.fillStyle='#0b0f14';g.fillRect(0,0,1920,1080);
+ g.fillStyle='#c4ced4';g.font='bold 120px sans-serif';g.fillText('SAS 71 - 42 NYK',420,560);
+ g.fillStyle='#e4572e';g.fillRect(200,700,1520*Math.min(1,t/2),20);};
+</script></body></html>

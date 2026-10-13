@@ -1,0 +1,60 @@
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# environments and caches
+node_modules
+.venv*/
+__pycache__/
+.cache/
+*.pyc
+.DS_Store
+unsloth_compiled_cache/
+
+# media
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.ts
+*.part
+*.m4a
+*.mp3
+*.wav
+*.flac
+*.ogg
+*.opus
+*.aac
+*.vtt
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+
+# model weights and binary data
+*.pt
+*.pth
+*.safetensors
+*.ckpt
+*.onnx
+*.bin
+*.task
+*.npy
+*.npz
+*.glb
+*.otf
+*.ttf
+*.zip
+
+# per-project generated folders
+**/raw/
+**/work/
+**/out/
+**/qa/
+**/online/
+**/takes/
+**/preview/

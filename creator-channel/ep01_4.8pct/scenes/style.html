@@ -1,0 +1,364 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:"WenKai";src:url(../assets/fonts/LXGWWenKai-Regular.ttf)}
+@font-face{font-family:"NSerif";src:url(../assets/fonts/NotoSerifSC-Regular.otf);font-weight:400}
+@font-face{font-family:"NSerif";src:url(../assets/fonts/NotoSerifSC-Bold.otf);font-weight:700}
+@font-face{font-family:"NSans";src:url(../assets/fonts/NotoSansSC-Regular.otf);font-weight:400}
+@font-face{font-family:"NSans";src:url(../assets/fonts/NotoSansSC-Bold.otf);font-weight:700}
+@font-face{font-family:"Barlow";src:url(../assets/fonts/BarlowCondensed-SemiBold.ttf)}
+@font-face{font-family:"Plex";src:url(../assets/fonts/IBMPlexMono-Regular.ttf)}
+body{margin:0;background:#000}
+</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// 风格样张：5 个场景各 5 秒，renderFrame(t) 确定性绘制
+const W = 1920, H = 1080, SEG = 5;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+window.FPS = 30; window.DURATION = SEG * 5;
+
+const F = { hand: '"WenKai"', serif: '"NSerif"', sans: '"NSans"', num: '"Barlow"', mono: '"Plex", "NSerif"' };
+const ERA = {
+  y1977: { desk: '#2a2018', paper: '#ece1c8', ink: '#2b2520', accent: '#c8452f', grain: 0.13, tint: 'rgba(255,190,110,0.07)' },
+  y1999: { desk: '#1b222b', paper: '#e9ecea', ink: '#1e252c', accent: '#c8452f', grain: 0.09, tint: 'rgba(120,160,210,0.06)' },
+  today: { bg: '#f2efe7', ink: '#1f2328', accent: '#d2412a', grain: 0.0, tint: null },
+};
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeIO = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+function hash(a, b = 0) { const h = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return h - Math.floor(h); }
+function rng(seed) { return () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let x = Math.imul(seed ^ (seed >>> 15), 1 | seed); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; }
+const step12 = (t) => Math.floor(t * 12);
+
+// ---------- 预生成纹理 ----------
+function off(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; }
+
+function makeGrain(seed) {
+  const [c, g] = off(512, 512), img = g.createImageData(512, 512), r = rng(seed);
+  for (let i = 0; i < img.data.length; i += 4) { const v = r() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  g.putImageData(img, 0, 0); return c;
+}
+function makePaper(base, seed) {
+  const [c, g] = off(1024, 1024), r = rng(seed);
+  g.fillStyle = base; g.fillRect(0, 0, 1024, 1024);
+  for (let i = 0; i < 26; i++) {
+    const x = r() * 1024, y = r() * 1024, rad = 80 + r() * 260, gr = g.createRadialGradient(x, y, 0, x, y, rad);
+    gr.addColorStop(0, `rgba(120,90,50,${0.03 + r() * 0.04})`); gr.addColorStop(1, 'rgba(120,90,50,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 1024, 1024);
+  }
+  for (let i = 0; i < 2600; i++) {
+    const x = r() * 1024, y = r() * 1024, a = r() * Math.PI, l = 3 + r() * 12;
+    g.strokeStyle = `rgba(${r() < 0.5 ? '90,70,40' : '255,255,255'},${0.05 + r() * 0.08})`; g.lineWidth = 0.6;
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke();
+  }
+  return c;
+}
+function makeDesk(base, grainCol, seed) {
+  const [c, g] = off(W, H), r = rng(seed);
+  g.fillStyle = base; g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 260; i++) {
+    const y0 = r() * H, amp = 4 + r() * 14, fr = 0.002 + r() * 0.004, ph = r() * 9;
+    g.strokeStyle = `rgba(${grainCol},${0.025 + r() * 0.05})`; g.lineWidth = 0.8 + r() * 2.2;
+    g.beginPath();
+    for (let x = 0; x <= W; x += 16) { const y = y0 + Math.sin(x * fr + ph) * amp + Math.sin(x * fr * 3.1 + ph) * amp * 0.3; x ? g.lineTo(x, y) : g.moveTo(x, y); }
+    g.stroke();
+  }
+  const v = g.createRadialGradient(W * 0.5, H * 0.45, H * 0.2, W * 0.5, H * 0.5, H * 1.05);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.55)');
+  g.fillStyle = v; g.fillRect(0, 0, W, H);
+  return c;
+}
+function makeHatch(col, gap = 9, lw = 3) {
+  const [c, g] = off(gap * 4, gap * 4);
+  g.strokeStyle = col; g.lineWidth = lw;
+  for (let i = -4; i < 8; i++) { g.beginPath(); g.moveTo(i * gap, gap * 4); g.lineTo(i * gap + gap * 4, 0); g.stroke(); }
+  return ctx.createPattern(c, 'repeat');
+}
+
+let TEX = {};
+window.ready = (async () => {
+  const specs = ['700 40px NSerif', '400 40px NSerif', '700 40px NSans', '400 40px NSans', '40px WenKai', '40px Barlow', '40px Plex'];
+  await Promise.all(specs.map((s) => document.fonts.load(s, '高考录取率一九七七年部长 0123456789%')));
+  TEX.grain = [1, 2, 3, 4].map(makeGrain);
+  TEX.paperWarm = makePaper(ERA.y1977.paper, 11);
+  TEX.paperNews = makePaper('#e4dccb', 12);
+  TEX.paperCool = makePaper(ERA.y1999.paper, 13);
+  TEX.sticky = makePaper('#f1dc84', 14);
+  TEX.deskWarm = makeDesk(ERA.y1977.desk, '10,6,3', 21);
+  TEX.deskCool = makeDesk(ERA.y1999.desk, '0,4,10', 22);
+})();
+
+// ---------- 通用绘制 ----------
+function text(s, x, y, { size = 40, font = F.sans, weight = 400, color = '#fff', align = 'left', base = 'alphabetic', alpha = 1, spacing = 0 } = {}) {
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.font = `${weight} ${size}px ${font}`; ctx.fillStyle = color;
+  ctx.textAlign = align; ctx.textBaseline = base; if (spacing) ctx.letterSpacing = spacing + 'px';
+  ctx.fillText(s, x, y); ctx.restore();
+}
+// 按字换行，返回每行文字及每个字的 x 偏移，用于定位要圈注的词
+function wrap(s, maxW, font) {
+  ctx.save(); ctx.font = font; const lines = []; let cur = '', xs = [], x = 0;
+  for (const ch of s) {
+    const w = ctx.measureText(ch).width;
+    if (x + w > maxW && cur) { lines.push({ s: cur, xs, w: x }); cur = ''; xs = []; x = 0; }
+    xs.push(x); cur += ch; x += w;
+  }
+  if (cur) lines.push({ s: cur, xs, w: x });
+  ctx.restore(); return lines;
+}
+function paragraph(s, x, y, maxW, { size = 30, lh = 52, font = F.serif, weight = 400, color = '#222', indent = 2 } = {}) {
+  const f = `${weight} ${size}px ${font}`, pad = '\u3000'.repeat(indent);
+  const lines = wrap(pad + s, maxW, f);
+  ctx.save(); ctx.font = f; ctx.fillStyle = color; ctx.textBaseline = 'alphabetic';
+  lines.forEach((l, i) => ctx.fillText(l.s, x, y + i * lh)); ctx.restore();
+  return { lines, x, y, lh, size, end: y + lines.length * lh };
+}
+// 在已排好的段落里找到某个词的包围盒（只支持不跨行）
+function locate(p, word) {
+  for (let i = 0; i < p.lines.length; i++) {
+    const k = p.lines[i].s.indexOf(word);
+    if (k >= 0) {
+      const xs = p.lines[i].xs, x0 = p.x + xs[k], x1 = k + word.length < xs.length ? p.x + xs[k + word.length] : p.x + p.lines[i].w;
+      return { x0, x1, cy: p.y + i * p.lh - p.size * 0.36, h: p.size * 1.25 };
+    }
+  }
+}
+function paper(tex, x, y, w, h, rot, draw, { shadow = 0.5 } = {}) {
+  ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(rot); ctx.translate(-w / 2, -h / 2);
+  ctx.save(); ctx.shadowColor = `rgba(0,0,0,${shadow})`; ctx.shadowBlur = 40; ctx.shadowOffsetX = 10; ctx.shadowOffsetY = 18;
+  ctx.fillStyle = ctx.createPattern(tex, 'repeat'); ctx.fillRect(0, 0, w, h); ctx.restore();
+  const eg = ctx.createLinearGradient(0, 0, w, h); eg.addColorStop(0, 'rgba(255,255,255,0.05)'); eg.addColorStop(1, 'rgba(80,50,20,0.08)');
+  ctx.fillStyle = eg; ctx.fillRect(0, 0, w, h);
+  draw && draw(w, h); ctx.restore();
+}
+// 12 帧/秒步进的手绘圈注：每 1/12 秒换一次抖动，进度 p 控制画到哪
+function handEllipse(cx, cy, rx, ry, t, p, { color = '#c8452f', lw = 4, seed = 1 } = {}) {
+  const s = step12(t), n = 64, a0 = -2.4 + hash(seed, 9) * 0.4, sweep = Math.PI * 2 * 1.12;
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath();
+  const m = Math.max(2, Math.floor(n * p));
+  for (let i = 0; i <= m; i++) {
+    const u = i / n, a = a0 + sweep * u, j = 1 + (hash(seed + i, s) - 0.5) * 0.05 + u * 0.06;
+    const x = cx + Math.cos(a) * rx * j, y = cy + Math.sin(a) * ry * j + Math.sin(u * 7 + seed) * 2;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.stroke(); ctx.restore();
+}
+function handLine(x0, y0, x1, y1, t, p, { color = '#c8452f', lw = 4, seed = 3, bow = 6 } = {}) {
+  const s = step12(t), n = 24, m = Math.max(1, Math.floor(n * p));
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.beginPath();
+  for (let i = 0; i <= m; i++) {
+    const u = i / n, x = x0 + (x1 - x0) * u, y = y0 + (y1 - y0) * u + Math.sin(u * Math.PI) * bow + (hash(seed + i, s) - 0.5) * 2.2;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.stroke(); ctx.restore();
+}
+function handArrow(x0, y0, x1, y1, t, p, opt = {}) {
+  handLine(x0, y0, x1, y1, t, p, { bow: -14, ...opt });
+  if (p < 1) return;
+  const a = Math.atan2(y1 - y0, x1 - x0), L = 22;
+  for (const d of [2.6, -2.6]) handLine(x1, y1, x1 + Math.cos(a + d) * L, y1 + Math.sin(a + d) * L, t, 1, { ...opt, bow: 0, seed: (opt.seed || 3) + d * 10 });
+}
+function person(x, y, s, fill) {
+  ctx.fillStyle = fill; ctx.beginPath(); ctx.arc(x, y - s * 0.28, s * 0.17, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x - s * 0.3, y + s * 0.36);
+  ctx.quadraticCurveTo(x - s * 0.32, y - s * 0.06, x, y - s * 0.07);
+  ctx.quadraticCurveTo(x + s * 0.32, y - s * 0.06, x + s * 0.3, y + s * 0.36); ctx.closePath(); ctx.fill();
+}
+function subtitle(s, { light = false } = {}) {
+  ctx.save(); ctx.font = `700 44px ${F.sans}`; const w = ctx.measureText(s).width + 56;
+  ctx.fillStyle = light ? 'rgba(20,22,26,0.78)' : 'rgba(0,0,0,0.55)';
+  const x = (W - w) / 2, y = 958; ctx.beginPath(); ctx.roundRect(x, y, w, 70, 10); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(s, W / 2, y + 37); ctx.restore();
+}
+function sourceTag(s, color = 'rgba(255,255,255,0.55)') { text(s, 60, 62, { size: 22, color, font: F.sans }); }
+function finish(t, era) {
+  if (era && era.tint) { ctx.fillStyle = era.tint; ctx.fillRect(0, 0, W, H); }
+  if (era && era.grain) {
+    ctx.save(); ctx.globalAlpha = era.grain; ctx.globalCompositeOperation = 'overlay';
+    ctx.fillStyle = ctx.createPattern(TEX.grain[Math.floor(t * 30) % 4], 'repeat'); ctx.fillRect(0, 0, W, H); ctx.restore();
+  }
+}
+function camera(t, dur, fx, fy, z0, z1, draw) {
+  const z = z0 + (z1 - z0) * easeIO(clamp(t / dur));
+  ctx.save(); ctx.translate(fx, fy); ctx.scale(z, z); ctx.translate(-fx, -fy); draw(); ctx.restore();
+}
+
+// ---------- 场景 1：档案桌 · 1977 年招生文件 ----------
+function sc_doc(t) {
+  const E = ERA.y1977;
+  camera(t, SEG, 860, 560, 1.0, 1.045, () => {
+    ctx.drawImage(TEX.deskWarm, 0, 0);
+    paper(TEX.paperNews, 1180, 120, 640, 780, 0.07, (w) => {
+      text('1977年10月21日', 50, 74, { size: 26, color: '#6b5f50', font: F.serif });
+      ctx.fillStyle = '#3a332c'; ctx.fillRect(50, 96, w - 100, 3);
+      text('高等学校招生', 50, 200, { size: 92, weight: 700, font: F.serif, color: '#2a241f' });
+      text('进行重大改革', 50, 310, { size: 92, weight: 700, font: F.serif, color: '#2a241f' });
+      const r = rng(5);
+      for (let col = 0; col < 3; col++) for (let i = 0; i < 13; i++) {
+        ctx.fillStyle = `rgba(60,52,44,${0.18 + r() * 0.1})`;
+        ctx.fillRect(50 + col * 186, 370 + i * 30, 160 * (i % 5 === 4 ? 0.55 : 0.9 + r() * 0.1), 9);
+      }
+    }, { shadow: 0.55 });
+    paper(TEX.paperWarm, 230, 110, 1020, 840, -0.022, (w) => {
+      text('关于一九七七年高等学校招生工作的意见', w / 2, 112, { size: 40, weight: 700, font: F.serif, color: E.ink, align: 'center' });
+      text('（节选）', w / 2, 162, { size: 26, font: F.serif, color: '#6b5f50', align: 'center' });
+      text('四、招生经费和学生待遇', 90, 248, { size: 31, weight: 700, font: F.serif, color: E.ink });
+      const p1 = paragraph('参加统一考试者缴报名费五角，用于招生工作所需的费用。赴考的往返路费、体检费和食宿费等，均由本人自理。', 90, 318, w - 180, { color: E.ink });
+      paragraph('国家职工入学时工龄满五年的，在校学习期间，工资由原单位照发，毕业后一般回原单位。其他学生从今年开始，一律实行人民助学金制度，具体办法由教育部、财政部另订。', 90, p1.end + 24, w - 180, { color: E.ink });
+      const b = locate(p1, '缴报名费五角');
+      if (b) {
+        const pc = easeOut(prog(t, 1.0, 1.8));
+        handEllipse((b.x0 + b.x1) / 2, b.cy, (b.x1 - b.x0) / 2 + 12, b.h * 0.7, t, pc, { color: E.accent, lw: 4.5, seed: 4 });
+        const pa = prog(t, 1.9, 2.4);
+        if (pa > 0) handArrow(b.x1 + 40, b.cy - 70, b.x1 + 4, b.cy - 26, t, pa, { color: E.accent, lw: 4, seed: 8 });
+        if (t > 2.3) text('五毛钱', b.x1 + 46, b.cy - 74, { size: 46, font: F.hand, color: E.accent, alpha: easeOut(prog(t, 2.3, 2.7)) });
+      }
+    });
+  });
+  finish(t, E);
+  sourceTag('资料：教育部《关于1977年高等学校招生工作的意见》 · 画面为重新排版');
+  subtitle('报名费倒是便宜，五毛钱，当年的招生文件里写得清清楚楚。');
+}
+
+// ---------- 场景 2：100 人方阵 · 1977 ----------
+function sc_grid(t) {
+  const E = ERA.y1977;
+  ctx.fillStyle = '#1d1712'; ctx.fillRect(0, 0, W, H);
+  const v = ctx.createRadialGradient(W * 0.6, H * 0.45, 100, W * 0.6, H * 0.5, H);
+  v.addColorStop(0, 'rgba(255,200,130,0.07)'); v.addColorStop(1, 'rgba(0,0,0,0.4)'); ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  const gx = 1020, gy = 190, cell = 68, s = 64, amber = '#f0c06a', dim = 'rgba(236,225,200,0.12)';
+  const hatch = makeHatch('rgba(240,192,106,0.9)', 7, 2.4);
+  // 前 3.5 格是原计划 20 万（3.5%），后 1.3 格是后加的 7.3 万
+  const plan = 20 / 570 * 100, total = 27.3 / 570 * 100, lit = easeOut(prog(t, 0.6, 1.6)) * total;
+  for (let i = 0; i < 100; i++) {
+    const x = gx + (i % 10) * cell + cell / 2, y = gy + Math.floor(i / 10) * cell + cell / 2;
+    person(x, y, s, dim);
+    const a = clamp(lit - i), b = clamp(Math.min(lit, plan) - i);
+    if (a <= 0) continue;
+    ctx.save(); ctx.beginPath(); ctx.rect(x - s / 2, y - s / 2, s * a, s); ctx.clip();
+    person(x, y, s, hatch); ctx.restore();
+    if (b > 0) { ctx.save(); ctx.beginPath(); ctx.rect(x - s / 2, y - s / 2, s * b, s); ctx.clip(); person(x, y, s, amber); ctx.restore(); }
+  }
+  const k = easeOut(prog(t, 0.2, 1.0));
+  text('4.8%', 180, 470, { size: 250, font: F.num, color: amber, alpha: k });
+  text('1977 年 · 570 万人报考 · 录取 27.3 万', 186, 545, { size: 34, color: 'rgba(236,225,200,0.85)', alpha: k });
+  text('一个小人 = 1%', 186, 600, { size: 26, color: 'rgba(236,225,200,0.5)', alpha: k });
+  const pa = prog(t, 2.0, 2.6);
+  if (pa > 0) {
+    handArrow(gx + 6 * cell + 10, gy - 50, gx + 4 * cell + 40, gy + 2, t, pa, { color: amber, lw: 3.5, seed: 12 });
+    text('原计划只招 20 万，', gx + 6 * cell + 24, gy - 92, { size: 34, font: F.hand, color: amber, alpha: easeOut(prog(t, 2.4, 2.9)) });
+    text('后来又加了 7 万多（斜线）', gx + 6 * cell + 24, gy - 46, { size: 34, font: F.hand, color: amber, alpha: easeOut(prog(t, 2.6, 3.1)) });
+  }
+  finish(t, E);
+  sourceTag('资料：教育部、维基百科 · 1 格 ≈ 5.7 万人', 'rgba(236,225,200,0.45)');
+  subtitle('最后录了 27 万 3 千人，100 个人里不到 5 个。');
+}
+
+// ---------- 场景 3：剧本卡 · 1999 年 6 月 2 日 ----------
+function sc_script(t) {
+  const E = ERA.y1999;
+  camera(t, SEG, 960, 520, 1.03, 1.0, () => {
+    ctx.drawImage(TEX.deskCool, 0, 0);
+    paper(TEX.paperCool, 400, 70, 1120, 880, 0.012, (w) => {
+      const L = 120, C = w / 2, ink = E.ink;
+      text('内景 · 教育部部长办公室 · 1999 年 6 月 2 日 上午', L, 120, { size: 30, font: F.mono, weight: 700, color: ink });
+      text('部长把发展规划司司长叫进办公室。', L, 186, { size: 28, font: F.serif, color: '#4a535c' });
+      const who = (s, y) => text(s, C, y, { size: 28, font: F.mono, color: ink, align: 'center', spacing: 2 });
+      const say = (s, y) => text(s, C, y, { size: 34, font: F.serif, color: ink, align: 'center' });
+      who('陈至立（时任教育部部长）', 268);
+      say('国务院决定，今年要进一步扩大招生，', 322);
+      say('要比去年增加 100 万人。', 372);
+      who('纪宝成（时任发展规划司司长）', 466);
+      text('（一下子跳了起来）', C, 512, { size: 28, font: F.serif, color: '#4a535c', align: 'center' });
+      say('这绝对不可能。', 562);
+      who('陈至立', 656); say('你觉得最多能扩招多少？', 710);
+      who('纪宝成', 804); say('最多 50 万人。', 858 - 0);
+      // 划掉 100 万，手写改成 50 万
+      ctx.save(); ctx.font = `400 34px ${F.serif}`; const full = '要比去年增加 100 万人。', pre = ctx.measureText('要比去年增加 ').width,
+        wd = ctx.measureText('100 万').width, fw = ctx.measureText(full).width; ctx.restore();
+      const x0 = C - fw / 2 + pre, ps = easeOut(prog(t, 1.4, 1.9));
+      if (ps > 0) handLine(x0 - 8, 361, x0 + wd + 8, 359, t, ps, { color: E.accent, lw: 5, seed: 31, bow: 3 });
+      const pc = prog(t, 1.9, 2.2);
+      if (pc > 0) handArrow(C + fw / 2 + 14, 360, C + fw / 2 + 58, 360, t, pc, { color: E.accent, lw: 4, seed: 33, bow: 0 });
+      if (t > 2.1) text('50 万', C + fw / 2 + 72, 374, { size: 46, font: F.hand, color: E.accent, alpha: easeOut(prog(t, 2.1, 2.5)) });
+      text('据纪宝成回忆文章整理（教育部官网）', w - 60, 860, { size: 20, font: F.sans, color: '#7d868f', align: 'right' });
+    });
+  });
+  finish(t, E);
+  sourceTag('画面为根据当事人回忆重新排版，不是原始文件');
+  subtitle('纪宝成后来在回忆文章里写，他“一下子跳了起来，说这绝对不可能”。');
+}
+
+// ---------- 场景 4：分母拆解 · 今天 ----------
+function sc_split(t) {
+  const E = ERA.today;
+  ctx.fillStyle = E.bg; ctx.fillRect(0, 0, W, H);
+  const k = easeOut(prog(t, 0.2, 0.9));
+  text('录取率 ＝ 录取人数 ÷ 报名人数', 160, 220, { size: 58, weight: 700, color: E.ink, alpha: k });
+  ctx.save(); ctx.font = `700 58px ${F.sans}`; const xa = 160 + ctx.measureText('录取率 ＝ 录取人数 ÷ ').width, wa = ctx.measureText('报名人数').width; ctx.restore();
+  const pe = easeOut(prog(t, 1.0, 1.6));
+  if (pe > 0) handEllipse(xa + wa / 2, 200, wa / 2 + 26, 48, t, pe, { color: E.accent, lw: 4.5, seed: 41 });
+  text('湖南 · 2024 年高考报名 72.6 万人', 160, 350, { size: 36, weight: 700, color: E.ink, alpha: easeOut(prog(t, 1.4, 1.9)) });
+  const bx = 160, by = 440, bw = 1420, bh = 110, fr = 46.2 / 72.6, pb = easeIO(prog(t, 1.6, 2.6));
+  ctx.fillStyle = E.ink; ctx.fillRect(bx, by, bw * fr * clamp(pb * 1.6), bh);
+  const pr = prog(t, 2.4, 3.2);
+  if (pr > 0) {
+    ctx.save(); ctx.globalAlpha = easeOut(pr);
+    ctx.fillStyle = 'rgba(210,65,42,0.16)'; ctx.fillRect(bx + bw * fr, by, bw * (1 - fr), bh);
+    ctx.fillStyle = makeHatch('rgba(210,65,42,0.85)', 10, 3); ctx.fillRect(bx + bw * fr, by, bw * (1 - fr), bh);
+    ctx.strokeStyle = E.accent; ctx.lineWidth = 3; ctx.strokeRect(bx + bw * fr, by, bw * (1 - fr), bh); ctx.restore();
+  }
+  if (pb > 0.7) text('参加普通高考 46.2 万', bx + 36, by + bh / 2 + 2, { size: 38, weight: 700, color: '#fff', base: 'middle', alpha: prog(t, 2.2, 2.6) });
+  if (pr > 0) {
+    text('没进普通高考考场', bx + bw * fr + bw * (1 - fr) / 2, by + bh + 62, { size: 34, weight: 700, color: E.accent, align: 'center', alpha: easeOut(pr) });
+    text('26.4 万（单招、对口招生等）', bx + bw * fr + bw * (1 - fr) / 2, by + bh + 108, { size: 28, color: E.accent, align: 'center', alpha: easeOut(pr) });
+  }
+  const pk = prog(t, 3.2, 3.8);
+  if (pk > 0) {
+    ctx.save(); ctx.globalAlpha = easeOut(pk); ctx.strokeStyle = E.ink; ctx.lineWidth = 2.5; ctx.beginPath();
+    ctx.moveTo(bx, by - 26); ctx.lineTo(bx, by - 40); ctx.lineTo(bx + bw, by - 40); ctx.lineTo(bx + bw, by - 26); ctx.stroke(); ctx.restore();
+    text('都算在分母里', bx + bw - 10, by - 58, { size: 34, font: F.hand, color: E.ink, align: 'right', alpha: easeOut(pk) });
+  }
+  // 从第三章一直钉在右上角的便签
+  paper(TEX.sticky, 1530, 60, 330, 260, 0.05, (w, h) => {
+    ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.save(); ctx.translate(w / 2, 6); ctx.rotate(-0.06); ctx.fillRect(-60, -16, 120, 32); ctx.restore();
+    const lines = ['“我主张好学校多扩，', '差学校少扩，', '但结果却并不是这样。”'];
+    lines.forEach((s, i) => text(s, 26, 80 + i * 46, { size: 28, font: F.hand, color: '#3a3320' }));
+    text('汤敏', w - 26, h - 26, { size: 26, font: F.hand, color: '#5a5030', align: 'right' });
+  }, { shadow: 0.25 });
+  sourceTag('资料：腾讯新闻（湖南省教育考试院数据）', 'rgba(31,35,40,0.5)');
+  subtitle('拿湖南 2024 年来说，报名 72.6 万人，参加普通高考的只有 46.2 万。', { light: true });
+}
+
+// ---------- 场景 5：章节卡 ----------
+function sc_chapter(t) {
+  const E = ERA.y1999;
+  ctx.fillStyle = '#121820'; ctx.fillRect(0, 0, W, H);
+  const yrs = [1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002];
+  const val = [60.9, 62, 75.4, 92.4, 90, 92.6, 96.6, 100, 108, 159.7, 221, 268, 320];
+  const bx = 1010, base = 900, bw = 44, gap = 18, sc = 1.9, pg = prog(t, 0.3, 1.8);
+  yrs.forEach((y, i) => {
+    const h = val[i] * sc * easeOut(clamp(pg * 1.4 - i * 0.04)), x = bx + i * (bw + gap), hi = y === 1999;
+    ctx.fillStyle = hi ? 'rgba(210,65,42,0.9)' : y > 1999 ? 'rgba(200,215,230,0.22)' : 'rgba(200,215,230,0.35)';
+    ctx.fillRect(x, base - h, bw, h);
+    if (i % 3 === 0 || hi) text(String(y), x + bw / 2, base + 40, { size: 22, font: F.num, color: hi ? '#e8eef3' : 'rgba(200,215,230,0.55)', align: 'center' });
+  });
+  text('全国普通高校本专科招生（万人）', bx, base + 86, { size: 22, color: 'rgba(200,215,230,0.5)' });
+  const k = easeOut(prog(t, 0.1, 0.8)), k2 = easeOut(prog(t, 0.5, 1.2));
+  text('第 三 章', 180, 300, { size: 32, color: 'rgba(200,215,230,0.7)', spacing: 6, alpha: k });
+  text('+47%', 170, 560, { size: 300, font: F.num, color: '#e8eef3', alpha: k });
+  ctx.fillStyle = `rgba(210,65,42,${k2})`; ctx.fillRect(184, 610, 120 * k2, 6);
+  text('1999 年扩招', 180, 712, { size: 78, weight: 700, font: F.serif, color: '#e8eef3', alpha: k2 });
+  text('1999 年招生 159.68 万人，比上一年多 51.32 万', 184, 776, { size: 28, color: 'rgba(200,215,230,0.65)', alpha: k2 });
+  finish(t, { grain: 0.08, tint: null });
+  sourceTag('资料：历年全国教育事业发展统计公报', 'rgba(200,215,230,0.4)');
+}
+
+const SCENES = [sc_doc, sc_grid, sc_script, sc_split, sc_chapter];
+window.renderFrame = async (t) => {
+  const i = Math.min(SCENES.length - 1, Math.floor(t / SEG));
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  ctx.clearRect(0, 0, W, H); SCENES[i](t - i * SEG);
+};
+</script></body></html>

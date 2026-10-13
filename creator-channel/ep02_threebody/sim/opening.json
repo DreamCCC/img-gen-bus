@@ -1,0 +1,28 @@
+{
+ "k": 0.955,
+ "eps": 0.0001,
+ "delta": 1e-06,
+ "period": 3.6275987284684357,
+ "result": [
+  {
+   "run": "A",
+   "ejected": 0,
+   "eject_loops": 12.7,
+   "break_loops": 1.71,
+   "pair_bound": true,
+   "pair_dist_end": 0.496,
+   "escaper_dist_end": 122.6,
+   "energy_drift": 1.7309069733073557e-09
+  },
+  {
+   "run": "B",
+   "ejected": 2,
+   "eject_loops": 45.4,
+   "break_loops": 1.71,
+   "pair_bound": true,
+   "pair_dist_end": 0.41,
+   "escaper_dist_end": 45.4,
+   "energy_drift": 2.866691550806877e-09
+  }
+ ]
+}

@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "电影级镜头，异星大地被烤得龟裂发红，热浪扭曲空气。天空中三颗巨大的太阳同时逼近，每一颗都是刺眼的白热等离子火球，边缘翻腾着日珥和耀斑，光芒向四周溢出，像真实的太阳一样没有任何环形山、不是月亮。岩石边缘发红冒烟，尘土被热风卷起。酷热、灼烧，真实摄影，IMAX质感，无文字，无人物。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "16:9",
+  "duration": 3,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": null,
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "46ab2865-b728-42f7-8de5-69c108b62eb9"
+}

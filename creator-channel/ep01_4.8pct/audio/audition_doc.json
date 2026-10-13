@@ -1,0 +1,28 @@
+{
+ "base": "冷静、克制、有分量的纪录片旁白，成熟男声，中低音，语速中等偏慢，吐字清晰，停顿从容，情绪内敛但真诚，像在讲一段值得被记住的历史。不要播音腔，不要煽情。",
+ "preview": "百分之四点八。这是一九七七年，中国高考的录取率。",
+ "lines": [
+  ["H", "百分之四点八。这是一九七七年，中国高考的录取率。", "“百分之四点八”说完停顿一下，语气平静而有分量。"],
+  ["R", "那年冬天，五百七十万人走进考场，争二十七万个位置。", "平稳叙述，“二十七万”稍稍加重。"],
+  ["C", "到二零二五年，高等教育毛入学率，从百分之二点六，涨到了百分之六十一点三。", "逐渐升温，最后一个数字加重，有分量但不喊。"],
+  ["Q", "你家第一个大学生，是哪一年考上的？", "放轻，温和，像在跟人聊天。"]
+ ],
+ "cands": [
+  ["q_Kai", "qwen-i", "Kai"],
+  ["q_EldricSage", "qwen-i", "Eldric Sage"],
+  ["q_Neil", "qwen-i", "Neil"],
+  ["q_Arthur", "qwen-i", "Arthur"],
+  ["q_Ethan", "qwen-i", "Ethan"],
+  ["qa_lufeng", "qwen-audio-3.0-tts-plus", "longanlufeng"],
+  ["c_longsanshu", "cosyvoice-v3-flash", "longsanshu_v3"],
+  ["c_longxiaocheng", "cosyvoice-v2", "longxiaocheng_v2"],
+  ["c_longfei", "cosyvoice-v3-flash", "longfei_v3"],
+  ["m_audiobook2", "minimax", "audiobook_male_2"],
+  ["m_executive", "minimax", "Chinese (Mandarin)_Reliable_Executive"],
+  ["m_announcer", "minimax", "Chinese (Mandarin)_Male_Announcer"]
+ ],
+ "designs": {
+  "qvd_doc": ["qwen", "45岁左右的中国男性纪录片旁白。中低音，音色温厚，带一点磁性的颗粒感，胸腔共鸣明显；语速中等偏慢，停顿从容，语气冷静克制、真诚有分量，像在讲述一段值得被记住的历史。普通话标准，不要播音腔，不要煽情。"],
+  "cvd_doc": ["cosy", "45岁左右的男性纪录片旁白，中低音，音色温厚有磁性，胸腔共鸣明显，语速中等偏慢，停顿从容，语气冷静克制、真诚有分量，适合历史纪录片、财经纪录片和人文类解说。"]
+ }
+}

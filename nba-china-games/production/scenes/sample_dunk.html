@@ -1,0 +1,537 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+const W = 1920, H = 1080;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const bloomCv = Object.assign(document.createElement('canvas'), { width: W / 2, height: H / 2 });
+const bctx = bloomCv.getContext('2d');
+
+const COL = {
+  bg: '#05060a', gold: '#d8b46a', goldHi: '#ffe2a0', goldDim: 'rgba(216,180,106,0.22)',
+  white: '#f4efe6', grey: '#7d8590', dark: '#0b0c11',
+};
+const FONT_CN = '"Songti SC", "STSong", serif';
+const FONT_UI = '"PingFang SC", sans-serif';
+const FONT_NUM = '"DIN Condensed", "Helvetica Neue", sans-serif';
+
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeIn = (x) => x * x * x;
+const smooth = (x) => x * x * (3 - 2 * x);
+const hash = (a, b = 0) => { const s = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return s - Math.floor(s); };
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+let CUE;
+
+// ---------- 预生成：胶片颗粒、暗角、观众光点 ----------
+const grain = [];
+{
+  const r = mulberry32(7);
+  for (let k = 0; k < 4; k++) {
+    const g = Object.assign(document.createElement('canvas'), { width: 512, height: 512 });
+    const gx = g.getContext('2d');
+    const id = gx.createImageData(512, 512);
+    for (let i = 0; i < id.data.length; i += 4) {
+      const v = r() * 255;
+      id.data[i] = id.data[i + 1] = id.data[i + 2] = v;
+      id.data[i + 3] = 16;
+    }
+    gx.putImageData(id, 0, 0);
+    grain.push(g);
+  }
+}
+const vignette = Object.assign(document.createElement('canvas'), { width: W, height: H });
+{
+  const v = vignette.getContext('2d');
+  const g = v.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 1.0);
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(1, 'rgba(0,0,0,0.75)');
+  v.fillStyle = g;
+  v.fillRect(0, 0, W, H);
+}
+
+const crowd = [];
+{
+  const r = mulberry32(11);
+  while (crowd.length < 11000) {
+    const a = r() * Math.PI * 2;
+    const rr = lerp(0.36, 1, Math.sqrt(r()));
+    if ((rr * 14) % 1 < 0.14) continue; // 环形过道
+    const sector = (a / (Math.PI * 2)) * 18;
+    if (Math.abs(sector - Math.round(sector)) < 0.06) continue; // 放射状过道
+    crowd.push({ a, rr, b: 0.35 + r() * 0.65, d: r(), i: crowd.length });
+  }
+}
+
+// ---------- 通用绘制 ----------
+function partialPolyline(pts, frac) {
+  if (frac <= 0) return;
+  let total = 0;
+  const seg = [];
+  for (let i = 1; i < pts.length; i++) {
+    const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    seg.push(l); total += l;
+  }
+  let remain = total * clamp(frac);
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) {
+    if (remain >= seg[i - 1]) { ctx.lineTo(pts[i][0], pts[i][1]); remain -= seg[i - 1]; }
+    else {
+      const f = remain / seg[i - 1];
+      ctx.lineTo(lerp(pts[i - 1][0], pts[i][0], f), lerp(pts[i - 1][1], pts[i][1], f));
+      break;
+    }
+  }
+  ctx.stroke();
+}
+function arcPts(cx, cy, r, a0, a1, n = 64) {
+  const p = [];
+  for (let i = 0; i <= n; i++) { const a = lerp(a0, a1, i / n); p.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); }
+  return p;
+}
+function text(str, x, y, { size = 48, font = FONT_CN, weight = '', color = COL.white, align = 'center', alpha = 1, spacing = 0 } = {}) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.font = `${weight} ${size}px ${font}`;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'middle';
+  if (spacing) ctx.letterSpacing = `${spacing}px`;
+  ctx.fillText(str, x, y);
+  ctx.restore();
+}
+
+// ---------- A 段：一万一千个光点 ----------
+function drawCrowd(t, f, { alpha = 1, scale = 1, cx = 960, cy = 600, appear = true } = {}) {
+  let pulse = 0;
+  for (const b of CUE.chant) if (t >= b) pulse += Math.exp(-(t - b) / 0.18);
+  ctx.save();
+  for (const p of crowd) {
+    const x0 = Math.cos(p.a) * p.rr, y0 = Math.sin(p.a) * p.rr;
+    const sx = cx + x0 * 900 * scale;
+    const sy = cy + y0 * 430 * scale;
+    if (sx < -10 || sx > W + 10 || sy < -10 || sy > H + 10) continue;
+    let a = alpha;
+    if (appear) a *= prog(t, 0.15 + 0.9 * (p.rr - 0.36) + 0.5 * p.d, 0.4 + 0.9 * (p.rr - 0.36) + 0.5 * p.d);
+    if (a <= 0) continue;
+    const near = (y0 + 1) / 2;
+    const size = lerp(1.2, 2.8, near) * scale;
+    const flash = hash(p.i, f) < 0.0005;
+    const br = clamp(p.b * (0.5 + 0.55 * pulse));
+    ctx.globalAlpha = a * (flash ? 1 : lerp(0.35, 1, br) * lerp(0.55, 1, near));
+    ctx.fillStyle = flash ? '#ffffff' : br > 0.8 ? COL.goldHi : COL.gold;
+    const s = flash ? size * 2.2 : size;
+    ctx.fillRect(sx - s / 2, sy - s / 2, s, s);
+  }
+  ctx.restore();
+}
+function segA(t, f) {
+  const dive = prog(t, CUE.dive[0], CUE.dive[1]);
+  const scale = 1 + easeIn(dive) * 2.4;
+  drawCrowd(t, f, { alpha: 1 - dive, scale });
+  // 中央小球场
+  ctx.save();
+  ctx.globalAlpha = (1 - dive) * prog(t, 0.2, 0.8);
+  ctx.strokeStyle = COL.gold;
+  ctx.lineWidth = 2;
+  ctx.translate(960, 600);
+  ctx.scale(scale, scale);
+  ctx.strokeRect(-200, -100, 400, 200);
+  ctx.beginPath(); ctx.moveTo(0, -100); ctx.lineTo(0, 100); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+  // 文字
+  const ta = prog(t, 0.4, 0.7) * (1 - prog(t, 2.6, 2.9));
+  const n = Math.round(11000 * easeOut(prog(t, 0.4, 1.6)));
+  text(n.toLocaleString('en-US'), 960, 585, { size: 150, font: FONT_NUM, weight: 'bold', color: COL.goldHi, alpha: ta });
+  text('人', 960 + 205, 600, { size: 54, font: FONT_CN, weight: 'bold', color: COL.gold, alpha: ta });
+  text('同 一 个 名 字', 960, 690, { size: 46, font: FONT_CN, weight: 'bold', color: COL.white, alpha: prog(t, 1.8, 2.1) * (1 - prog(t, 2.6, 2.9)) });
+}
+
+// ---------- B 段：战术板复现 ----------
+const S = 16, CX0 = 584, CY0 = 140; // 1 英尺 = 16px；半场 47ft × 50ft
+const cp = (X, Y) => [CX0 + X * S, CY0 + Y * S];
+const RIM = cp(41.75, 25);
+const courtPaths = (() => {
+  const P = [];
+  P.push([cp(0, 0), cp(47, 0), cp(47, 50), cp(0, 50), cp(0, 0)]);
+  P.push([cp(47, 17), cp(28, 17), cp(28, 33), cp(47, 33)]);
+  P.push(arcPts(...cp(28, 25), 6 * S, Math.PI / 2, Math.PI * 1.5));
+  P.push([cp(47, 3), cp(33, 3)]);
+  P.push([cp(47, 47), cp(33, 47)]);
+  const a = Math.asin(22 / 23.75);
+  P.push(arcPts(RIM[0], RIM[1], 23.75 * S, Math.PI - a, Math.PI + a));
+  P.push(arcPts(RIM[0], RIM[1], 4 * S, Math.PI / 2, Math.PI * 1.5, 32));
+  P.push(arcPts(...cp(0, 25), 6 * S, -Math.PI / 2, Math.PI / 2));
+  P.push([cp(43, 22), cp(43, 28)]);
+  return P.filter((p) => p.length > 1);
+})();
+const YAO_PATH = [[26, 27], [33, 29.5], [37, 28], [40.2, 25.6]];
+function along(path, f) {
+  const pts = path.map(([x, y]) => cp(x, y));
+  let total = 0; const seg = [];
+  for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(l); total += l; }
+  let d = total * clamp(f);
+  for (let i = 1; i < pts.length; i++) {
+    if (d <= seg[i - 1]) { const k = d / seg[i - 1]; return [lerp(pts[i - 1][0], pts[i][0], k), lerp(pts[i - 1][1], pts[i][1], k)]; }
+    d -= seg[i - 1];
+  }
+  return pts[pts.length - 1];
+}
+function yaoPos(t) {
+  // 前三段（到 37,28）在 cutStart→passArrive，最后一段在 passArrive→rimArrive
+  const L1 = [[26, 27], [33, 29.5], [37, 28]];
+  if (t < CUE.passArrive) return along(L1, easeInOut(prog(t, CUE.cutStart, CUE.passArrive)));
+  return along([[37, 28], [40.2, 25.6]], easeOut(prog(t, CUE.passArrive, CUE.rimArrive)));
+}
+function dot(p, { fill = COL.gold, r = 14, label = '', num = '', hollow = false, alpha = 1 } = {}) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, Math.PI * 2);
+  if (hollow) { ctx.strokeStyle = COL.grey; ctx.lineWidth = 2.5; ctx.stroke(); }
+  else { ctx.fillStyle = fill; ctx.fill(); }
+  ctx.restore();
+  if (num) text(num, p[0], p[1] + 1, { size: 15, font: FONT_NUM, weight: 'bold', color: COL.dark, alpha });
+  if (label) text(label, p[0], p[1] - 32, { size: 26, font: FONT_CN, weight: 'bold', color: COL.goldHi, alpha });
+}
+function segB(t) {
+  const fadeIn = prog(t, 2.95, 3.25);
+  const z = 1 + easeIn(prog(t, CUE.zoom[0], CUE.zoom[1])) * 4.5;
+  ctx.save();
+  ctx.globalAlpha = fadeIn * (1 - prog(t, 5.85, 6.05));
+  ctx.translate(RIM[0], RIM[1]); ctx.scale(z, z); ctx.translate(-RIM[0], -RIM[1]);
+  // 球场线
+  ctx.strokeStyle = COL.gold; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+  courtPaths.forEach((p, i) => {
+    const s = CUE.courtDraw[0] + i * 0.06;
+    partialPolyline(p, easeInOut(prog(t, s, s + 0.55)));
+  });
+  // 篮筐
+  ctx.save(); ctx.globalAlpha *= prog(t, 3.5, 3.8);
+  ctx.beginPath(); ctx.arc(RIM[0], RIM[1], 0.75 * S, 0, Math.PI * 2); ctx.strokeStyle = COL.goldHi; ctx.lineWidth = 3; ctx.stroke();
+  ctx.restore();
+  const pa = prog(t, 3.6, 3.9);
+  // 防守方（国王）
+  const yp = yaoPos(t);
+  const defs = [[24.5, 10.5], [34, 40], [30, 15], [37, 12], [20, 38]].map(([x, y]) => cp(x, y));
+  const lag = yaoPos(t - 0.35);
+  defs.push([lag[0] + 18, lag[1] - 20]);
+  defs.forEach((d) => dot(d, { hollow: true, r: 13, alpha: pa }));
+  // 进攻方（火箭）
+  [[18, 40], [38, 45], [33, 4]].forEach(([x, y]) => dot(cp(x, y), { r: 12, alpha: pa * 0.55 }));
+  const tm = lerp(0, 1, prog(t, 3.9, 5.0));
+  const mac = [lerp(cp(22, 8)[0], cp(23.5, 9.5)[0], tm), lerp(cp(22, 8)[1], cp(23.5, 9.5)[1], tm)];
+  dot(mac, { r: 15, num: '1', label: '麦迪', alpha: pa });
+  // 姚明切入路线
+  ctx.save(); ctx.globalAlpha *= pa * 0.8; ctx.setLineDash([10, 10]); ctx.strokeStyle = COL.goldHi; ctx.lineWidth = 2.5;
+  const cutF = t < CUE.passArrive ? prog(t, CUE.cutStart, CUE.passArrive) * 0.82 : lerp(0.82, 1, prog(t, CUE.passArrive, CUE.rimArrive));
+  partialPolyline(YAO_PATH.map(([x, y]) => cp(x, y)), cutF);
+  ctx.restore();
+  dot(yp, { r: 17, num: '11', label: '姚明', alpha: pa });
+  // 传球
+  if (t >= CUE.pass) {
+    const k = prog(t, CUE.pass, CUE.passArrive);
+    const a = mac, b = cp(37, 28);
+    const mid = [(a[0] + b[0]) / 2 - 60, (a[1] + b[1]) / 2 - 40];
+    const bez = (u) => [(1 - u) * (1 - u) * a[0] + 2 * (1 - u) * u * mid[0] + u * u * b[0], (1 - u) * (1 - u) * a[1] + 2 * (1 - u) * u * mid[1] + u * u * b[1]];
+    ctx.save(); ctx.strokeStyle = COL.goldHi; ctx.lineWidth = 3; ctx.globalAlpha *= 0.9;
+    ctx.beginPath();
+    for (let i = 0; i <= 40; i++) { const u = (i / 40) * k; const p = bez(u); i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }
+    ctx.stroke(); ctx.restore();
+    const bp = k < 1 ? bez(k) : yp;
+    ctx.beginPath(); ctx.arc(bp[0], bp[1] - (k < 1 ? 0 : 0), 7, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+  }
+  ctx.restore();
+  // 角标
+  const ha = fadeIn * prog(t, 3.3, 3.6) * (1 - prog(t, 5.5, 5.8));
+  text('2004.10.14  ·  上海体育馆', 80, 70, { size: 30, font: FONT_CN, weight: 'bold', color: COL.gold, align: 'left', alpha: ha });
+  text('火箭 vs 国王  ·  第一节', 80, 112, { size: 24, font: FONT_UI, color: COL.grey, align: 'left', alpha: ha });
+}
+
+// ---------- C 段：线稿扣篮 ----------
+const B = { th: 150, sh: 150, sp: 170, nk: 26, hr: 31, ua: 115, fa: 105, ft: 42 };
+const KEYS = [
+  { u: 0.0, hip: [-560, -285], sp: 168, nUA: 60, nFA: 120, fUA: 50, fFA: 110, nTh: 35, nSh: 5, fTh: -35, fSh: -80 },
+  { u: 0.28, hip: [-330, -235], sp: 150, nUA: 120, nFA: 160, fUA: 100, fFA: 140, nTh: 70, nSh: -10, fTh: -20, fSh: -60 },
+  { u: 0.5, hip: [-120, -440], sp: 172, nUA: 165, nFA: 172, fUA: 130, fFA: 150, nTh: 75, nSh: 0, fTh: -15, fSh: -55 },
+  { u: 0.6, hip: [-40, -430], sp: 165, nUA: 140, nFA: 110, fUA: 110, fFA: 120, nTh: 60, nSh: -10, fTh: -10, fSh: -40 },
+  { u: 0.78, hip: [-20, -390], sp: 178, nUA: 170, nFA: 175, fUA: 160, fFA: 165, nTh: 20, nSh: -5, fTh: 0, fSh: -25 },
+  { u: 1.0, hip: [-15, -380], sp: 180, nUA: 172, nFA: 176, fUA: 162, fFA: 168, nTh: 10, nSh: 0, fTh: -5, fSh: -10 },
+];
+const RIM_W = [140, -740];
+const dir = (a) => { const r = (a * Math.PI) / 180; return [Math.sin(r), Math.cos(r)]; };
+const add = (p, d, l) => [p[0] + d[0] * l, p[1] + d[1] * l];
+function rawPose(u) {
+  u = clamp(u);
+  let i = 0;
+  while (i < KEYS.length - 2 && u > KEYS[i + 1].u) i++;
+  const a = KEYS[i], b = KEYS[i + 1];
+  const s = easeInOut(prog(u, a.u, b.u));
+  const P = {};
+  for (const k of Object.keys(a)) if (k !== 'u') P[k] = k === 'hip' ? [lerp(a.hip[0], b.hip[0], s), lerp(a.hip[1], b.hip[1], s)] : lerp(a[k], b[k], s);
+  const hip = P.hip;
+  const sd = dir(P.sp);
+  const chest = add(hip, sd, B.sp);
+  const sho = add(hip, sd, B.sp * 0.93);
+  const head = add(chest, sd, B.nk + B.hr);
+  const nEl = add(sho, dir(P.nUA), B.ua), nHa = add(nEl, dir(P.nFA), B.fa);
+  const fEl = add(sho, dir(P.fUA), B.ua), fHa = add(fEl, dir(P.fFA), B.fa);
+  const nKn = add(hip, dir(P.nTh), B.th), nFo = add(nKn, dir(P.nSh), B.sh), nTo = add(nFo, dir(P.nSh + 90), B.ft);
+  const fKn = add(hip, dir(P.fTh), B.th), fFo = add(fKn, dir(P.fSh), B.sh), fTo = add(fFo, dir(P.fSh + 90), B.ft);
+  return { P, hip, chest, sho, head, nEl, nHa, fEl, fHa, nKn, nFo, nTo, fKn, fFo, fTo };
+}
+function pose(u) {
+  const p = rawPose(u);
+  const w = smooth(prog(u, 0.5, 0.6));
+  const dx = (RIM_W[0] - p.nHa[0]) * w, dy = (RIM_W[1] - p.nHa[1]) * w;
+  for (const k of Object.keys(p)) if (Array.isArray(p[k]) && k !== 'P') p[k] = [p[k][0] + dx, p[k][1] + dy];
+  return p;
+}
+function limb(pts, w, toS, dim) {
+  const sp = pts.map(toS);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); sp.forEach((q, i) => (i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])));
+  ctx.strokeStyle = dim ? 'rgba(216,180,106,0.45)' : COL.goldHi; ctx.lineWidth = w + 6; ctx.stroke();
+  ctx.strokeStyle = COL.dark; ctx.lineWidth = w; ctx.stroke();
+}
+function figure(p, toS, z, ghost = 0) {
+  if (ghost) {
+    ctx.save(); ctx.globalAlpha *= ghost; ctx.strokeStyle = COL.gold; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    [[p.hip, p.nKn, p.nFo], [p.hip, p.fKn, p.fFo], [p.hip, p.chest], [p.sho, p.nEl, p.nHa], [p.sho, p.fEl, p.fHa]].forEach((ch) => {
+      ctx.beginPath(); ch.map(toS).forEach((q, i) => (i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]))); ctx.stroke();
+    });
+    ctx.restore();
+    return;
+  }
+  limb([p.hip, p.fKn, p.fFo, p.fTo], 34 * z, toS, true);
+  limb([p.sho, p.fEl, p.fHa], 24 * z, toS, true);
+  // 躯干
+  const sd = dir(p.P.sp), nd = [sd[1], -sd[0]];
+  const c1 = add(add(p.chest, nd, 38), sd, 0), c2 = add(add(p.chest, nd, -38), sd, 0);
+  const h1 = add(p.hip, nd, 30), h2 = add(p.hip, nd, -30);
+  const poly = [c1, c2, h2, h1].map(toS);
+  ctx.beginPath(); poly.forEach((q, i) => (i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]))); ctx.closePath();
+  ctx.fillStyle = COL.dark; ctx.fill(); ctx.strokeStyle = COL.goldHi; ctx.lineWidth = 3; ctx.stroke();
+  const mid = toS([(p.chest[0] + p.hip[0]) / 2, (p.chest[1] + p.hip[1]) / 2]);
+  ctx.save(); ctx.translate(mid[0], mid[1]); ctx.rotate(-((p.P.sp - 180) * Math.PI) / 180);
+  text('11', 0, 0, { size: 46 * z, font: FONT_NUM, weight: 'bold', color: COL.gold });
+  ctx.restore();
+  limb([p.hip, p.nKn, p.nFo, p.nTo], 38 * z, toS, false);
+  // 头
+  const hs = toS(p.head);
+  ctx.beginPath(); ctx.arc(hs[0], hs[1], B.hr * z, 0, Math.PI * 2);
+  ctx.fillStyle = COL.dark; ctx.fill(); ctx.strokeStyle = COL.goldHi; ctx.lineWidth = 3; ctx.stroke();
+  limb([p.sho, p.nEl, p.nHa], 27 * z, toS, false);
+}
+function ballY(t) {
+  const { startY, groundY, g, e, bounces } = CUE.ball;
+  let dt = t - CUE.slam;
+  const h0 = groundY - startY;
+  const t1 = Math.sqrt((2 * h0) / g);
+  if (dt < t1) return { y: startY + 0.5 * g * dt * dt, k: 0 };
+  dt -= t1;
+  let v = g * t1 * e;
+  for (let k = 1; k <= bounces; k++) {
+    const air = (2 * v) / g;
+    if (dt < air) return { y: groundY - (v * dt - 0.5 * g * dt * dt), k };
+    dt -= air; v *= e;
+  }
+  return { y: groundY, k: bounces };
+}
+function segC(t, f) {
+  const [c0, c1] = CUE.dunkSeg;
+  const u = prog(t, c0, c1);
+  const alpha = prog(t, 5.9, 6.15) * (1 - prog(t, 8.4, 8.8));
+  if (alpha <= 0) return;
+  const ts = CUE.slam;
+  const z = lerp(0.8, 0.92, easeInOut(u));
+  const camX = lerp(-330, 60, easeInOut(clamp(u / 0.7)));
+  const camY = lerp(0, -140, smooth(prog(u, 0.25, 0.6)));
+  let shx = 0, shy = 0;
+  if (t > ts) { const k = Math.exp(-(t - ts) / 0.12) * 22; shx = (hash(f, 1) - 0.5) * k; shy = (hash(f, 2) - 0.5) * k; }
+  const toS = (p) => [960 + (p[0] - camX) * z + shx, 930 + (p[1] - camY) * z + shy];
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  // 背景：远处看台
+  drawCrowd(t, f, { alpha: 0.28, scale: 1.3, cx: 960, cy: 260, appear: false });
+  // 起跳时人物身后的上升光线
+  const sl = prog(t, 6.75, 7.0) * (1 - prog(t, 7.4, 7.5));
+  if (sl > 0) {
+    const hipS = toS(pose(u).hip);
+    ctx.save(); ctx.globalAlpha *= sl * 0.55; ctx.lineCap = 'round';
+    for (let i = 0; i < 26; i++) {
+      const x = hipS[0] - 260 + hash(i, 4) * 420;
+      const len = 80 + hash(i, 6) * 160;
+      const y = ((hash(i, 3) * 1400 + t * 2600 * (0.6 + hash(i, 5))) % 1400) - 200;
+      const gr = ctx.createLinearGradient(x, y, x, y + len);
+      gr.addColorStop(0, 'rgba(255,226,160,0)'); gr.addColorStop(1, 'rgba(255,226,160,0.9)');
+      ctx.strokeStyle = gr; ctx.lineWidth = 1.5 + hash(i, 7) * 1.5;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + len); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  // 地面
+  const g0 = toS([-2000, 0]), g1 = toS([2000, 0]);
+  ctx.strokeStyle = COL.goldDim; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(g0[0], g0[1]); ctx.lineTo(g1[0], g1[1]); ctx.stroke();
+  // 篮架
+  const bb0 = toS([RIM_W[0] + 70, RIM_W[1] - 120]), bb1 = toS([RIM_W[0] + 70, RIM_W[1] + 35]);
+  ctx.strokeStyle = COL.goldHi; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(bb0[0], bb0[1]); ctx.lineTo(bb1[0], bb1[1]); ctx.stroke();
+  const arm0 = toS([RIM_W[0] + 70, RIM_W[1] - 40]), arm1 = toS([RIM_W[0] + 500, RIM_W[1] + 60]), pole = toS([RIM_W[0] + 500, 0]);
+  ctx.lineWidth = 4; ctx.strokeStyle = COL.gold; ctx.beginPath(); ctx.moveTo(arm0[0], arm0[1]); ctx.lineTo(arm1[0], arm1[1]); ctx.lineTo(pole[0], pole[1]); ctx.stroke();
+  // 球网
+  const rimS = toS(RIM_W);
+  const netStretch = t > ts ? Math.exp(-(t - ts) / 0.35) * Math.cos((t - ts) * 22) * 26 : 0;
+  ctx.strokeStyle = COL.gold; ctx.lineWidth = 2;
+  for (let i = 0; i <= 6; i++) {
+    const x0 = rimS[0] - 45 * z + (90 * z * i) / 6;
+    const x1 = rimS[0] - 26 * z + (52 * z * i) / 6;
+    ctx.beginPath(); ctx.moveTo(x0, rimS[1]); ctx.lineTo(x1, rimS[1] + (88 + netStretch) * z); ctx.stroke();
+  }
+  // 人物残影
+  if (t < ts) for (let k = 1; k <= 4; k++) figure(pose(prog(t - k * 0.045, c0, c1)), toS, z, 0.18 - k * 0.035);
+  const p = pose(u);
+  figure(p, toS, z);
+  // 篮筐（画在人物手之后，形成"扣下"的前后关系）
+  ctx.beginPath(); ctx.ellipse(rimS[0], rimS[1], 46 * z, 9 * z, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = '#ffb35c'; ctx.lineWidth = 5; ctx.stroke();
+  // 球
+  let bp;
+  if (t < ts) bp = add(p.nHa, dir(p.P.nFA), 18);
+  else { const b = ballY(t); bp = [RIM_W[0] + (t - ts) * 40, b.y]; }
+  const bs = toS(bp);
+  ctx.beginPath(); ctx.arc(bs[0], bs[1], 22 * z, 0, Math.PI * 2); ctx.fillStyle = COL.dark; ctx.fill();
+  ctx.strokeStyle = '#ffb35c'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(bs[0] - 22 * z, bs[1]); ctx.lineTo(bs[0] + 22 * z, bs[1]); ctx.stroke();
+  // 冲击波与火花
+  if (t >= ts) {
+    const k = t - ts;
+    for (let r = 0; r < 3; r++) {
+      const kk = k - r * 0.08; if (kk < 0) continue;
+      ctx.beginPath(); ctx.arc(rimS[0], rimS[1], easeOut(clamp(kk / 0.7)) * 1100, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255,226,160,${(1 - clamp(kk / 0.7)) * 0.7})`; ctx.lineWidth = 6 - r * 1.5; ctx.stroke();
+    }
+    for (let i = 0; i < 140; i++) {
+      const ang = hash(i, 9) * Math.PI * 2, sp = 400 + hash(i, 10) * 1300;
+      const x = rimS[0] + Math.cos(ang) * sp * k, y = rimS[1] + Math.sin(ang) * sp * k + 900 * k * k;
+      const a = 1 - clamp(k / (0.6 + hash(i, 11) * 0.8));
+      if (a <= 0) continue;
+      ctx.globalAlpha = alpha * a; ctx.fillStyle = hash(i, 12) > 0.5 ? COL.goldHi : '#fff';
+      ctx.fillRect(x - 2, y - 2, 4, 4);
+    }
+    ctx.globalAlpha = alpha;
+  }
+  ctx.restore();
+}
+
+// ---------- D 段：计分牌 ----------
+function flapDigit(x, y, d, k, t) {
+  const land = CUE.flapStart + (CUE.flapLand - CUE.flapStart) * (k / 3);
+  const w = 120, h = 170;
+  ctx.fillStyle = '#12141b'; ctx.fillRect(x - w / 2, y - h / 2, w, h);
+  ctx.strokeStyle = 'rgba(216,180,106,0.5)'; ctx.lineWidth = 2; ctx.strokeRect(x - w / 2, y - h / 2, w, h);
+  let shown = d, sy = 1;
+  if (t < land) { const step = Math.floor(t * 30); shown = Math.floor(hash(k, step) * 10); sy = 1 - 0.5 * ((t * 30) % 1); }
+  const bounce = t >= land ? 1 + 0.12 * Math.exp(-(t - land) / 0.06) : 1;
+  ctx.save(); ctx.translate(x, y); ctx.scale(bounce, sy * bounce);
+  text(String(shown), 0, 8, { size: 150, font: FONT_NUM, weight: 'bold', color: t >= land ? COL.goldHi : COL.gold });
+  ctx.restore();
+  ctx.fillStyle = COL.bg; ctx.fillRect(x - w / 2, y - 1.5, w, 3);
+}
+function segD(t) {
+  const a = prog(t, 8.45, 8.75) * (1 - prog(t, CUE.end[0], CUE.end[1]));
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = 'rgba(5,6,10,0.82)'; ctx.fillRect(0, 0, W, H);
+  const cx = 960, cy = 480;
+  ctx.strokeStyle = COL.gold; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.roundRect(cx - 600, cy - 170, 1200, 340, 18); ctx.stroke();
+  text('火箭', cx - 470, cy - 25, { size: 64, weight: 'bold', color: COL.white });
+  text('HOUSTON', cx - 470, cy + 45, { size: 22, font: FONT_UI, color: COL.grey, spacing: 6 });
+  text('国王', cx + 470, cy - 25, { size: 64, weight: 'bold', color: COL.white });
+  text('SACRAMENTO', cx + 470, cy + 45, { size: 22, font: FONT_UI, color: COL.grey, spacing: 6 });
+  flapDigit(cx - 270, cy, 8, 0, t); flapDigit(cx - 135, cy, 8, 1, t);
+  flapDigit(cx + 135, cy, 8, 2, t); flapDigit(cx + 270, cy, 6, 3, t);
+  text(':', cx, cy, { size: 120, font: FONT_NUM, weight: 'bold', color: COL.gold });
+  text('2004.10.14  ·  上海  ·  第一场 NBA 中国赛', cx, cy + 250, { size: 34, weight: 'bold', color: COL.gold, alpha: prog(t, 9.2, 9.6), spacing: 2 });
+  ctx.restore();
+  // 左上角届数
+  text('第 1 届', 80, 70, { size: 30, weight: 'bold', color: COL.goldHi, align: 'left', alpha: a });
+}
+
+// ---------- 字幕 ----------
+function subtitles(t) {
+  for (const [a, b, s] of CUE.subs) {
+    const al = prog(t, a, a + 0.15) * (1 - prog(t, b - 0.15, b));
+    if (al <= 0) continue;
+    ctx.save(); ctx.globalAlpha = al;
+    ctx.font = `bold 44px ${FONT_UI}`;
+    const w = ctx.measureText(s).width;
+    ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(960 - w / 2 - 28, 960 - 36, w + 56, 72);
+    ctx.fillStyle = COL.goldHi; ctx.fillRect(960 - w / 2 - 28, 960 + 34, w + 56, 2);
+    ctx.restore();
+    text(s, 960, 960, { size: 44, font: FONT_UI, weight: 'bold', color: COL.white, alpha: al });
+  }
+}
+
+// ---------- 主函数 ----------
+// ?shift=秒：6 秒后的内容整体后移，扣篮段留空给 3D 镜头（dunk3d.html）合成
+const SHIFT = parseFloat(new URLSearchParams(location.search).get('shift')) || 0;
+window.renderFrame = function (t0) {
+  const t = SHIFT && t0 >= 6.0 ? Math.max(6.0, t0 - SHIFT) : t0;
+  const f = Math.round(t0 * CUE.fps);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
+  ctx.fillStyle = COL.bg; ctx.fillRect(0, 0, W, H);
+  if (t0 < 3.4) segA(t0, f);
+  if (t0 >= 2.9 && t0 < 6.1 && (!SHIFT || t0 < 6.0)) segB(t0);
+  if (!SHIFT && t >= 5.85 && t < 8.9) segC(t, f);
+  if (t >= 8.4) segD(t);
+  // 泛光
+  bctx.clearRect(0, 0, W / 2, H / 2);
+  bctx.filter = 'blur(9px)';
+  bctx.drawImage(cv, 0, 0, W / 2, H / 2);
+  bctx.filter = 'none';
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.6; ctx.drawImage(bloomCv, 0, 0, W, H); ctx.restore();
+  // 扣篮闪白
+  if (!SHIFT && t >= CUE.slam) {
+    const fl = Math.exp(-(t - CUE.slam) / 0.09);
+    ctx.save(); ctx.globalAlpha = fl; ctx.fillStyle = '#fff8e8'; ctx.fillRect(0, 0, W, H); ctx.restore();
+  }
+  subtitles(t);
+  // 颗粒与暗角
+  const g = grain[f % 4], ox = -Math.floor(hash(f, 21) * 512), oy = -Math.floor(hash(f, 22) * 512);
+  for (let x = ox; x < W; x += 512) for (let y = oy; y < H; y += 512) ctx.drawImage(g, x, y);
+  ctx.drawImage(vignette, 0, 0);
+};
+
+window.ready = (async () => {
+  CUE = await (await fetch('sample_cues.json')).json();
+  window.DURATION = CUE.duration + SHIFT;
+  window.FPS = CUE.fps;
+  await Promise.all([
+    document.fonts.load(`bold 100px ${FONT_CN}`),
+    document.fonts.load(`bold 100px ${FONT_UI}`),
+    document.fonts.load(`bold 100px ${FONT_NUM}`),
+  ]);
+})();
+</script>
+</body>
+</html>

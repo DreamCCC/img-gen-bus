@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "电影级科幻镜头，异星荒原上空，三颗不同颜色的太阳——橙红、金黄、蓝白——在天空中快速掠过、交错穿行，大地上的光线和影子剧烈晃动、忽明忽暗，云层被迅速撕开又合拢，像延时摄影一样混乱的天象。不安、压迫，真实摄影，IMAX质感，无文字，无人物。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "16:9",
+  "duration": 4,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": null,
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "f2996ec3-770d-4334-85c7-bb60601b70fd"
+}

@@ -1,0 +1,11 @@
+numpy
+scipy
+librosa
+soundfile
+opencv-python
+pillow
+requests
+dashscope>=1.27
+yt-dlp
+# RIFE 补帧（Apple Silicon / MPS）。非 Mac 平台改用其他 RIFE 实现，并改 prep_clip.py 里调用 venhance 的那一行
+venhance

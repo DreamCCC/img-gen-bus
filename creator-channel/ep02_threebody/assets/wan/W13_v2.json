@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "三颗太阳缓缓沉向远方的地平线，天色逐渐变暗，地平线的辉光由亮转暗，山脊剪影保持不动，镜头缓慢后拉。宁静、苍凉、史诗感，真实摄影，IMAX质感，无文字，无人物。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 6,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/ep02_threebody/assets/wan/keyframes/W01_last.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "d9945586-fee8-463f-b197-03b142902ceb"
+}

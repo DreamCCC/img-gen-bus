@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "19世纪电报机的特写，黄铜按键上下敲击，一条细长的纸带从机器里一格一格吐出来，纸带上打着点和划，煤油灯昏黄的光，浅景深。紧迫，写实摄影，35mm胶片质感，不出现人脸，无文字。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "16:9",
+  "duration": 3,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": null,
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "1afb0882-e3eb-4e1e-85cf-1890bb8b766c"
+}

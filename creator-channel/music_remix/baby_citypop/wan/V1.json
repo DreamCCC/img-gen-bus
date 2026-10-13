@@ -1,0 +1,15 @@
+{
+ "model": "wan2.7-i2v-2026-04-25",
+ "prompt": "女歌手站在银座霓虹招牌下对着麦克风开始唱歌，口型与歌声同步，微笑看向镜头，霓虹灯闪烁，远处老式出租车驶过。镜头缓慢推近。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 4,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/V1_neon.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "978fb560-1016-468b-8fb8-de46c9c751c0"
+}

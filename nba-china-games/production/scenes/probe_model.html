@@ -1,0 +1,32 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head><body style="margin:0"><canvas id="c" width="960" height="1080"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), preserveDrawingBuffer: true });
+console.log('GL', renderer.getContext().getParameter(renderer.getContext().VERSION), renderer.getContext().getExtension('WEBGL_debug_renderer_info') ? renderer.getContext().getParameter(renderer.getContext().getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : '');
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(30, 960 / 1080, 0.1, 100);
+cam.position.set(0, 1, 6); cam.lookAt(0, 0.9, 0);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x222222, 2));
+const gltf = await new GLTFLoader().loadAsync('/assets/model/male_base_mesh.glb');
+scene.add(gltf.scene);
+gltf.scene.updateMatrixWorld(true);
+let mesh;
+gltf.scene.traverse((o) => { if (o.isSkinnedMesh) mesh = o; });
+const box = new THREE.Box3().setFromObject(gltf.scene, true);
+console.log('box', JSON.stringify(box.min), JSON.stringify(box.max));
+const v = new THREE.Vector3();
+for (const b of mesh.skeleton.bones) {
+  if (/f_|thumb|heel/.test(b.name)) continue;
+  b.getWorldPosition(v);
+  console.log(b.name, 'parent=' + (b.parent && b.parent.name), v.toArray().map((x) => x.toFixed(3)).join(','));
+}
+window.DURATION = 1; window.FPS = 1;
+const m = mesh.material;
+console.log('mat', m.type, m.color && m.color.getHexString(), m.opacity, m.transparent, !!m.map, m.side, 'verts', mesh.geometry.attributes.position.count, 'attrs', Object.keys(mesh.geometry.attributes).join(','), 'scale', JSON.stringify(gltf.scene.children.map(c => [c.name, c.scale, c.rotation])));
+window.renderFrame = () => { renderer.setClearColor(0x303030); renderer.render(scene, cam); console.log('calls', renderer.info.render.calls, renderer.info.render.triangles); };
+window.ready = true;
+</script></body></html>

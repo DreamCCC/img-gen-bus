@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "烛火轻轻摇曳，镜头非常缓慢地推近桌上摊开的手稿，烛光在纸面上晃动，细小的灰尘在光里飘浮。安静、专注，写实摄影，画面中没有人物。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 5,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/ep02_threebody/assets/wan/keyframes/W06_first.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "2f3f1a72-30ea-4ccd-a114-e7a06628579d"
+}

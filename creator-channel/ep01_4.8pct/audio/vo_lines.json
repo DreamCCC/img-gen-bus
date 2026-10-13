@@ -1,0 +1,12 @@
+[
+ {"id": "V01", "voice": "longsanshu_v3", "mood": "normal", "text": "4.8%。这是1977年，中国高考的录取率。", "say": "百分之四点八。这是一九七七年，中国高考的录取率。"},
+ {"id": "V02", "voice": "longsanshu_v3", "mood": "normal", "text": "那年冬天，570万人走进考场。", "say": "那年冬天，五百七十万人，走进考场。"},
+ {"id": "V03", "voice": "longsanshu_v3", "mood": "normal", "text": "大约每21个人里，只有1个能走进大学。", "say": "大约每二十一个人里，只有一个，能走进大学。"},
+ {"id": "V04", "voice": "longsanshu_v3", "mood": "normal", "text": "这一届考生，横跨了13个年级。", "say": "这一届考生，横跨了十三个年级。"},
+ {"id": "V05", "voice": "longsanshu_v3", "mood": "quiet", "text": "很多考场，都挂着一句话：一颗红心，两种准备。", "say": "很多考场，都挂着一句话。一颗红心，两种准备。"},
+ {"id": "V06", "voice": "longsanshu_v3", "mood": "normal", "rate": 0.9, "text": "49年后。", "say": "四十九年后。"},
+ {"id": "V07", "voice": "longsanshu_v3", "mood": "normal", "text": "今年，1290万人报名高考。", "say": "今年，一千二百九十万人，报名高考。"},
+ {"id": "V08", "voice": "longsanshu_v3", "mood": "hype", "text": "高等教育毛入学率，从2.6%，涨到了61.3%。", "say": "高等教育毛入学率，从百分之二点六，涨到了百分之六十一点三！"},
+ {"id": "V09", "voice": "longsanshu_v3", "mood": "normal", "rate": 0.9, "text": "49年，这道门，从一条缝，开成了一扇门。", "say": "四十九年。这道门，从一条缝，开成了一扇门。"},
+ {"id": "V10", "voice": "longsanshu_v3", "mood": "quiet", "rate": 0.9, "text": "你家第一个大学生，是哪一年考上的？"}
+]

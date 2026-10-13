@@ -1,0 +1,15 @@
+{
+ "model": "wan2.7-i2v-2026-04-25",
+ "prompt": "女歌手用手指着镜头、对着麦克风大声喊话，口型与声音同步，然后笑着把手举高，长发甩动，射灯光束扫过。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 4,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/B7_point.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "f56f6a62-4e9e-4abf-b9ce-448af821a6de"
+}

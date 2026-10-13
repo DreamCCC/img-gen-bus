@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "电影级科幻镜头，异星广阔的金色平原，远处是低矮连绵的山脉，一颗巨大的金黄色太阳平稳地从地平线升起，天空清澈，柔和的晨光铺满大地，地面上的晶体碎石微微反光，镜头缓慢横移。宁静、温暖、有秩序，真实摄影，IMAX质感，无文字，无人物。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "16:9",
+  "duration": 4,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": null,
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "acb5d782-080a-4a82-be57-de9bedd16937"
+}

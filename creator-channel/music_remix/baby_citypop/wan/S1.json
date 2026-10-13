@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "萨克斯手在舞台中央忘情吹奏萨克斯独奏，身体随着节奏后仰再前倾，肩膀和膝盖跟着拍子摆动，手指在按键上快速起落，追光从上方照下，镜球旋转，彩色射灯光束左右扫动，地面烟雾缓缓翻滚。镜头从低角度缓慢推近。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 5,
+  "watermark": false,
+  "prompt_extend": true,
+  "audio": false
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/S1_sax_wide.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "32eee66a-5814-44f5-b8d8-2f0f01e4a1cc"
+}

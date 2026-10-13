@@ -1,0 +1,15 @@
+{
+ "model": "wan2.7-i2v-2026-04-25",
+ "prompt": "女歌手在迪斯科舞厅高台上挥舞粉色羽毛扇子，边跳边唱，口型与歌声同步，舞池人群剪影随节奏跳动，镜球光斑扫过。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 4,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/P1_fan.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "16724ab6-51c3-41c4-ab14-95e6d6619813"
+}

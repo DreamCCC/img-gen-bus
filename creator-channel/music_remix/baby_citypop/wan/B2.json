@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "女子张开双臂在东京夜空上方的粉彩色云朵上轻快地一朵一朵跳着走过，长发和裙摆飘动，透明的肥皂泡在她身边缓缓上升，脚下城市灯火闪烁。镜头缓慢横移跟随。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 5,
+  "watermark": false,
+  "prompt_extend": true,
+  "audio": false
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/B2_clouds.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "3ea15786-e790-4da9-81ba-32fbe4a08c3c"
+}

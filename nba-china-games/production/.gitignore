@@ -1,0 +1,6 @@
+.env
+.venv/
+.numba_cache/
+node_modules/
+out/
+assets/footage/

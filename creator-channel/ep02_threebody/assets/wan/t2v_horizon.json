@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "电影级科幻镜头，一颗荒凉的岩石行星表面，黑色锯齿状山脊剪影横贯画面下方三分之一。地平线上方的夜空中悬挂着三颗大小相近的恒星：一颗橙红色、一颗金黄色、一颗蓝白色，彼此靠得很近，发出强烈光芒，带有横向变形宽银幕镜头光晕。地平线被染成左暖右冷的渐变辉光，背景是暗色银河和星云。镜头贴地缓慢向前推进，山脊边缘有逆光描边，风吹起细微的尘埃。冷峻、壮阔、史诗感，IMAX质感，真实摄影，无文字，无人物。",
+ "params": {
+  "resolution": "720P",
+  "ratio": "16:9",
+  "duration": 5,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": null,
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "a5863fe8-c1df-4e00-9fe5-3c52d9ce9033"
+}

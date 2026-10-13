@@ -1,0 +1,15 @@
+{
+ "model": "wan2.7-i2v-2026-04-25",
+ "prompt": "女歌手站在1989年电视音乐节目的舞台上，对着银色麦克风开心地唱副歌，口型与歌声精确同步，身体随着轻快的节奏左右摇摆，偶尔对镜头眨眼微笑，长发随动作飘动，射灯光束扫动、镜球旋转。镜头缓慢推近。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 15,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/stage_mcu.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "37ad172e-b781-49b6-8ee4-45438338c419"
+}

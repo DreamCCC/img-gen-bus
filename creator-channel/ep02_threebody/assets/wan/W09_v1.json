@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "大雪纷纷扬扬地飘落，镜头沿着石板街缓慢向前推进，煤气路灯的光晕里雪花飞舞，远处行人的背影慢慢走远。寒冷、庄严，写实摄影。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 5,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/ep02_threebody/assets/wan/keyframes/W09_first.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "e760a9c0-9761-4642-a6e5-f448d0bee513"
+}

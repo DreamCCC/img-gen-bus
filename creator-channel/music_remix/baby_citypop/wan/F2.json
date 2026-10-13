@@ -1,0 +1,15 @@
+{
+ "model": "wan2.7-i2v-2026-04-25",
+ "prompt": "女歌手在金色华丽舞台上高唱最后一段副歌，口型与歌声精确同步，笑容灿烂，向镜头伸手邀请大家一起唱，最后高举麦克风，彩纸飘落，镜球光斑闪耀。镜头缓慢拉远。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 15,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/F_gold_mcu.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "225ada18-0f82-4f04-8618-ae83fa512566"
+}

@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "印刷机的滚筒和齿轮快速运转，纸张一张张印出、叠起，随后机器猛地停下，最后一张纸停在半空中缓缓落下。紧张、戛然而止，写实摄影，不出现人脸。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 5,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/ep02_threebody/assets/wan/keyframes/W10_first.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "eb1c92db-0791-4e62-9014-077bc3742892"
+}

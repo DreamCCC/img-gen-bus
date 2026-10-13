@@ -1,0 +1,246 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">
+{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}
+</script>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+
+// 样张模式：t 直接当模拟时间用。?split=1 左右分屏对比两次模拟，?forces=1 画引力线。
+const W = 1920, H = 1080;
+const Q = new URLSearchParams(location.search);
+const SPLIT = Q.get('split') === '1';
+const FORCES = Q.get('forces') === '1';
+const SPEED = parseFloat(Q.get('speed') || '1');
+window.FPS = 30;
+window.DURATION = parseFloat(Q.get('dur') || '60');
+
+const D = await (await fetch('/scenes/data/opening.json')).json();
+const HEX = ['#ff4b3e', '#2fd27a', '#ffc928'];
+const NAME = ['红球', '绿球', '黄球'];
+const COL = HEX.map((h) => new THREE.Color(h));
+const FONT = '"PingFang SC", "Noto Sans CJK SC", sans-serif';
+
+const out = document.getElementById('c').getContext('2d');
+const glc = document.createElement('canvas');
+const VW = SPLIT ? W / 2 : W;
+glc.width = VW; glc.height = H;
+const renderer = new THREE.WebGLRenderer({ canvas: glc, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(VW, H, false);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+function rng(seed) {
+  let s = seed >>> 0;
+  return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+}
+
+function haloTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(255,255,255,0.6)'); gr.addColorStop(0.3, 'rgba(255,255,255,0.12)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+}
+const HALO = haloTexture();
+const TRAIL_N = 200;
+
+function makeView(arr) {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('#05070d');
+  const camera = new THREE.PerspectiveCamera(34, VW / H, 0.01, 2000);
+  {
+    const r = rng(11), n = 1800, pos = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const u = r() * 2 - 1, th = r() * Math.PI * 2, R = 900;
+      const s = Math.sqrt(1 - u * u);
+      pos.set([R * s * Math.cos(th), R * u, R * s * Math.sin(th)], i * 3);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size: 1.4, sizeAttenuation: false, color: '#8090a8', depthWrite: false })));
+  }
+  scene.add(new THREE.AmbientLight('#ffffff', 0.35));
+  const sun = new THREE.DirectionalLight('#ffffff', 2.4);
+  scene.add(sun, sun.target);
+
+  const bodies = COL.map((c) => {
+    const core = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 32), new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.25, roughness: 0.35, metalness: 0.0 }));
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: HALO, color: c, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const geo = new LineGeometry();
+    geo.setPositions(new Float32Array((TRAIL_N + 1) * 3));
+    geo.setColors(new Float32Array((TRAIL_N + 1) * 3));
+    const mat = new LineMaterial({ linewidth: 3, vertexColors: true, transparent: true, depthWrite: false, worldUnits: false });
+    mat.resolution.set(VW, H);
+    const line = new Line2(geo, mat);
+    scene.add(line, halo, core);
+    return { core, halo, geo, line, c };
+  });
+  const pairs = [[0, 1], [1, 2], [0, 2]].map(([a, b]) => {
+    const geo = new LineGeometry();
+    geo.setPositions([0, 0, 0, 1, 0, 0]);
+    const mat = new LineMaterial({ color: '#cfe3ff', linewidth: 2, transparent: true, depthWrite: false, worldUnits: false });
+    mat.resolution.set(VW, H);
+    const line = new Line2(geo, mat);
+    line.visible = FORCES;
+    scene.add(line);
+    return { a, b, geo, mat, line };
+  });
+
+  const composer = new EffectComposer(renderer);
+  composer.setPixelRatio(1);
+  composer.setSize(VW, H);
+  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(VW, H), 0.35, 0.4, 0.6));
+  composer.addPass(new OutputPass());
+  return { arr, scene, camera, sun, bodies, pairs, composer };
+}
+
+function sample(arr, s) {
+  const f = Math.min(Math.max(s * D.rate, 0), arr.length - 1.001), i = Math.floor(f), u = f - i;
+  const a = arr[i], b = arr[i + 1];
+  return a.map((x, k) => x + (b[k] - x) * u);
+}
+
+const v3 = (p, j) => new THREE.Vector3(p[2 * j], 0, -p[2 * j + 1]);
+
+// 镜头框住过去一小段时间里三个球到过的范围，球飞远时自动拉远
+function frame(arr, s) {
+  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  for (let k = 0; k <= 24; k++) {
+    const p = sample(arr, s - k * 0.25);
+    for (let j = 0; j < 3; j++) {
+      x0 = Math.min(x0, p[2 * j]); x1 = Math.max(x1, p[2 * j]);
+      z0 = Math.min(z0, -p[2 * j + 1]); z1 = Math.max(z1, -p[2 * j + 1]);
+    }
+  }
+  const span = Math.max(1.6, (x1 - x0) / (VW / H), z1 - z0);
+  return { cx: (x0 + x1) / 2, cz: (z0 + z1) / 2, span };
+}
+
+function updateView(V, s) {
+  const p = sample(V.arr, s);
+  const f = frame(V.arr, s);
+  const dist = f.span * 2.3 + 1.2, elev = 1.15, yaw = 0.15;
+  const target = new THREE.Vector3(f.cx, 0, f.cz);
+  V.camera.position.set(f.cx + Math.sin(yaw) * Math.cos(elev) * dist, Math.sin(elev) * dist, f.cz + Math.cos(yaw) * Math.cos(elev) * dist);
+  V.camera.lookAt(target);
+  V.sun.position.copy(V.camera.position).add(new THREE.Vector3(-dist, dist * 0.6, 0));
+  V.sun.target.position.copy(target);
+  const rad = Math.max(0.075, dist * 0.016);
+  const step = 1 / D.rate, nk = Math.max(1, Math.min(TRAIL_N, Math.floor(s / step)));
+  V.bodies.forEach((B, j) => {
+    B.core.position.copy(v3(p, j));
+    B.core.scale.setScalar(rad);
+    B.halo.position.copy(B.core.position);
+    B.halo.scale.setScalar(rad * 6);
+    const ps = B.geo.attributes.instanceStart.data, cs = B.geo.attributes.instanceColorStart.data;
+    const pts = [], cols = [];
+    const tstep = Math.max(step, step * dist / 6);
+    for (let k = TRAIL_N; k >= 0; k--) {
+      const q = sample(V.arr, Math.max(0, s - Math.min(k, nk) * tstep));
+      pts.push(q[2 * j], 0, -q[2 * j + 1]);
+      const a = k > nk ? 0 : Math.pow(1 - k / TRAIL_N, 1.4) * 0.9;
+      cols.push(B.c.r * a, B.c.g * a, B.c.b * a);
+    }
+    for (let i = 0; i < TRAIL_N; i++) {
+      ps.array.set(pts.slice(3 * i, 3 * i + 6), 6 * i);
+      cs.array.set(cols.slice(3 * i, 3 * i + 6), 6 * i);
+    }
+    ps.needsUpdate = cs.needsUpdate = true;
+    B.geo.computeBoundingSphere();
+  });
+  for (const L of V.pairs) {
+    const A = v3(p, L.a), B = v3(p, L.b), r = A.distanceTo(B);
+    L.geo.setPositions([A.x, 0.002, A.z, B.x, 0.002, B.z]);
+    const k = Math.min(1, 0.35 / (r * r));
+    L.mat.linewidth = 1 + 7 * k;
+    L.mat.opacity = 0.15 + 0.75 * k;
+  }
+  V.composer.render();
+  return p;
+}
+
+function toScreen(V, x, z, ox) {
+  const v = new THREE.Vector3(x, 0, z).project(V.camera);
+  return [ox + (v.x + 1) / 2 * VW, (1 - v.y) / 2 * H];
+}
+
+function callout(V, ox, text, j, p, dx = 160, dy = -120) {
+  const [bx, by] = toScreen(V, p[2 * j], -p[2 * j + 1], ox);
+  out.save();
+  out.font = `600 46px ${FONT}`;
+  const w = out.measureText(text).width + 44;
+  const side = bx + dx + (dx >= 0 ? w : -w) > ox + VW - 30 ? -1 : bx + dx - w < ox + 30 && dx < 0 ? 1 : Math.sign(dx);
+  const tx = bx + side * Math.abs(dx), ty = Math.min(Math.max(by + dy, SPLIT ? 230 : 120), H - 200);
+  const lx = Math.min(Math.max(side > 0 ? tx : tx - w, ox + 30), ox + VW - 30 - w);
+  out.strokeStyle = 'rgba(255,255,255,0.85)'; out.lineWidth = 3;
+  out.beginPath(); out.moveTo(bx + side * 26, by + Math.sign(ty - by) * 22); out.lineTo(side > 0 ? lx : lx + w, ty); out.stroke();
+  out.fillStyle = 'rgba(8,12,22,0.82)';
+  out.beginPath(); out.roundRect(lx, ty - 40, w, 80, 16); out.fill();
+  out.strokeStyle = HEX[j]; out.lineWidth = 3; out.stroke();
+  out.fillStyle = '#fff'; out.textBaseline = 'middle';
+  out.fillText(text, lx + 22, ty + 2);
+  out.restore();
+}
+
+function header(ox, text, sub) {
+  out.save();
+  out.fillStyle = '#fff'; out.font = `700 52px ${FONT}`; out.textAlign = 'center';
+  out.fillText(text, ox + VW / 2, 96);
+  if (sub) { out.font = `500 34px ${FONT}`; out.fillStyle = '#b8c4d8'; out.fillText(sub, ox + VW / 2, 146); }
+  out.restore();
+}
+
+const views = SPLIT ? [makeView(D.A), makeView(D.B)] : [makeView(D.A)];
+
+// A 组事件（模拟时间）：约 6 队形散架；约 43 红球被甩出；B 组约 25 开始和 A 不同，约 42 黄球飞远，约 161 回来又被甩出
+function notes(run, s) {
+  const n = [];
+  if (run === 'A') {
+    if (s < 6) n.push(['一起转圈', 0, 170, -110]);
+    else if (s < 14) n.push(['队形散了', 2, 170, -120]);
+    if (s >= 43 && s < 52) n.push(['红球被甩出去了', 0, -170, -110]);
+    if (s >= 52) n.push(['绿球和黄球成了一对', 1, 170, 120]);
+  } else {
+    if (s >= 42 && s < 70) n.push(['黄球飞出去了', 2, -170, -110]);
+    if (s >= 155 && s < 163) n.push(['又被拽了回来', 2, -170, -110]);
+    if (s >= 163) n.push(['这回真走了', 2, -170, -110]);
+  }
+  return n;
+}
+
+window.renderFrame = async (t) => {
+  const s = t * SPEED;
+  out.fillStyle = '#000'; out.fillRect(0, 0, W, H);
+  views.forEach((V, i) => {
+    const p = updateView(V, s);
+    const ox = i * VW;
+    out.drawImage(glc, ox, 0);
+    for (const [txt, j, dx, dy] of notes(i ? 'B' : 'A', s)) callout(V, ox, txt, j, p, dx, dy);
+    if (SPLIT) header(ox, i ? '第二次' : '第一次', i ? '绿球往右挪了 1 毫米' : '原来的位置');
+    if (FORCES && s < 1) {
+      const [x, y] = toScreen(V, 0, 0.45, ox);
+      out.save(); out.font = `600 46px ${FONT}`; out.fillStyle = '#dbe8ff'; out.textAlign = 'center';
+      out.fillText('白线 = 互相吸引，离得越近，线越粗', x, y + 110); out.restore();
+    }
+  });
+  if (SPLIT) { out.fillStyle = 'rgba(255,255,255,0.25)'; out.fillRect(W / 2 - 1, 0, 2, H); }
+};
+window.ready = Promise.resolve();
+</script>
+</body>
+</html>

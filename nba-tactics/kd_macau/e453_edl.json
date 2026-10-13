@@ -1,0 +1,82 @@
+{
+ "_note": "e453 杜兰特 12 英尺急停（申京助攻）。时间写法: 段或旁白 id 加偏移秒，如 \"L3+0.5\"、\"C.end-0.2\"；from/to/at 是原片帧号（30fps）。",
+ "work": "work/e453",
+ "fps": 30,
+ "size": [1920, 1080],
+ "orig": "work/e453/fr/orig",
+ "slow": {"dir": "work/e453/fr/slow", "from": 95, "mul": 4},
+ "audio_src": "raw/e453_pullup.mp4",
+ "vo": {"lines": "e453_vo.json", "dir": "audio/e453"},
+ "out": "out/e453_v1.mp4",
+ "style": {"KD": "gold", "SG": "orange", "VV": "white", "JS": "white", "AT": "white",
+           "TB": "blue", "DP": "blue", "ZR": "blue", "MC": "blue", "NM": "blue"},
+ "anchors": {"rim": [229, 802, 236]},
+ "ball": [[142, 1328, 553], [145, 1441, 572], [148, 1530, 604], [151, 1617, 649], [154, 1675, 700]],
+
+ "segments": [
+  {"id": "live", "kind": "play", "from": 40, "to": 262, "speed": 1, "audio_db": -9, "vo": [["L1", 0.5]]},
+  {"id": "rew", "kind": "rewind", "from": 262, "to": 104, "dur": 0.9, "badge": "倒回", "sfx": "rewind", "vo": [["L2", -0.55]]},
+  {"id": "A", "kind": "freeze", "at": 104, "stop": true, "spot": ["VV", "SG", "KD", "NM"], "focus": "SG",
+   "badge": "时停", "sfx": "stop", "zoom": [1.05, [960, 520]], "vo": [["L3", 0.35]], "pad": 0.5},
+  {"id": "drive", "kind": "play", "from": 104, "to": 141, "speed": 0.25, "badge": "慢放 ×0.25", "sfx": "resume", "zoom": [1.0, null], "vo": [["L4", 0.1]]},
+  {"id": "B", "kind": "freeze", "at": 141, "stop": true, "spot": ["SG", "DP", "TB", "NM", "KD"], "focus": "SG",
+   "badge": "时停", "sfx": "stop", "zoom": [1.05, "SG"], "vo": [["L5", 0.3]], "pad": 0.4},
+  {"id": "kick", "kind": "play", "from": 141, "to": 155, "speed": 0.25, "badge": "子弹时间 ×0.25", "sfx": "resume",
+   "zoom": [1.1, "KD"], "vo": [["L6", 0.15]]},
+  {"id": "C", "kind": "freeze", "at": 155, "stop": true, "spot": ["KD", "NM"], "focus": "KD",
+   "badge": "时停", "sfx": "stop", "zoom": [1.14, "KD"], "vo": [["L7", 0.25]], "pad": 0.4},
+  {"id": "s1", "kind": "play", "from": 155, "to": 229, "speed": 0.5, "badge": "慢放 ×0.5", "sfx": "resume",
+   "zoom": [1.04, "KD"], "vo": [["L8a", 0.3]]},
+  {"id": "R", "kind": "freeze", "at": 229, "stop": true, "spot": ["KD", "DP", "NM"], "focus": "KD",
+   "badge": "出手", "sfx": "stop", "zoom": [1.12, "KD"], "vo": [["L8b", 0.2]], "pad": 0.3},
+  {"id": "s2", "kind": "play", "from": 229, "to": 256, "speed": 0.5, "badge": "慢放 ×0.5", "sfx": "resume",
+   "zoom": [1.0, null], "vo": [["L8c", {"end": 1.45}]]},
+  {"id": "end", "kind": "play", "from": 256, "to": 300, "speed": 1, "audio_db": 0},
+  {"id": "card", "kind": "card", "at": 300, "vo": [["L9", 0.3]], "pad": 0.9,
+   "score": ["火箭", "76", "64", "独行侠"],
+   "rows": [["杜兰特", "12 英尺急停跳投，本场第 12 分"], ["申京", "本场第 8 次助攻"], ["35 秒内", "杜兰特第二记中距离急停"]],
+   "credit": "画面：NBA 中国赛官方转播　数据：NBA 官方逐回合记录　球员位置：画面追踪估算"}
+ ],
+
+ "layers": [
+  {"type": "title", "on": "live+0.3", "off": "live+4.8",
+   "lines": ["2026 NBA 中国赛 · 澳门", "第三节 7:14　火箭 74 - 64 独行侠", "杜兰特 12 英尺急停 · 申京助攻"]},
+  {"type": "ring", "keys": ["KD"], "on": "L1+2.0", "off": "card"},
+  {"type": "tag", "keys": ["KD"], "on": "L1+2.0", "off": "card"},
+
+  {"type": "board", "on": "A+0.6", "off": "card"},
+  {"type": "ring", "keys": ["VV"], "on": "L3", "off": "B"},
+  {"type": "tag", "keys": ["VV"], "on": "L3", "off": "drive+1.5"},
+  {"id": "dVV", "type": "path", "key": "VV", "from": 62, "to": 97, "color": "white", "on": "L3", "off": "card", "img_off": "B"},
+  {"id": "p1", "type": "pass", "a": ["VV", 97], "b": ["SG", 104], "anim": ["L3+0.8", "L3+1.5"], "on": "L3+0.8", "off": "card", "img_off": "B", "color": "pass"},
+  {"type": "ring", "keys": ["SG"], "on": "L3+1.5", "off": "s1"},
+  {"type": "tag", "keys": ["SG"], "on": "L3+1.5", "off": "s1"},
+  {"type": "ring", "keys": ["NM"], "on": "L3+3.4", "off": "s2"},
+  {"type": "tag", "keys": ["NM"], "on": "L3+3.4", "off": "s2"},
+  {"type": "tether", "a": "KD", "b": "NM", "on": "L3+3.7", "off": "C"},
+
+  {"id": "dSG", "type": "path", "key": "SG", "from": 104, "to": 141, "color": "orange", "on": "drive", "off": "card", "img_off": "C"},
+  {"id": "dNM", "type": "path", "key": "NM", "from": 104, "to": 141, "color": "blue", "label": "协防", "on": "drive", "off": "card", "img_off": "C"},
+  {"id": "dDP", "type": "path", "key": "DP", "from": 104, "to": 141, "color": "blue", "on": "L4+1.6", "off": "card", "img_off": "C"},
+  {"id": "dTB", "type": "path", "key": "TB", "from": 108, "to": 150, "color": "blue", "on": "L4+1.6", "off": "card", "img_off": "C"},
+  {"type": "ring", "keys": ["DP", "TB"], "on": "L4+1.6", "off": "kick+0.4"},
+  {"type": "tag", "keys": ["DP", "TB"], "on": "L4+1.6", "off": "kick+0.4"},
+
+  {"type": "ball", "from": 141, "to": 155, "on": "kick", "off": "C+0.5"},
+  {"id": "p2", "type": "pass", "a": ["SG", 141], "b": ["KD", 155], "on": "kick", "off": "card", "img_off": "s1+0.3", "color": "gold"},
+
+  {"type": "radius", "key": "KD", "defs": ["NM", "DP", "TB", "ZR", "MC"], "anim": ["C+0.3", "C+0.9"], "on": "C+0.3", "off": "s1+0.3"},
+
+  {"id": "dKD", "type": "path", "key": "KD", "from": 155, "to": 224, "color": "gold", "label": "突破", "on": "s1+0.2", "off": "card", "img_off": "R"},
+  {"id": "cNM", "type": "path", "key": "NM", "from": 155, "to": 229, "color": "blue", "label": "扑防", "on": "s1", "off": "card", "img_off": "R"},
+  {"type": "ring", "keys": ["DP"], "on": "L8a+1.6", "off": "s2+0.8"},
+  {"type": "tag", "keys": ["DP"], "on": "L8a+1.6", "off": "s2+0.8"},
+
+  {"type": "tether", "a": "KD", "b": "DP", "on": "R+0.2", "off": "R.end"},
+  {"type": "shotline", "key": "KD", "label": "12.2 英尺", "on": "R", "off": "s2+0.6"},
+  {"type": "arc", "at": 229, "key": "KD", "anim": ["R+0.05", "R+0.7"], "on": "R", "off": "s2+1.6"},
+  {"type": "pop", "text": "+2", "src_on": 246, "on": "s2", "off": "end+1.2"},
+
+  {"type": "board", "pos": "card", "s": 155, "on": "card+0.3", "show": ["dVV", "p1", "dSG", "dNM", "dDP", "dTB", "p2", "dKD", "cNM"]}
+ ]
+}

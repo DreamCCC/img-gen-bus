@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "烛火轻轻摇曳，镜头缓慢推向窗外的满月，薄云从月亮前慢慢飘过，月光冷白。安静、沉思，写实摄影，画面中没有人物。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 4,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/ep02_threebody/assets/wan/keyframes/W07_first.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "1761d227-9c4f-4c87-8931-00a623067015"
+}

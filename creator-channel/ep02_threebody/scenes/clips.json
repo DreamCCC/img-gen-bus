@@ -1,0 +1,124 @@
+[
+ {
+  "name": "W01",
+  "src": "assets/wan/W01_v1.mp4",
+  "ss": 0,
+  "len": 6,
+  "out": 6
+ },
+ {
+  "name": "T1",
+  "src": "assets/footage/T1_liu_yangquan.mp4",
+  "ss": 7.6,
+  "len": 3.8,
+  "out": 3.8,
+  "crop": "1080:608:0:470",
+  "grade": "eq=saturation=0.9:contrast=1.04"
+ },
+ {
+  "name": "W02",
+  "src": "assets/wan/W02_v1.mp4",
+  "ss": 0,
+  "len": 4,
+  "out": 4
+ },
+ {
+  "name": "W03",
+  "src": "assets/wan/W03_v1.mp4",
+  "ss": 0,
+  "len": 4,
+  "out": 4
+ },
+ {
+  "name": "W04",
+  "src": "assets/wan/W04_v1.mp4",
+  "ss": 0,
+  "len": 3,
+  "out": 3
+ },
+ {
+  "name": "W05",
+  "src": "assets/wan/W05_v2.mp4",
+  "ss": 0,
+  "len": 3,
+  "out": 3
+ },
+ {
+  "name": "W06",
+  "src": "assets/wan/W06_v1.mp4",
+  "ss": 0,
+  "len": 5,
+  "out": 8.6
+ },
+ {
+  "name": "W07",
+  "src": "assets/wan/W07_v1.mp4",
+  "ss": 0,
+  "len": 4,
+  "out": 4.4
+ },
+ {
+  "name": "W08",
+  "src": "assets/wan/W08_v1.mp4",
+  "ss": 0,
+  "len": 5,
+  "out": 9
+ },
+ {
+  "name": "W09",
+  "src": "assets/wan/W09_v1.mp4",
+  "ss": 0,
+  "len": 5,
+  "out": 11.2
+ },
+ {
+  "name": "W10a",
+  "src": "assets/wan/W10_v1.mp4",
+  "ss": 0,
+  "len": 1.93,
+  "out": 4.0
+ },
+ {
+  "name": "W10c",
+  "src": "assets/wan/W10_v1.mp4",
+  "ss": 3.5,
+  "len": 1.5,
+  "out": 4.2
+ },
+ {
+  "name": "W10b",
+  "src": "assets/wan/W10_v1.mp4",
+  "ss": 2.0,
+  "len": 1.43,
+  "out": 2.4
+ },
+ {
+  "name": "W11",
+  "src": "assets/wan/W11_v1.mp4",
+  "ss": 0,
+  "len": 3,
+  "out": 3.2
+ },
+ {
+  "name": "W12",
+  "src": "assets/wan/W12_v2.mp4",
+  "ss": 0,
+  "len": 5,
+  "out": 7.8
+ },
+ {
+  "name": "W13",
+  "src": "assets/wan/W13_v2.mp4",
+  "ss": 0,
+  "len": 6,
+  "out": 8.4
+ },
+ {
+  "name": "T2",
+  "src": "assets/footage/T2_tianhe.mp4",
+  "ss": 2,
+  "len": 3.6,
+  "out": 3.6,
+  "grade": "eq=saturation=0.85:contrast=1.05"
+ }
+]

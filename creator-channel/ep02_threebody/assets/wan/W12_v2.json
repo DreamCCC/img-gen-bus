@@ -1,0 +1,16 @@
+{
+ "model": "wan3.0-video",
+ "prompt": "电影级科幻镜头，一颗围绕红矮星运行的岩石行星表面。地平线上低悬着一颗巨大的红矮星：它是一团发光的暗红色等离子火球，表面有翻腾的米粒组织、黑子和耀斑，边缘向外辉光，像真实的恒星一样自己发光，没有任何环形山、不是月亮。夜空另一侧有两颗挨得很近的明亮黄白色星星，像一对双星。地面是荒凉的岩石和薄冰，被红光染成暗红色。镜头缓慢上摇，孤寂、辽阔，真实摄影，IMAX质感，无文字，无人物。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "16:9",
+  "duration": 5,
+  "audio": false,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": null,
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "5e44321c-ba55-4eb2-8028-db820a9e495b"
+}

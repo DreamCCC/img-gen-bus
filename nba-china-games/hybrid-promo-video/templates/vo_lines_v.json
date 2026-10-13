@@ -1,0 +1,12 @@
+[
+ {"id": "V01", "voice": "longfei_v3", "mood": "normal", "text": "一九八九年，NBA总裁在央视传达室，等了将近一个小时。"},
+ {"id": "V02", "voice": "longfei_v3", "mood": "normal", "text": "就为了，送出一盘录像带。"},
+ {"id": "V03", "voice": "longfei_v3", "mood": "normal", "text": "其实早在一九七九年，NBA总冠军就来过中国。"},
+ {"id": "V04", "voice": "longfei_v3", "mood": "normal", "text": "在北京，他们仰头看见了两米二八的穆铁柱。", "say": "在北京，他们仰头看见了，两米二八的穆铁柱！"},
+ {"id": "V05", "voice": "longfei_v3", "mood": "hype", "text": "二零零四年，NBA第一次在中国打正式比赛。主角，是姚明。", "say": "二零零四年，NBA第一次在中国打正式比赛！主角，是姚明！"},
+ {"id": "V07", "voice": "longfei_v3", "mood": "hype", "text": "此后十五年，十七支球队，二十八场比赛。", "say": "此后十五年！十七支球队！二十八场比赛！"},
+ {"id": "V08", "voice": "longfei_v3", "mood": "hype", "text": "詹姆斯、科比、乔丹，都来了。", "say": "詹姆斯！科比！乔丹！都来了！"},
+ {"id": "V09", "voice": "longfei_v3", "mood": "quiet", "rate": 0.85, "text": "然后，中国赛暂停了。"},
+ {"id": "V10", "voice": "longfei_v3", "mood": "quiet", "rate": 0.85, "text": "一停，就是六年。"},
+ {"id": "V14", "voice": "longfei_v3", "mood": "hype", "text": "四十七年，球一直在跳。澳门，见。", "say": "四十七年，球一直在跳！澳门，见！"}
+]

@@ -1,0 +1,794 @@
+{
+ "tokyo_night": [
+  {
+   "file": "raw/tokyo_night_1987.mp4",
+   "in": 290.0,
+   "label": "Tokyo at Night (1987)"
+  },
+  {
+   "file": "raw/tokyo_night_1987.mp4",
+   "in": 200.0,
+   "label": "Tokyo at Night (1987)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 353.5,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/tokyo_night_1987.mp4",
+   "in": 350.0,
+   "label": "Tokyo at Night (1987)"
+  }
+ ],
+ "money_taxi": [
+  {
+   "file": "raw/bubblego_trailer.mp4",
+   "in": 44.5,
+   "label": "バブルへGO!! タイムマシンはドラム式 (2007)"
+  }
+ ],
+ "shoulder": [
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 2081.5,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 2060.6,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  }
+ ],
+ "toast": [
+  {
+   "file": "raw/bubblego_trailer.mp4",
+   "in": 40.8,
+   "label": "バブルへGO!! タイムマシンはドラム式 (2007)"
+  },
+  {
+   "file": "raw/ski_1987_trailer.mp4",
+   "in": 56.5,
+   "label": "私をスキーに連れてって (1987)"
+  },
+  {
+   "file": "raw/tahosuru_ed.mp4",
+   "in": 15.8,
+   "label": "君の瞳をタイホする! (1988)"
+  }
+ ],
+ "fan": [
+  {
+   "file": "raw/disco_nyny.mp4",
+   "in": 479.0,
+   "label": "新宿 New York New York ディスコ映像 (1980年代)",
+   "crop": [
+    0.125,
+    0,
+    0.75,
+    1
+   ]
+  },
+  {
+   "file": "raw/disco_nyny.mp4",
+   "in": 425.0,
+   "label": "新宿 New York New York ディスコ映像 (1980年代)",
+   "crop": [
+    0.125,
+    0,
+    0.75,
+    1
+   ]
+  }
+ ],
+ "office": [
+  {
+   "file": "raw/office_80s.mp4",
+   "in": 40.0,
+   "label": "80年代 日本のオフィス映像"
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 1841.0,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  }
+ ],
+ "react": [
+  {
+   "file": "raw/tahosuru_op.mp4",
+   "in": 8.75,
+   "label": "君の瞳をタイホする! (1988)"
+  },
+  {
+   "file": "raw/disco_nyny.mp4",
+   "in": 34.9,
+   "label": "新宿 New York New York ディスコ映像 (1980年代)",
+   "crop": [
+    0.125,
+    0,
+    0.75,
+    1
+   ]
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5669.2,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/nami_1991_promo.mp4",
+   "in": 41.75,
+   "label": "波の数だけ抱きしめて (1991)",
+   "crop": [
+    0.131,
+    0,
+    0.742,
+    1
+   ]
+  },
+  {
+   "file": "raw/bubblego_trailer.mp4",
+   "in": 80.9,
+   "label": "バブルへGO!! タイムマシンはドラム式 (2007)"
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 5742.5,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  }
+ ],
+ "kaeri": [
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 5723.8,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/ski_1987_trailer.mp4",
+   "in": 50.7,
+   "label": "私をスキーに連れてって (1987)"
+  }
+ ],
+ "party": [
+  {
+   "file": "raw/disco_nyny.mp4",
+   "in": 425.0,
+   "label": "新宿 New York New York ディスコ映像 (1980年代)",
+   "crop": [
+    0.125,
+    0,
+    0.75,
+    1
+   ]
+  },
+  {
+   "file": "raw/bubblego_trailer.mp4",
+   "in": 55.0,
+   "label": "バブルへGO!! タイムマシンはドラム式 (2007)"
+  },
+  {
+   "file": "raw/tahosuru_ed.mp4",
+   "in": 6.7,
+   "label": "君の瞳をタイホする! (1988)"
+  },
+  {
+   "file": "raw/aishiatte_op.mp4",
+   "in": 5.8,
+   "label": "愛しあってるかい! (1989)",
+   "crop": [
+    0.078,
+    0,
+    0.844,
+    1
+   ]
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 5618.5,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/bubblego_trailer.mp4",
+   "in": 79.9,
+   "label": "バブルへGO!! タイムマシンはドラム式 (2007)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 1637.0,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/tahosuru_ed.mp4",
+   "in": 11.3,
+   "label": "君の瞳をタイホする! (1988)"
+  },
+  {
+   "file": "raw/ski_1987_trailer.mp4",
+   "in": 56.5,
+   "label": "私をスキーに連れてって (1987)"
+  },
+  {
+   "file": "raw/disco_nyny.mp4",
+   "in": 367.0,
+   "label": "新宿 New York New York ディスコ映像 (1980年代)",
+   "crop": [
+    0.125,
+    0,
+    0.75,
+    1
+   ]
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 5702.3,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/disco_nyny.mp4",
+   "in": 185.0,
+   "label": "新宿 New York New York ディスコ映像 (1980年代)",
+   "crop": [
+    0.125,
+    0,
+    0.75,
+    1
+   ]
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5701.6,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/bubblego_trailer.mp4",
+   "in": 80.9,
+   "label": "バブルへGO!! タイムマシンはドラム式 (2007)"
+  }
+ ],
+ "ski": [
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 4018.5,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/ski_1987_trailer.mp4",
+   "in": 28.9,
+   "label": "私をスキーに連れてって (1987)"
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 4043.0,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  }
+ ],
+ "shopping": [
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 2937.0,
+   "label": "彼女が水着にきがえたら (1989)"
+  }
+ ],
+ "karaoke": [
+  {
+   "file": "raw/tahosuru_ed.mp4",
+   "in": 33.2,
+   "label": "君の瞳をタイホする! (1988)"
+  }
+ ],
+ "regain": [
+  {
+   "file": "raw/regain_cm.mp4",
+   "in": 16.3,
+   "label": "三共 リゲイン CM (1989–91)"
+  }
+ ],
+ "salaryman": [
+  {
+   "file": "raw/office_80s.mp4",
+   "in": 161.0,
+   "label": "80年代 日本のオフィス映像"
+  },
+  {
+   "file": "raw/regain_cm.mp4",
+   "in": 134.8,
+   "label": "三共 リゲイン CM (1989–91)"
+  }
+ ],
+ "money_rain": [
+  {
+   "file": "raw/bubblego_trailer.mp4",
+   "in": 45.8,
+   "label": "バブルへGO!! タイムマシンはドラム式 (2007)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 198.7,
+   "label": "彼女が水着にきがえたら (1989)"
+  }
+ ],
+ "react_day": [
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 463.8,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 4693.7,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5686.0,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/nami_1991_promo.mp4",
+   "in": 75.95,
+   "label": "波の数だけ抱きしめて (1991)",
+   "crop": [
+    0.131,
+    0,
+    0.742,
+    1
+   ]
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5696.2,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/nami_1991_promo.mp4",
+   "in": 71.45,
+   "label": "波の数だけ抱きしめて (1991)",
+   "crop": [
+    0.131,
+    0,
+    0.742,
+    1
+   ]
+  }
+ ],
+ "sunset": [
+  {
+   "file": "raw/nami_1991_promo.mp4",
+   "in": 84.85,
+   "label": "波の数だけ抱きしめて (1991)",
+   "crop": [
+    0.131,
+    0,
+    0.742,
+    1
+   ]
+  },
+  {
+   "file": "raw/regain_cm.mp4",
+   "in": 186.9,
+   "label": "三共 リゲイン CM (1989–91)"
+  }
+ ],
+ "pool_party": [
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5701.6,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5663.3,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 4761.5,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/regain_cm.mp4",
+   "in": 150.0,
+   "label": "三共 リゲイン CM (1989–91)"
+  }
+ ],
+ "smile": [
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 601.2,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/tahosuru_ed.mp4",
+   "in": 19.4,
+   "label": "君の瞳をタイホする! (1988)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5696.2,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/tahosuru_ed.mp4",
+   "in": 27.2,
+   "label": "君の瞳をタイホする! (1988)"
+  }
+ ],
+ "grid": [
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 601.2,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/tahosuru_ed.mp4",
+   "in": 19.4,
+   "label": "君の瞳をタイホする! (1988)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5696.2,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/tahosuru_ed.mp4",
+   "in": 27.2,
+   "label": "君の瞳をタイホする! (1988)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 463.8,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 4693.7,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5686.0,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/nami_1991_promo.mp4",
+   "in": 75.95,
+   "label": "波の数だけ抱きしめて (1991)",
+   "crop": [
+    0.131,
+    0,
+    0.742,
+    1
+   ]
+  },
+  {
+   "file": "raw/nami_1991_promo.mp4",
+   "in": 71.45,
+   "label": "波の数だけ抱きしめて (1991)",
+   "crop": [
+    0.131,
+    0,
+    0.742,
+    1
+   ]
+  },
+  {
+   "file": "raw/bubblego_trailer.mp4",
+   "in": 40.8,
+   "label": "バブルへGO!! タイムマシンはドラム式 (2007)"
+  },
+  {
+   "file": "raw/ski_1987_trailer.mp4",
+   "in": 56.5,
+   "label": "私をスキーに連れてって (1987)"
+  },
+  {
+   "file": "raw/tahosuru_ed.mp4",
+   "in": 15.8,
+   "label": "君の瞳をタイホする! (1988)"
+  },
+  {
+   "file": "raw/tahosuru_op.mp4",
+   "in": 8.75,
+   "label": "君の瞳をタイホする! (1988)"
+  },
+  {
+   "file": "raw/disco_nyny.mp4",
+   "in": 34.9,
+   "label": "新宿 New York New York ディスコ映像 (1980年代)",
+   "crop": [
+    0.125,
+    0,
+    0.75,
+    1
+   ]
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5669.2,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/nami_1991_promo.mp4",
+   "in": 41.75,
+   "label": "波の数だけ抱きしめて (1991)",
+   "crop": [
+    0.131,
+    0,
+    0.742,
+    1
+   ]
+  },
+  {
+   "file": "raw/bubblego_trailer.mp4",
+   "in": 80.9,
+   "label": "バブルへGO!! タイムマシンはドラム式 (2007)"
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 5742.5,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/tahosuru_ed.mp4",
+   "in": 6.7,
+   "label": "君の瞳をタイホする! (1988)"
+  },
+  {
+   "file": "raw/aishiatte_op.mp4",
+   "in": 5.8,
+   "label": "愛しあってるかい! (1989)",
+   "crop": [
+    0.078,
+    0,
+    0.844,
+    1
+   ]
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 5618.5,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/bubblego_trailer.mp4",
+   "in": 79.9,
+   "label": "バブルへGO!! タイムマシンはドラム式 (2007)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 1637.0,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/tahosuru_ed.mp4",
+   "in": 11.3,
+   "label": "君の瞳をタイホする! (1988)"
+  },
+  {
+   "file": "raw/disco_nyny.mp4",
+   "in": 367.0,
+   "label": "新宿 New York New York ディスコ映像 (1980年代)",
+   "crop": [
+    0.125,
+    0,
+    0.75,
+    1
+   ]
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 5702.3,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/disco_nyny.mp4",
+   "in": 185.0,
+   "label": "新宿 New York New York ディスコ映像 (1980年代)",
+   "crop": [
+    0.125,
+    0,
+    0.75,
+    1
+   ]
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5701.6,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 4018.5,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/ski_1987_trailer.mp4",
+   "in": 28.9,
+   "label": "私をスキーに連れてって (1987)"
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 4043.0,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 5663.3,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 4761.5,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/regain_cm.mp4",
+   "in": 150.0,
+   "label": "三共 リゲイン CM (1989–91)"
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 5723.8,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/ski_1987_trailer.mp4",
+   "in": 50.7,
+   "label": "私をスキーに連れてって (1987)"
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 2081.5,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/ski_1987_full.mp4",
+   "in": 2060.6,
+   "label": "私をスキーに連れてって (1987)",
+   "crop": [
+    0.09,
+    0.04,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "file": "raw/tokyo_night_1987.mp4",
+   "in": 290.0,
+   "label": "Tokyo at Night (1987)"
+  },
+  {
+   "file": "raw/tokyo_night_1987.mp4",
+   "in": 200.0,
+   "label": "Tokyo at Night (1987)"
+  },
+  {
+   "file": "raw/mizugi_1989_full.mp4",
+   "in": 353.5,
+   "label": "彼女が水着にきがえたら (1989)"
+  },
+  {
+   "file": "raw/tokyo_night_1987.mp4",
+   "in": 350.0,
+   "label": "Tokyo at Night (1987)"
+  },
+  {
+   "file": "raw/bubblego_trailer.mp4",
+   "in": 44.5,
+   "label": "バブルへGO!! タイムマシンはドラム式 (2007)"
+  },
+  {
+   "file": "raw/regain_cm.mp4",
+   "in": 16.3,
+   "label": "三共 リゲイン CM (1989–91)"
+  }
+ ]
+}

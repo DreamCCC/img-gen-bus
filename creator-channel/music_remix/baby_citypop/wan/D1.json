@@ -1,0 +1,15 @@
+{
+ "model": "wan2.7-i2v-2026-04-25",
+ "prompt": "女歌手在阳光明媚的泳池边开心地唱副歌，口型与歌声精确同步，身体随轻快的节奏摇摆，一手扶着头顶的墨镜、对镜头眨眼，水面波光在她身上闪动，棕榈树随风摇曳。镜头缓慢推近。全程保持1980年代后期日本OVA动画电影的手绘赛璐璐画风，人物外貌、发型、服装与首帧完全一致，画面中没有任何文字变化。",
+ "params": {
+  "resolution": "1080P",
+  "ratio": "adaptive",
+  "duration": 15,
+  "watermark": false,
+  "prompt_extend": true
+ },
+ "first": "/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/creator-channel/music_remix/baby_citypop/mina/frames/D_pool_mcu.png",
+ "last": null,
+ "actual_prompt": null,
+ "task_id": "4f7dae52-6d79-4058-9c60-b50250983f66"
+}
