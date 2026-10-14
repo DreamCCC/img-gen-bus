@@ -22,6 +22,7 @@ CACHE = ROOT / "work/vt_det"
 OUT = ROOT / "scenes/track_vt.json"
 CROP_W = 1080 * 1080 / 1350
 STEP = 2
+BALL_Y = (130, 900)
 
 
 def detect(name, model, dev):
@@ -54,7 +55,41 @@ def detect(name, model, dev):
     return det
 
 
-def track(det):
+def find_cuts(name):
+    """逐帧找镜头切换，返回检测序号（帧号 / STEP 向上取整）。
+    颜色直方图距离 > 0.45 或灰度差 > max(30, 4 × 本镜头中位数) 算切换；一两帧后又回到原画面的是闪光，不算。"""
+    small = []
+    for fp in sorted((CLIPS / name).glob("*.jpg")):
+        f = cv2.resize(cv2.imread(str(fp)), (160, 90))
+        hsv = cv2.cvtColor(f, cv2.COLOR_BGR2HSV)
+        h = cv2.normalize(cv2.calcHist([hsv], [0, 1], None, [32, 32], [0, 180, 0, 256]), None).flatten()
+        small.append((cv2.cvtColor(f, cv2.COLOR_BGR2GRAY).astype(np.float32), h))
+    d = [float(np.abs(small[i][0] - small[i - 1][0]).mean()) for i in range(1, len(small))]
+    if not d:
+        return []
+    th = max(30.0, 4 * float(np.median(d)))
+    cuts = []
+    for i in range(1, len(small)):
+        hd = cv2.compareHist(small[i - 1][1], small[i][1], cv2.HISTCMP_BHATTACHARYYA)
+        if hd <= 0.45 and d[i - 1] <= th:
+            continue
+        back = [np.abs(small[j][0] - small[i - 1][0]).mean() for j in (i + 1, i + 2) if j < len(small)]
+        if back and min(back) < 0.5 * th:
+            continue
+        k = -(-i // STEP)
+        if not cuts or k - cuts[-1] > 2:
+            cuts.append(k)
+    return cuts
+
+
+def prepare(det, name):
+    """重算镜头切换；去掉台标区（顶部）和计分牌区（底部）里的“球”——总决赛台标、回放角标里都有橙色篮球图案。"""
+    return dict(det, cuts=find_cuts(name),
+                frames=[dict(f, ball=[b for b in f["ball"] if BALL_Y[0] < b[1] < BALL_Y[1]]) for f in det["frames"]])
+
+
+def track(det, name):
+    det = prepare(det, name)
     balls = reframe.pick_balls(det)
     path = reframe.camera_path(det, balls, CROP_W)
     bug = reframe.bug_visible(det)
@@ -68,7 +103,7 @@ def track(det):
         cx[a + 1:b] = path[c]
         bv[a + 1:b] = bug[c]
     seen = sum(1 for b in balls if b and b[2] > 0)
-    return cx, bv, seen / max(1, len(balls))
+    return cx, bv, seen / max(1, len(balls)), det
 
 
 def main():
@@ -78,7 +113,7 @@ def main():
     out = json.loads(OUT.read_text()) if OUT.exists() else {}
     for name in names:
         det = detect(name, model, dev)
-        cx, bv, rate = track(det)
+        cx, bv, rate, det = track(det, name)
         out[name] = {"cx": [round(float(x), 1) for x in cx], "bug": [round(float(x), 2) for x in bv]}
         print(f"{name:16s} {det['n']:4d} 帧  球 {rate:4.0%}  镜头切换 {det['cuts']}  cx {cx.min():.0f}–{cx.max():.0f}  bug {bv.mean():.2f}", flush=True)
         OUT.write_text(json.dumps(out))

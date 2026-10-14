@@ -237,8 +237,30 @@ def bgm(file, s0, t, db, fin=1.5, fout=2.0):
 
 
 def montage(items, bounds, tail=0.7, **opts):
-    for (name, cid), a, b in zip(items, bounds, bounds[1:]):
-        shot(name, DB(cid), a, b, ev=EV(cid), tail=tail, **opts)
+    for (name, cid, *more), a, b in zip(items, bounds, bounds[1:]):
+        kw_ = dict(opts, **(more[0] if more else {}))
+        if "t0" not in kw_:
+            kw_.update(ev=EV(cid), tail=tail)
+        shot(name, DB(cid), a, b, **kw_)
+
+
+SW = 1080 * 1080 / 1350
+CXR = (SW / 2, 1920 - SW / 2)
+
+
+def follow(rel, xs, mk, xr, *, before=None, after=None):
+    """投篮跟球的 cxk。rel / mk = 出手、球到篮筐在镜头内的秒数，xs / xr = 射手、篮筐在原画面的横坐标（取出手、进球那一刻）。
+    出手前射手放在远离篮筐的三分之一处，出手后缓入缓出移到篮筐，球到之前 0.2 秒到位；射手和篮筐一个框装得下就不移。
+    before / after = 出手前 / 进球后另加的关键帧 [[t, cx], ...]。"""
+    clamp = lambda x: round(min(max(x, CXR[0]), CXR[1]))
+    sign = 1 if xr > xs else -1
+    if abs(xr - xs) <= SW - 200:
+        ks = [[rel, clamp((xs + xr) / 2)]]
+    else:
+        cs, cr = clamp(xs + sign * SW / 6), clamp(xr - sign * SW * 0.1)
+        ks = [[rel, cs], [mk - 0.2, cr]]
+    ks = (before or []) + ks + (after or [])
+    return [[round(t, 2), clamp(x)] for t, x in ks]
 
 
 DB = lambda cid: f"../raw/{cid}.mp4"
@@ -294,22 +316,26 @@ m0["dur"] = round(seg1 + 0.4 - m0["t"], 3)
 chapter(seg1 + 0.3, "01", "借来的领先", "CHAPTER 1 · FIRST HALF")
 e = say("a1", seg1 + 0.5)
 e = say("a2", e + 0.25)
-mb = [seg1, AT["a2"], K("a2", "半场"), K("a2", "有记录"), K("a2", "那真是"), e + 0.7]
-montage([("s1_v13", "2606110853187102"), ("s1_c70", "2606110908507902"), ("s1_w88", "2606110908252902"), ("s1_h325", "2606110959171102"),
-         ("s1_h373", "2606111004560502")], mb, tail=0.6)
+mb = [seg1, seg1 + 2.3] + [seg1 + 2.3 + (e + 0.7 - seg1 - 2.3) * i / 4 for i in (1, 2, 3, 4)]
+montage([("s1_v13", "2606110853187102", {"t0": 4.65, "cxk": [[0, 1000], [0.5, 1080], [1.8, 1100], [2.3, 1060]]}),
+         ("s1_c70", "2606110908507902", {"t0": 8.21, "cxk": follow(0.1, 200, 1.3, 1230)}),
+         ("s1_w88", "2606110908252902", {"t0": 6.84, "cxk": follow(0.1, 170, 1.2, 1290)}),
+         ("s1_h325", "2606110959171102", {"t0": 5.26, "cxk": follow(0.1, 590, 1.35, 1249)}),
+         ("s1_h373", "2606111004560502", {"t0": 7.80, "cxk": follow(0.15, 1610, 1.2, 1310)})], mb)
 ov("score", AT["a2"] - 0.2, K("a2", "半场"), keys=[[0, 41, 22, "第一节结束"]])
 ov("huazi", K("a2", "14"), e + 0.6, text="半场 14 记三分", x=540, y=Y_TOP, size=80, kicker="14 3PM · Most in a Finals half")
 a = e + 0.7
 e = say("a3", a + 0.25)
-shot("s1_f111", DB("2606110913193002"), a, e + 0.5, ev=EV("2606110913193002"), tail=0.7)
+shot("s1_f111", DB("2606110913193002"), a, e + 0.5, ev=EV("2606110913193002"), tail=0.7,
+     cxk=[[0, 960], [1.0, 1000], [1.8, 1200], [2.6, 1260]])
 ov("shotcard", a + 0.3, e + 0.45, who="福克斯", what="三分 · 被扑", hand=2.2, xfg=33, hot=True)
 a = e + 0.5
 e4 = say("a4", a + 0.3)
 e5 = say("a5", e4 + 1.2)
 kx = K("a5", "手感这玩意儿")
 card("xbars", a, kx, n=1, e1=K("a4", "按正常") + 0.2, r1=K("a4", "实际"), d1=AT["a5"] + 0.2)
-shot("s1_h373s", DB("2606111004560502"), kx, e5 + 0.8, ev=EV("2606111004560502"), tail=1.6, rate=0.5, mute=True,
-     clipkw={"grade": dict(LIVE, mono=0.5)}, kb=[1.02, 1.1], fout=0.5)
+shot("s1_h373s", DB("2606111004560502"), kx, e5 + 0.8, t0=7.70, rate=0.5, mute=True,
+     clipkw={"grade": dict(LIVE, mono=0.5)}, kb=[1.02, 1.1], fout=0.5, cx=1460)
 seg2 = e5 + 0.8
 m1 = bgm("Hitman.mp3", 28.0 - (AT["a3"] - seg1), seg1, -15, fin=0.8)
 m1["dur"] = round(seg2 - m1["t"], 3)
@@ -324,16 +350,18 @@ add_clip("v_bg_jgnc", JGNC, 8.0, 1 / 30)
 kwb = K("b2", "文班亚马")
 card("board", seg2, kwb, delay=2.3, bg="v_bg_jgnc", head="第三节 9:27", sas=81, nyk=52, lead="马刺领先 29", leadT=K("b2", "马刺还领先"),
      leadK="SPURS +29")
-shot("s2_elbow", JGNC, kwb, K("b2", "一级"), ev=13.2, at=K("b2", "唐斯") + 0.4, gain=-2, bug=False)
-shot("s2_ref", JGNC, K("b2", "一级"), e2 + 0.3, t0=60.5, gain=-8, bug=False)
+shot("s2_elbow", JGNC, kwb, K("b2", "一级"), ev=13.2, at=K("b2", "唐斯") + 0.4, gain=-2, bug=False,
+     cxk=[[0, 820], [1.9, 820], [1.95, 1000]])
+shot("s2_ref", JGNC, K("b2", "一级"), e2 + 0.3, t0=60.5, gain=-8, bug=False, cx=1060)
 a = e2 + 0.3
 e = say("b3", a + 0.1)
-shot("s2_down", JGNC, a, K("b3", "再来"), t0=23.5, gain=-8, bug=False)
-shot("s2_rep", JGNC, K("b3", "再来"), e + 0.4, t0=40.0, gain=-8, bug=False)
+shot("s2_down", JGNC, a, K("b3", "再来"), t0=23.5, gain=-8, bug=False, cxk=[[0, 930], [1.0, 1000]])
+shot("s2_rep", JGNC, K("b3", "再来"), e + 0.4, t0=40.0, gain=-8, bug=False, cx=975)
 ov("fpts", a + 0.3, e + 0.4, keys=[[K("b3", "3 个"), 3]], tnote=K("b3", "再来"))
 a = e + 0.4
 e = say("b4", a + 0.2)
-shot("s2_kat", JGNC, a, e + 0.4, t0=50.5, gain=-8, cx=820, bug=False)
+shot("s2_kat", JGNC, a, e + 0.4, t0=50.5, gain=-8, bug=False,
+     cxk=[[0, 1010], [1.5, 1000], [2.4, 900], [3.1, 1020], [3.9, 1060]])
 ov("run", a + 0.3, e + 0.4, label="尼克斯一波", steps=[[a, 0], [K("b4", "两个罚球") + 0.3, 2]])
 bd1 = e + 0.4
 e = breakdown("e428", bd1, head="中路没人", kicker="BREAKDOWN · 8:49 Q3")
@@ -341,15 +369,18 @@ dunk = BD["e428"]["dunk"][0] + 1.83
 ov("run", bd1, e, label="尼克斯一波", steps=[[bd1, 2], [dunk, 4]])
 mont0 = e
 mb = [mont0, mont0 + 2.5, mont0 + 5.0, mont0 + 7.5]
-montage([("s2_b432", "2606111033176002"), ("s2_o448", "2606111038291302"), ("s2_h470", "2606111043178802")], mb, tail=0.7)
-ov("run", mont0, mb[-1], label="尼克斯一波", steps=[[mont0, 4], [mb[1] - 0.7, 7], [mb[2] - 0.7, 10], [mb[3] - 0.7, 13]])
-ov("huazi", mb[3] - 0.6, mb[3], text="13 : 0", x=540, y=Y_TOP, size=110, anim="slam", kicker="Knicks 13-0 run")
+montage([("s2_b432", "2606111033176002", {"t0": 9.75, "cxk": follow(0.6, 720, 1.5, 1310, before=[[0, 900]])}),
+         ("s2_o448", "2606111038291302", {"t0": 3.70, "cxk": follow(0.65, 1520, 1.65, 1320)}),
+         ("s2_h470", "2606111043178802", {"t0": 1.60, "cxk": follow(0.95, 260, 2.0, 1310)})], mb)
+ov("run", mont0, mb[-1], label="尼克斯一波", steps=[[mont0, 4], [mb[0] + 1.5, 7], [mb[1] + 1.65, 10], [mb[2] + 2.0, 13]])
+ov("huazi", mb[2] + 2.05, mb[3], text="13 : 0", x=540, y=Y_TOP, size=110, anim="slam", kicker="Knicks 13-0 run")
 a = mb[3]
 e = say("b7", a + 0.3)
 k_end = K("b7", "一节打完")
 card("shotmix", a, k_end, q="Q3", bar=a + 0.3, three=K("b7", "12"), result=K("b7", "就进俩"))
 q3end = e + 0.5
-shot("s2_q3end", Q3R, k_end, q3end, t0=225.8 - (q3end - k_end), gain=-4)
+shot("s2_q3end", Q3R, k_end, q3end, t0=225.8 - (q3end - k_end), gain=-4,
+     cxk=[[0, 1330], [0.4, 1150], [0.8, 1000], [1.2, 850], [1.7, 620], [2.2, 540]])
 ov("score", k_end - 0.2, q3end, keys=[[0, 90, 75, "第三节结束"]])
 BARK = [{"zh": "我就批评这一点，老兄，你们根本投不进啊", "en": "That's my criticism. Like, damn, dude, you ain't making them.", "a": 0.2, "b": 3.4},
         {"zh": "领先 20 分，根本没理由连着投八九个三分", "en": "There's never a reason to shoot eight or nine in a row when you got a 20-point lead.", "a": 4.3, "b": 7.9}]
@@ -359,7 +390,8 @@ a = e
 e = say("b8", a + 0.6)
 kz = K("b8", "你领先")
 shot("s2_inside2", "assets/footage/inside_barkley.mp4", a, kz, t0=44.0, gain=-14, cx=880, bug=False)
-shot("s2_run", Q3R, kz, e + 0.6, ev=185.6, tail=0.6, gain=-6)
+shot("s2_run", Q3R, kz, e + 0.6, ev=185.6, tail=0.6, gain=-6,
+     cxk=[[0, 800], [1.0, 1000], [1.6, 1130], [3.5, 1130], [4.5, 1020]])
 seg3 = e + 0.6
 m2 = bgm("Impact_Prelude.mp3", 100.0 - (mont0 - seg2), seg2, -16)
 m2["dur"] = round(seg3 - m2["t"], 3)
@@ -371,18 +403,21 @@ m2["push"].append([mont0 - 0.5, mb[-1], 2])
 chapter(seg3 + 0.2, "03", "第四节：往里打，还是不进", "CHAPTER 3 · FOURTH QUARTER")
 e1 = say("c1", seg3 + 0.4)
 kr = K("c1", "结果呢")
-shot("s3_drive", Q4R, seg3, kr, t0=35.6, gain=-4)
+shot("s3_drive", Q4R, seg3, kr, t0=35.6, gain=-4, cxk=[[0, 720], [0.8, 620], [2.0, 560]])
 e2 = say("c2", e1 + 0.5)
 kd0, kd = K("c2", "因为"), K("c2", "防守人")
 card("shotmix", kr - 0.2, kd0, q="Q4", bar=kr, hls=[["rim", kr + 0.7]], result=K("c1", "19 投"))
-shot("s3_contest", Q4R, kd0, kd, ev=3.6, tail=0.5, gain=-4)
+shot("s3_contest", Q4R, kd0, kd, ev=3.6, tail=0.5, gain=-4, cxk=[[0, 680], [1.5, 540], [2.8, 480]])
 card("defdist", kd, e2 + 2.0, r3=kd + 0.3, r4=K("c2", "平均"), m80=K("c2", "八十"), open=K("c2", "你说"))
 e = quote("q3_1", e2 + 2.0)
 a = e
 bb = [a + i * 2.2 for i in range(6)]
 e = say("c3", a + 0.3)
-montage([("s3_a598", "2606111112208502"), ("s3_b606", "2606111112181502"), ("s3_t622", "2606111117300602"), ("s3_o632", "2606111117394102"),
-         ("s3_o658", "2606111127259502")], bb, tail=0.55)
+montage([("s3_a598", "2606111112208502", {"cx": 1160}),
+         ("s3_b606", "2606111112181502", {"cxk": [[0, 1050], [1.0, 1200], [1.8, 1380]]}),
+         ("s3_t622", "2606111117300602", {"cxk": follow(0.3, 430, 1.5, 1400)}),
+         ("s3_o632", "2606111117394102", {"cxk": follow(1.05, 830, 1.7, 1300, before=[[0, 1000]])}),
+         ("s3_o658", "2606111127259502", {"cxk": follow(0.85, 490, 1.75, 1440, before=[[0, 620]])})], bb, tail=0.55)
 ov("score", a + 0.2, bb[-1], keys=[[0, 95, 75, "第四节 9:33"], [bb[1] - 0.55, 95, 78, "9:16"], [bb[2] - 0.55, 95, 80, "8:44"],
                                    [bb[3] - 0.55, 95, 83, "7:28"], [bb[4] - 0.55, 97, 86, "7:03"], [bb[5] - 0.55, 99, 95, "4:34"]])
 ov("huazi", bb[5] - 0.5, bb[5], text="5 分钟 20 : 4", x=540, y=Y_TOP, size=84, anim="slam", kicker="Knicks 20-4 run")
@@ -407,7 +442,10 @@ chapter(seg4 + 0.2, "04", "最后 3 分 31 秒", "CHAPTER 4 · CLUTCH")
 e = say("d1", seg4 + 0.5)
 kwm = K("d1", "文班亚马") + 0.9
 e2 = say("d2", e + 0.3)
-shot("s4_wem", DCF8, seg4, e2 + 1.0, ev=262.0, at=kwm, gain=-2)
+shot("s4_wem", DCF8, seg4, e2 + 1.0, ev=259.79, at=kwm, gain=-2,
+     cxk=follow(1.2, 1360, 2.3, 500, before=[[0, 1220]],
+                after=[[2.7, 600], [3.2, 800], [3.78, 1050], [3.8, 1060], [4.7, 980], [5.2, 1120], [5.7, 1400], [6.2, 1250],
+                       [6.48, 1250], [6.5, 560], [8.5, 450]]))
 ov("score", AT["d1"] - 0.3, e2 + 1.0, keys=[[0, 102, 97, "第四节 3:31"], [kwm, 104, 97, "3:31"]])
 ov("huazi", K("d2", "这是"), e2 + 0.9, text="最后一个运动战进球", x=540, y=Y_TOP, size=66, kicker="Spurs' last field goal")
 a = e2 + 1.0
@@ -416,22 +454,24 @@ e4 = say("d4", e3 + 0.3)
 rel = e4 + 0.05
 mk27 = rel + (17.33 - 15.87)
 e5 = say("d5", mk27 + 0.5)
-shot("s4_br27", "../raw/d676.mp4", a, e5 + 1.2, ev=15.87, at=rel, gain=0)
+shot("s4_br27", "../raw/d676.mp4", a, e5 + 1.2, ev=15.87, at=rel, gain=0,
+     cxk=follow(rel - a, 840, mk27 - a, 1270, before=[[0, 520], [2.0, 850], [4.0, 1000], [6.0, 780]],
+                after=[[mk27 - a + 0.1, 980], [e5 + 1.2 - a, 820]]))
 ov("score", a + 0.2, e5 + 1.2, keys=[[0, 104, 100, "2:31"], [mk27, 104, 103, "2:21"]])
 ov("huazi", K("d4", "27"), rel + 0.3, text="27 英尺 · 8 米多", x=540, y=Y_TOP, size=66, kicker="27-ft three")
 a = e5 + 1.2
 e = say("d6", a + 1.76)
-shot("s4_ft1", DCF8, a, a + 4.8, t0=386.0, gain=-2)
+shot("s4_ft1", DCF8, a, a + 4.8, t0=386.0, gain=-2, cxk=[[0, 850], [1.98, 850], [2.0, 900]])
 ov("huazi", a + 3.0, a + 4.7, text="两罚全丢", x=540, y=Y_TOP, size=80, kicker="1:47 · Spurs lead by 1")
 a = a + 4.8
 e = say("d7", a + 0.3)
 kf = K("d7", "抛投") + 0.7
-shot("s4_float", DCF8, a, e + 1.6, ev=426.6, at=kf, gain=-2)
+shot("s4_float", DCF8, a, e + 1.6, ev=425.1, at=kf, gain=-2, cxk=[[0, 1150], [1.5, 1200], [2.4, 1100], [4.0, 900]])
 ov("score", a + 0.3, e + 1.6, keys=[[0, 104, 103, "1:22"], [kf, 104, 105, "1:22"]])
 ov("huazi", kf + 0.3, e + 1.5, text="尼克斯全场第一次领先", x=540, y=Y_TOP, size=60, bg="blue", kicker="Knicks lead 105-104")
 a = e + 1.6
 e = say("d8", a + 0.2)
-shot("s4_castleft", DCF8, a, e + 1.2, ev=526.0, at=K("d8", "马刺 106"), gain=-2)
+shot("s4_castleft", DCF8, a, e + 1.2, ev=515.0, at=K("d8", "两罚") + 0.6, gain=-2, cx=950)
 ov("score", a + 0.2, e + 1.2, keys=[[0, 104, 105, "0:32"], [K("d8", "两罚") + 0.6, 105, 105, "0:30.3"], [K("d8", "马刺 106"), 106, 105, "0:30.3"]])
 bd3 = e + 1.2
 PY715 = 285 + 150
@@ -458,7 +498,8 @@ card("tl13", a, e + 0.9, st1="v_st_fox130", st2="v_st_fox125", bug1="v_bug_fox13
 sfx.append(["stamp", round(K("d14", "前后不到") + 0.15, 3)])
 a = e + 0.9
 e = say("d15", a + 0.2)
-shot("s4_blkslow", BLK, a, e + 0.4, ev=6.67, at=e - 0.4, rate=0.35, mute=True, clipkw={"grade": dict(LIVE, mono=0.8)}, kb=[1.08, 1.16])
+shot("s4_blkslow", BLK, a, e + 0.4, ev=6.67, at=e - 0.4, rate=0.35, mute=True, clipkw={"grade": dict(LIVE, mono=0.8)}, kb=[1.08, 1.16],
+     cxk=[[0, 980], [1.8, 920], [3.0, 800], [4.2, 690], [5.4, 610], [6.6, 570]])
 sfx.append(["boom", round(e - 0.4, 3)])
 bd4 = e + 0.4
 e = breakdown("e727", bd4, head="最后 5.7 秒", kicker="BREAKDOWN · 0:05.7")
@@ -466,7 +507,8 @@ sfx.append(["impact", round(AT["d17"] - 0.05, 3)])
 a = e
 e = say("d18", a + 0.2)
 seg5 = e + 2.2
-shot("s4_msg", "../online/lL4TMc1sYmQ.mp4", a, seg5, t0=256.4, gain=-4, cx=960, bug=False)
+shot("s4_msg", "../online/lL4TMc1sYmQ.mp4", a, seg5, t0=256.4, gain=-4, bug=False,
+     cxk=[[0, 960], [1.2, 1000], [1.7, 1270], [2.5, 1070], [3.3, 1110], [4.4, 960], [5.6, 760], [6.2, 760]])
 ov("huazi", K("d18", "53.8"), seg5 - 0.2, text="尼克斯全场只领先 53.8 秒", x=540, y=Y_TOP, size=60, bg="blue", kicker="Knicks led for 53.8 seconds")
 m4 = bgm("Impact_Lento.mp3", 122.0 - (BD["e715"]["A"][1] - seg4), seg4, -15)
 fa0 = bd4 - 3.0
