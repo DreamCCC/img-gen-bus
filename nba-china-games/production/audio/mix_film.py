@@ -178,7 +178,7 @@ for k, tt in enumerate(EV["endBounces"]):
 # ---------------- 旁白与压低音乐 ----------------
 vg = np.zeros(N)
 for v in TL["vo"]:
-    vo.place(load_vo(f"audio/vo/{v['id']}.wav"), v["t"], 0.5 * vo_gain(v["id"]))
+    vo.place(load_vo(f"{TL.get('vo_dir', 'audio/vo')}/{v['id']}.wav"), v["t"], 0.5 * vo_gain(v["id"]))
     i0, i1 = int(v["t"] * SR), int((v["t"] + v["dur"]) * SR)
     vg[i0:i1] = 1
 # ---------------- 混响与总线 ----------------

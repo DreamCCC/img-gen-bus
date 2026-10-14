@@ -1,14 +1,16 @@
 """横版成片总时间轴：音乐剪接、旁白、场景、音效全部从这里生成 scenes/film_h.json。
 时间单位：成片秒。音乐里的时间点用 fa()/ha() 换算成成片时间，保证画面卡在音乐的拍点上。
-用法：python tools/timeline_h.py
+用法：python tools/timeline_h.py [en]   # en：英文版，读 vo_lines_en.json / vo_en，写 scenes/film_h_en.json
 """
 import json
+import sys
 from pathlib import Path
 
 import librosa
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
+SUF = "_en" if sys.argv[1:] == ["en"] else ""
 y, sr = librosa.load(ROOT / "assets/music/Five_Armies.mp3", sr=22050)
 _, FA_BEATS = librosa.beat.beat_track(y=y, sr=sr, units="time")
 
@@ -93,8 +95,8 @@ VO = [
     ("L28", A["act4"] + 15.3), ("L29", A["act4"] + 18.7),
     ("L30", A["haEnd"] - 4.6),
 ]
-lines = {d["id"]: d for d in json.loads((ROOT / "audio/vo_lines.json").read_text())}
-durs = json.loads((ROOT / "audio/vo/durations.json").read_text())
+lines = {d["id"]: d for d in json.loads((ROOT / f"audio/vo_lines{SUF}.json").read_text())}
+durs = json.loads((ROOT / f"audio/vo{SUF}/durations.json").read_text())
 vo = [{"id": i, "t": round(t, 3), "dur": durs[i], "text": lines[i]["text"]} for i, t in VO]
 for a, b in zip(vo, vo[1:]):
     assert a["t"] + a["dur"] <= b["t"] + 0.01, f"VO overlap {a['id']} {b['id']}"
@@ -175,9 +177,10 @@ out = {
     "anchors": A,
     "scenes": S,
     "vo": vo,
+    "vo_dir": f"audio/vo{SUF}",
     "flips": flips,
     "faBeats": fa_beats_film,
     "haBeats": ha_beats_film,
 }
-(ROOT / "scenes/film_h.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
+(ROOT / f"scenes/film_h{SUF}.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
 print(json.dumps({"duration": DUR, "anchors": A, "scenes": S}, ensure_ascii=False, indent=1))

@@ -49,6 +49,7 @@ def main():
     ap.add_argument("--audio", help="驱动音频（wav/mp3），口型和动作跟着它走；先传到百炼临时存储")
     ap.add_argument("--seed", type=int)
     ap.add_argument("--model", default="wan3.0-video")
+    ap.add_argument("--task", help="已提交的 task_id：不再提交，直接轮询下载")
     a = ap.parse_args()
 
     inp = {"prompt": a.prompt}
@@ -66,8 +67,7 @@ def main():
         params["audio"] = False
     if a.seed is not None:
         params["seed"] = a.seed
-    r = req("POST", "/services/aigc/video-generation/video-synthesis", {"model": a.model, "input": inp, "parameters": params}, extra)
-    tid = r["output"]["task_id"]
+    tid = a.task or req("POST", "/services/aigc/video-generation/video-synthesis", {"model": a.model, "input": inp, "parameters": params}, extra)["output"]["task_id"]
     print("task", tid, flush=True)
     t0 = time.time()
     while True:

@@ -1,8 +1,9 @@
 """Multi-take VO synthesis (CosyVoice system voice) with ASR check, slot fit and automatic take selection.
 
 usage:
-  python tools/vo_takes.py audio/vo_lines.json audio/vo [takes=3]
-Line fields: id, text (subtitle), say (spoken text, defaults to text), voice, mood (hype|quiet|normal), rate.
+  python tools/vo_takes.py audio/vo_lines.json audio/vo [takes=3] [时间槽来源 json，逗号分隔]
+  python tools/vo_takes.py audio/vo_lines_en.json audio/vo_en 3 scenes/film_h.json   # 英文：lang=en 的行用 qwen3-tts-flash 和英文 ASR
+Line fields: id, text (subtitle), say (spoken text, defaults to text), voice, lang (zh|en), mood (hype|quiet|normal), rate, pick (force a take seed after listening).
 Takes go to <out>/takes/<id>_s<seed>.wav; the chosen take is copied to <out>/<id>.wav; picks.json keeps every metric.
 """
 import json
@@ -11,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import time
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -26,9 +28,12 @@ dashscope.api_key = ENV["DASHSCOPE_API_KEY"]
 MODEL = {"_v3": "cosyvoice-v3-flash", "_v2": "cosyvoice-v2"}
 
 
-def slots():
+QWEN_LANG = {"en": "English", "zh": "Chinese"}
+
+
+def slots(files=("scenes/film_h.json", "scenes/film_v.json")):
     s = {}
-    for f in ("scenes/film_h.json", "scenes/film_v.json"):
+    for f in files:
         d = json.loads((ROOT / f).read_text())
         vo = d["vo"]
         for a, b in zip(vo, vo[1:] + [None]):
@@ -38,36 +43,53 @@ def slots():
 
 
 def synth(out, ln, seed):
+    """CosyVoice 音色（_v3/_v2 结尾）用 SpeechSynthesizer；其余当 qwen3-tts-flash 系统音色，语速用 atempo 补。"""
     voice = ln["voice"]
-    model = next(m for k, m in MODEL.items() if voice.endswith(k))
+    tmp = Path(out).with_suffix(".src")
+    tempo = ""
     for attempt in range(5):
         try:
-            audio = SpeechSynthesizer(model=model, voice=voice, speech_rate=ln.get("rate", 1.0), seed=seed).call(ln.get("say", ln["text"]))
+            if any(voice.endswith(k) for k in MODEL):
+                model = next(m for k, m in MODEL.items() if voice.endswith(k))
+                tmp.write_bytes(SpeechSynthesizer(model=model, voice=voice, speech_rate=ln.get("rate", 1.0), seed=seed).call(ln.get("say", ln["text"])))
+            else:
+                r = dashscope.MultiModalConversation.call(model="qwen3-tts-flash", text=ln.get("say", ln["text"]), voice=voice,
+                                                          language_type=QWEN_LANG[ln.get("lang", "zh")])
+                if r.status_code != 200:
+                    raise RuntimeError(f"{r.code} {r.message}")
+                urllib.request.urlretrieve(r.output["audio"]["url"], tmp)
+                if ln.get("rate", 1.0) != 1.0:
+                    tempo = f",atempo={ln['rate']}"
             break
         except Exception as e:  # noqa: BLE001
-            if "Throttling" in str(e) and attempt < 4:
+            if ("Throttling" in str(e) or "429" in str(e)) and attempt < 4:
                 time.sleep(4 * (attempt + 1))
                 continue
             raise
-    tmp = Path(out).with_suffix(".src")
-    tmp.write_bytes(audio)
     trim = ("silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.05,areverse,"
-            "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.08,areverse")
+            "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.08,areverse" + tempo)
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(tmp), "-af", trim, "-ar", "48000", "-ac", "1", str(out)], check=True)
     tmp.unlink()
 
 
-def asr(p):
+def asr(p, lang="zh"):
     for attempt in range(4):
         r = dashscope.MultiModalConversation.call(model="qwen3-asr-flash", messages=[{"role": "user", "content": [{"audio": f"file://{Path(p).resolve()}"}]}],
-                                                  asr_options={"language": "zh", "enable_itn": False})
+                                                  asr_options={"language": lang, "enable_itn": False})
         if r.status_code == 200:
             return r.output.choices[0].message.content[0]["text"]
         time.sleep(3 * (attempt + 1))
     return ""
 
 
-def norm(s):
+EN_NUM = {"0": "zero", "1": "one", "2": "two", "3": "three", "4": "four", "5": "five", "6": "six", "7": "seven", "8": "eight", "9": "nine"}
+
+
+def norm(s, lang="zh"):
+    if lang == "en":
+        s = re.sub(r"\d", lambda m: f" {EN_NUM[m.group()]} ", s.lower().replace("-", " "))
+        s = re.sub(r"\band\b", " ", s)
+        return re.sub(r"[^a-z]", "", s)
     s = s.upper().replace("他", "它").replace("她", "它")
     return re.sub(r"[^\u4e00-\u9fffA-Z]", "", s)
 
@@ -90,13 +112,17 @@ def take(job):
     p = d / "takes" / f"{ln['id']}_s{seed}.wav"
     if not p.exists():
         synth(p, ln, seed)
-    heard = asr(p)
+    lang = ln.get("lang", "zh")
+    heard = asr(p, lang)
     m = metrics(p)
-    m.update(seed=seed, heard=heard, ok=norm(heard) == norm(ln["text"]))
+    ref = ln.get("say", ln["text"]) if lang == "en" else ln["text"]
+    m.update(seed=seed, heard=heard, ok=norm(heard, lang) == norm(ref, lang))
     return ln["id"], m
 
 
 def pick(ln, takes, room):
+    if "pick" in ln:
+        return next(t for t in takes if t["seed"] == ln["pick"]), True
     fit = [t for t in takes if t["ok"] and t["dur"] <= room - 0.1]
     pool = fit or [t for t in takes if t["dur"] <= room - 0.1] or takes
     mood = ln.get("mood", "normal")
@@ -112,7 +138,7 @@ if __name__ == "__main__":
     d = ROOT / sys.argv[2]
     n = int(sys.argv[3]) if len(sys.argv) > 3 else 3
     (d / "takes").mkdir(parents=True, exist_ok=True)
-    room = slots()
+    room = slots(tuple(sys.argv[4].split(","))) if len(sys.argv) > 4 else slots()
     res = {}
     with ThreadPoolExecutor(2) as ex:
         for lid, m in ex.map(take, [(ln, s, d) for ln in lines for s in range(1, n + 1)]):

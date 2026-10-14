@@ -1,0 +1,1292 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+const W = 1920, H = 1080, FPS = 30;
+const mk = (w, h) => Object.assign(document.createElement('canvas'), { width: w, height: h });
+const OUT = document.getElementById('c');
+const cv = OUT;
+let ctx = cv.getContext('2d');
+const bloomCv = mk(W / 2, H / 2), bctx = bloomCv.getContext('2d');
+const tiny = mk(160, 90), tctx = tiny.getContext('2d');
+
+// NBA 官方图文配色：gold 系列沿用旧键名，换成灰白，原场景的线条和描边自动变成 NBA 风格
+const COL = {
+  bg: '#0d0c0d', gold: '#c3ced3', goldHi: '#ffffff', goldDim: 'rgba(195,206,211,0.22)',
+  white: '#ffffff', grey: '#9aa6ad', dark: '#231f20', red: '#c8102e', paper: '#f4f5f6', ink: '#231f20',
+  blue: '#1d428a', blueHi: '#3a6bd1', light: '#d5d9dd',
+};
+const FONT_CN = '"NotoSansSC", sans-serif';
+const FONT_UI = '"NotoSansSC", sans-serif';
+const FONT_NUM = '"Action NBA Condensed", "DIN Condensed", sans-serif';
+const FONT_NUMW = '"Action NBA", "Action NBA Condensed", sans-serif';
+const FONT_KO = '"Knockout", "Action NBA Condensed", sans-serif';
+const SKEW = -0.21;
+let LOGO = null;
+
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeOut5 = (x) => 1 - Math.pow(1 - x, 5);
+const easeIn = (x) => x * x * x;
+const smooth = (x) => x * x * (3 - 2 * x);
+const hash = (a, b = 0) => { const s = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return s - Math.floor(s); };
+const pad = (k) => String(k).padStart(5, '0');
+const fade = (t, a, b, fin = 0.3, fout = 0.3) => prog(t, a, a + fin) * (1 - prog(t, b - fout, b));
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+let TL, S, A, EV, MAN = {};
+const GEN = {};
+const GEN_NAMES = ['bj1979_bikes', 'forbidden_dawn', 'room1989', 'vhs_macro', 'hutong_hoop', 'school_court', 'streetlight_boy'];
+
+// ---------- 图片加载与缓存 ----------
+const imgCache = new Map();
+function loadImg(src) {
+  if (!imgCache.has(src)) {
+    const im = new Image();
+    im.src = src;
+    imgCache.set(src, im.decode().then(() => im).catch(() => null));
+    if (imgCache.size > 240) imgCache.delete(imgCache.keys().next().value);
+  }
+  return imgCache.get(src);
+}
+async function clip(name, lt) {
+  const m = MAN[name];
+  if (!m) return null;
+  const k = clamp(Math.floor(lt * FPS + 1e-4), 0, m.n - 1);
+  if (k + 1 < m.n) loadImg(`clips/${name}/${pad(k + 1)}.jpg`);
+  return loadImg(`clips/${name}/${pad(k)}.jpg`);
+}
+
+// ---------- 预生成：颗粒、暗角、扫描线、光点 ----------
+const grain = [];
+{
+  const r = mulberry32(7);
+  for (let k = 0; k < 4; k++) {
+    const g = mk(512, 512), gx = g.getContext('2d');
+    const id = gx.createImageData(512, 512);
+    for (let i = 0; i < id.data.length; i += 4) { const v = r() * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 16; }
+    gx.putImageData(id, 0, 0);
+    grain.push(g);
+  }
+}
+const vignette = mk(W, H);
+{
+  const v = vignette.getContext('2d');
+  const g = v.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 1.0);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.75)');
+  v.fillStyle = g; v.fillRect(0, 0, W, H);
+}
+const scan = mk(4, 4);
+{ const s = scan.getContext('2d'); s.fillStyle = 'rgba(0,0,0,0.55)'; s.fillRect(0, 0, 4, 2); }
+let scanPat;
+
+const crowd = [];
+{
+  const r = mulberry32(11);
+  while (crowd.length < 11000) {
+    const a = r() * Math.PI * 2;
+    const rr = lerp(0.36, 1, Math.sqrt(r()));
+    if ((rr * 14) % 1 < 0.14) continue;
+    const sector = (a / (Math.PI * 2)) * 18;
+    if (Math.abs(sector - Math.round(sector)) < 0.06) continue;
+    crowd.push({ a, rr, b: 0.35 + r() * 0.65, d: r(), i: crowd.length });
+  }
+}
+
+// ---------- 通用绘制 ----------
+function text(str, x, y, { size = 48, font = FONT_CN, weight = 'bold', color = COL.white, align = 'center', alpha = 1, spacing = 0, base = 'middle' } = {}) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.font = `${weight} ${size}px ${font}`;
+  ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = base;
+  if (spacing) ctx.letterSpacing = `${spacing}px`;
+  ctx.fillText(str, x, y);
+  ctx.restore();
+}
+function strokeText(str, x, y, { size = 200, font = FONT_NUM, color = COL.gold, width = 2, alpha = 1, align = 'center', spacing = 0 } = {}) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha *= alpha;
+  ctx.font = `bold ${size}px ${font}`; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  if (spacing) ctx.letterSpacing = `${spacing}px`;
+  ctx.strokeStyle = color; ctx.lineWidth = width; ctx.strokeText(str, x, y);
+  ctx.restore();
+}
+function line(x0, y0, x1, y1, { color = COL.gold, width = 2, alpha = 1 } = {}) {
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.strokeStyle = color; ctx.lineWidth = width;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); ctx.restore();
+}
+function partialPolyline(pts, frac) {
+  if (frac <= 0) return;
+  let total = 0; const seg = [];
+  for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(l); total += l; }
+  let remain = total * clamp(frac);
+  ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) {
+    if (remain >= seg[i - 1]) { ctx.lineTo(pts[i][0], pts[i][1]); remain -= seg[i - 1]; }
+    else { const f = remain / seg[i - 1]; ctx.lineTo(lerp(pts[i - 1][0], pts[i][0], f), lerp(pts[i - 1][1], pts[i][1], f)); break; }
+  }
+  ctx.stroke();
+}
+function arcPts(cx, cy, r, a0, a1, n = 64) {
+  const p = [];
+  for (let i = 0; i <= n; i++) { const a = lerp(a0, a1, i / n); p.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); }
+  return p;
+}
+// 整屏铺满图片，s 为相对缩放，(fx, fy) 为画面中心在图上的位置（0..1）
+function cover(im, { s = 1, fx = 0.5, fy = 0.5, alpha = 1, filter = 'none', x = 0, y = 0, w = W, h = H } = {}) {
+  if (!im || alpha <= 0) return;
+  const sc = Math.max(w / im.width, h / im.height) * s;
+  const iw = im.width * sc, ih = im.height * sc;
+  let dx = x + w / 2 - fx * iw, dy = y + h / 2 - fy * ih;
+  dx = clamp(dx, x + w - iw, x); dy = clamp(dy, y + h - ih, y);
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.filter = filter;
+  ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  ctx.drawImage(im, dx, dy, iw, ih);
+  ctx.restore();
+}
+// 竖窗真人画面：两侧是同一画面的模糊放大，中间是清晰画面，金色边线
+function blurBack(im, { alpha = 1, dark = 0.3, tint = null } = {}) {
+  if (!im || alpha <= 0) return;
+  tctx.filter = 'blur(3px)';
+  const sc = Math.max(tiny.width / im.width, tiny.height / im.height) * 1.15;
+  tctx.drawImage(im, (tiny.width - im.width * sc) / 2, (tiny.height - im.height * sc) / 2, im.width * sc, im.height * sc);
+  tctx.filter = 'none';
+  ctx.save(); ctx.globalAlpha *= alpha * dark; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(tiny, 0, 0, W, H);
+  if (tint) { ctx.globalAlpha = alpha * 0.4; ctx.fillStyle = tint; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+}
+function panel(im, { x = (W - 834) / 2, y = 0, w = 834, h = 1080, alpha = 1, back = true, dark = 0.3, frame = true, s = 1, fx = 0.5, fy = 0.5, filter = 'none' } = {}) {
+  if (!im || alpha <= 0) return;
+  if (back) blurBack(im, { alpha, dark });
+  cover(im, { x, y, w, h, s, fx, fy, alpha, filter });
+  if (frame) {
+    ctx.save(); ctx.globalAlpha *= alpha * 0.75; ctx.strokeStyle = COL.gold; ctx.lineWidth = 2;
+    if (h >= H) { ctx.beginPath(); ctx.moveTo(x - 1, 0); ctx.lineTo(x - 1, H); ctx.moveTo(x + w + 1, 0); ctx.lineTo(x + w + 1, H); ctx.stroke(); }
+    else ctx.strokeRect(x - 1, y - 1, w + 2, h + 2);
+    ctx.restore();
+  }
+}
+function flash(a, color = '#fff8e8') {
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = clamp(a); ctx.fillStyle = color; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+function black(a) { flash(a, '#000'); }
+function decay(t, t0, tau) { return t >= t0 ? Math.exp(-(t - t0) / tau) : 0; }
+function hitSum(t, list, tau) { let s = 0; for (const b of list) s += decay(t, b, tau); return s; }
+function withZoom(z, cx, cy, fn) { ctx.save(); ctx.translate(cx, cy); ctx.scale(z, z); ctx.translate(-cx, -cy); const r = fn(); ctx.restore(); return r; }
+
+// ---------- NBA 图文组件 ----------
+function measure(s, { size = 48, font = FONT_UI, weight = 'bold', spacing = 0 } = {}) {
+  ctx.save(); ctx.font = `${weight} ${size}px ${font}`; if (spacing) ctx.letterSpacing = `${spacing}px`;
+  const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+function slab(x, y, w, h, color, skew = SKEW) {
+  const k = h * skew / 2;
+  ctx.beginPath();
+  ctx.moveTo(x - k, y); ctx.lineTo(x + w - k, y); ctx.lineTo(x + w + k, y + h); ctx.lineTo(x + k, y + h);
+  ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+// 英文小标：Knockout 全大写、字距 0.12em，后跟红色短线；返回文字宽度
+function kicker(s, x, y, { size = 30, color = COL.white, alpha = 1, rule = 120, align = 'left' } = {}) {
+  if (alpha <= 0) return 0;
+  s = s.toUpperCase();
+  const sp = size * 0.12, w = measure(s, { size, font: FONT_KO, weight: '', spacing: sp });
+  const x0 = align === 'center' ? x - (w + (rule ? rule + 20 : 0)) / 2 : align === 'right' ? x - w : x;
+  text(s, x0, y, { size, font: FONT_KO, weight: '', color, align: 'left', alpha, spacing: sp, base: 'alphabetic' });
+  if (rule) { ctx.save(); ctx.globalAlpha *= alpha; ctx.fillStyle = COL.red; ctx.fillRect(x0 + w + 18, y - size * 0.4, rule, 4); ctx.restore(); }
+  return w;
+}
+// 斜切色块花字：从左擦入（wipe）或砸入（slam），白色粗字跟进，右侧异色细条，上方可带 kicker
+function huazi(t, t0, s, x, y, { size = 96, bg = COL.blue, fg = COL.white, font = FONT_KO, weight = '', kick = '', kc = COL.white, anim = 'wipe', align = 'left', hold = 99, out = 0.22, spacing = 0.04 } = {}) {
+  const u = t - t0;
+  if (u < 0 || u > hold + out) return;
+  ctx.save();
+  ctx.font = `${weight} ${size}px ${font}`; ctx.letterSpacing = `${size * spacing}px`;
+  const tw = ctx.measureText(s).width;
+  const padX = size * 0.4, h = size * 1.22, w = tw + padX * 2;
+  const x0 = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  const top = y - h / 2;
+  ctx.translate(x0 + w / 2, y);
+  if (anim === 'slam') { const sc = lerp(1.35, 1, easeOut(clamp(u / 0.12))); ctx.scale(sc, sc); }
+  ctx.translate(-(x0 + w / 2), -y);
+  const din = anim === 'slam' ? 1 : easeOut(clamp(u / 0.22));
+  const dout = easeInOut(prog(u, hold, hold + out));
+  const L = x0 - h, R = x0 + w + h;
+  ctx.beginPath(); ctx.rect(lerp(L, R, dout), top - size * 1.2, (R - L) * (din - dout), h + size * 2.4); ctx.clip();
+  ctx.globalAlpha = anim === 'slam' ? clamp(u / 0.05) : 1;
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
+  slab(x0, top, w, h, bg); ctx.restore();
+  slab(x0 + w - size * 0.16, top, size * 0.16, h, bg === COL.red ? COL.blue : COL.red);
+  const tx = lerp(-size * 0.5, 0, easeOut(clamp((u - 0.05) / 0.25)));
+  ctx.fillStyle = fg; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  ctx.fillText(s, x0 + padX + tx, y + size * 0.06);
+  ctx.restore();
+  if (kick) kicker(kick, x0 + 4, top - 18, { size: Math.max(26, size * 0.3), color: kc, alpha: clamp(u / 0.25) * (1 - dout) });
+}
+// 数据页背景：墨黑底 + 右下 NBA 蓝大圆 + 白色弧线 + 淡球场线
+function courtBg(u, { alpha = 1, orb = true } = {}) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha *= alpha;
+  ctx.fillStyle = COL.ink; ctx.fillRect(0, 0, W, H);
+  const d = easeOut(clamp(u / 0.8));
+  if (orb) {
+    ctx.fillStyle = COL.blue; ctx.beginPath(); ctx.arc(W + 900, H + 400, 1500, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 12;
+    ctx.beginPath(); ctx.arc(W + 900, H + 400, 1530, Math.PI, Math.PI + 0.9 * d); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 10;
+  ctx.beginPath(); ctx.arc(560, -380, 640, 0.15, Math.PI - 0.15); ctx.stroke();
+  ctx.restore();
+}
+function cornerLogo(alpha = 0.92) {
+  if (!LOGO || alpha <= 0) return;
+  const lh = 96, lw = lh * LOGO.width / LOGO.height;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 2;
+  ctx.imageSmoothingQuality = 'high'; ctx.drawImage(LOGO, 56, 46, lw, lh); ctx.restore();
+}
+
+function drawCrowd(t, f, { alpha = 1, scale = 1, cx = 960, cy = 600, appear = null, pulse = 0, swirl = 0, collapse = 0, tone = null } = {}) {
+  ctx.save();
+  for (const p of crowd) {
+    const ang = p.a + swirl * (1.4 - p.rr);
+    const rr = p.rr * (1 - collapse);
+    const x0 = Math.cos(ang) * rr, y0 = Math.sin(ang) * rr;
+    const sx = cx + x0 * 900 * scale, sy = cy + y0 * 430 * scale;
+    if (sx < -10 || sx > W + 10 || sy < -10 || sy > H + 10) continue;
+    let a = alpha;
+    if (appear !== null) a *= prog(appear, 0.9 * (p.rr - 0.36) + 0.5 * p.d, 0.25 + 0.9 * (p.rr - 0.36) + 0.5 * p.d);
+    if (a <= 0) continue;
+    const near = (y0 + 1) / 2;
+    const size = lerp(1.2, 2.8, near) * scale;
+    const fl = hash(p.i, f) < 0.0005;
+    const br = clamp(p.b * (0.5 + 0.55 * pulse));
+    ctx.globalAlpha = a * (fl ? 1 : lerp(0.35, 1, br) * lerp(0.55, 1, near));
+    ctx.fillStyle = tone || (fl ? '#ffffff' : p.i % 9 === 0 ? '#e8334f' : p.i % 4 === 0 ? COL.blueHi : br > 0.8 ? COL.goldHi : COL.gold);
+    const s = fl ? size * 2.2 : size;
+    ctx.fillRect(sx - s / 2, sy - s / 2, s, s);
+  }
+  ctx.restore();
+}
+function flapDigit(x, y, d, land, t, { w = 120, h = 170, size = 150, seed = 0, color = null } = {}) {
+  ctx.fillStyle = COL.blue; ctx.fillRect(x - w / 2, y - h / 2, w, h);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 2; ctx.strokeRect(x - w / 2, y - h / 2, w, h);
+  let shown = d, sy = 1;
+  if (t < land) { const step = Math.floor(t * 30); shown = Math.floor(hash(seed, step) * 10); sy = 1 - 0.5 * ((t * 30) % 1); }
+  const bounce = t >= land ? 1 + 0.12 * Math.exp(-(t - land) / 0.06) : 1;
+  ctx.save(); ctx.translate(x, y); ctx.scale(bounce, sy * bounce);
+  text(String(shown), 0, size * 0.04, { size, font: FONT_NUMW, color: color || (t >= land ? COL.white : COL.light) });
+  ctx.restore();
+  ctx.fillStyle = COL.ink; ctx.fillRect(x - w / 2, y - 1.5, w, 3);
+}
+function nearestBeat(t, grid) { let b = grid[0]; for (const g of grid) if (Math.abs(g - t) < Math.abs(b - t)) b = g; return b; }
+function goldBall(x, y, r, { alpha = 1, rot = 0, fill = COL.blue } = {}) {
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.translate(x, y); ctx.rotate(rot);
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill();
+  ctx.strokeStyle = COL.goldHi; ctx.lineWidth = Math.max(2, r * 0.06); ctx.stroke();
+  ctx.lineWidth = Math.max(1.5, r * 0.04);
+  ctx.beginPath(); ctx.moveTo(-r, 0); ctx.lineTo(r, 0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, -r); ctx.lineTo(0, r); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(-r * 0.95, 0, r * 0.55, r * 0.9, 0, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(r * 0.95, 0, r * 0.55, r * 0.9, 0, Math.PI / 2, Math.PI * 1.5); ctx.stroke();
+  ctx.restore();
+}
+// 弹跳：落地时刻列表 → 当前高度（0 = 地面）
+function bounceHeight(t, hits, h0) {
+  if (t < hits[0]) { const k = prog(t, hits[0] - Math.sqrt(1), hits[0]); return h0 * (1 - k * k); }
+  for (let i = 0; i < hits.length - 1; i++) {
+    if (t < hits[i + 1]) { const a = hits[i], b = hits[i + 1], u = (t - a) / (b - a); const peak = h0 * Math.pow((b - a) / (hits[1] - hits[0]), 2) * 0.55; return 4 * peak * u * (1 - u); }
+  }
+  return 0;
+}
+
+// ================= 冷开场 =================
+async function sc_open(t, f) {
+  const [a, b] = S.open;
+  const lt = t - a;
+  const hits = EV.openBounces;
+  // 一颗球落下弹起
+  const ballA = 1 - prog(lt, 3.3, 4.2);
+  if (ballA > 0) {
+    const h = bounceHeight(lt, hits, 620);
+    const r = 46;
+    const fy = 760;
+    const by = fy - r - h;
+    const squash = hitSum(lt, hits, 0.05) * 0.18;
+    ctx.save(); ctx.globalAlpha = ballA;
+    // 地面光
+    for (const hit of hits) {
+      const k = lt - hit; if (k < 0 || k > 0.9) continue;
+      ctx.beginPath(); ctx.ellipse(960, fy, 60 + k * 900, 8 + k * 60, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(120,160,240,${(1 - k / 0.9) * 0.7})`; ctx.lineWidth = 2; ctx.stroke();
+    }
+    line(560, fy, 1360, fy, { color: COL.goldDim, width: 2 });
+    ctx.translate(960, by + r); ctx.scale(1 + squash, 1 - squash); ctx.translate(-960, -(by + r));
+    goldBall(960, by, r, { rot: lt * 2.2 });
+    ctx.restore();
+  }
+  {
+    const ka = fade(lt, 1.0, 3.6, 0.5, 0.4);
+    kicker('NBA China Games', 960, 300, { size: 40, align: 'center', alpha: ka, rule: 0 });
+    ctx.save(); ctx.globalAlpha = ka; ctx.fillStyle = COL.red; ctx.fillRect(960 - 60 * easeOut(prog(lt, 1.2, 1.8)), 324, 120 * easeOut(prog(lt, 1.2, 1.8)), 4); ctx.restore();
+  }
+  // 光点汇成看台（球变成中央一点）
+  const appear = prog(lt, 3.6, 7.6) * 1.9;
+  const rw = lt - 9.6;
+  const swirl = rw > 0 ? -easeIn(prog(rw, 0, 4.68)) * 9 : 0;
+  const collapse = easeIn(prog(lt, 13.75, 14.28));
+  const desat = prog(lt, 9.8, 12.0);
+  if (lt > 3.4) {
+    const pulse = 0.6 + 0.6 * prog(lt, 5.6, 7.3) - 0.4 * desat;
+    drawCrowd(t, f, { appear, pulse, swirl, collapse, cy: 560, tone: desat > 0.5 ? '#7f8a90' : null, alpha: 1 - 0.35 * desat });
+    ctx.save(); ctx.globalAlpha = prog(lt, 3.6, 4.4) * (1 - collapse); ctx.strokeStyle = COL.gold; ctx.lineWidth = 2;
+    ctx.translate(960, 560); ctx.rotate(swirl * 0.3);
+    ctx.strokeRect(-200, -100, 400, 200);
+    ctx.beginPath(); ctx.moveTo(0, -100); ctx.lineTo(0, 100); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+    goldBall(960, 560, lerp(46, 9, easeInOut(prog(lt, 3.4, 4.4))), { alpha: 1 - collapse });
+  }
+  // 年份倒退 2026 → 1979
+  if (lt >= EV.rewind[0] - a - 0.2) {
+    const [r0, r1] = EV.rewind;
+    const u = prog(t, r0, r1);
+    const year = Math.round(2026 - 47 * (1 - Math.pow(1 - u, 2.6)));
+    const al = prog(t, r0 - 0.2, r0 + 0.2) * (1 - prog(t, r1 + 0.05, r1 + 0.3));
+    ctx.save(); ctx.globalAlpha = al;
+    ctx.fillStyle = 'rgba(5,6,10,0.65)'; ctx.fillRect(560, 430, 800, 260);
+    const ds = String(year).split('').map(Number);
+    ds.forEach((d, i) => flapDigit(960 - 225 + i * 150, 560, d, t >= r1 ? r1 : -10, t, { w: 136, h: 200, size: 180, seed: i + 40 }));
+    ctx.restore();
+  }
+  black(prog(lt, 0, 0.25) < 1 ? 1 - prog(lt, 0, 0.25) : 0);
+}
+
+// ================= 1979：地球与航线 =================
+const DC = [38.9, -77.0], BJ = [39.9, 116.4];
+const rad = (d) => (d * Math.PI) / 180;
+function slerpLatLon(p, q, u) {
+  const v = ([la, lo]) => [Math.cos(rad(la)) * Math.cos(rad(lo)), Math.cos(rad(la)) * Math.sin(rad(lo)), Math.sin(rad(la))];
+  const a = v(p), b = v(q);
+  const dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const om = Math.acos(dot);
+  const s0 = Math.sin((1 - u) * om) / Math.sin(om), s1 = Math.sin(u * om) / Math.sin(om);
+  const c = [a[0] * s0 + b[0] * s1, a[1] * s0 + b[1] * s1, a[2] * s0 + b[2] * s1];
+  return [Math.asin(c[2]) * 180 / Math.PI, Math.atan2(c[1], c[0]) * 180 / Math.PI];
+}
+function proj([la, lo], [la0, lo0], R, cx, cy, lift = 0) {
+  const f = rad(la), l = rad(lo), f0 = rad(la0), l0 = rad(lo0);
+  const cosc = Math.sin(f0) * Math.sin(f) + Math.cos(f0) * Math.cos(f) * Math.cos(l - l0);
+  const r = R * (1 + lift);
+  return [cx + r * Math.cos(f) * Math.sin(l - l0), cy - r * (Math.cos(f0) * Math.sin(f) - Math.sin(f0) * Math.cos(f) * Math.cos(l - l0)), cosc];
+}
+async function sc_map(t, f) {
+  const [a, b] = S.map;
+  const lt = t - a;
+  const al = prog(lt, 0, 0.5);
+  const [r0, r1] = EV.arc;
+  const u = prog(t, r0, r1);
+  const center = [lerp(48, 52, u), lerp(-85, 105, easeInOut(prog(t, a + 0.3, r1 + 0.3)))];
+  const zoomIn = easeIn(prog(lt, 7.0, 7.72));
+  const R = lerp(430, 470, prog(lt, 0, 7.7)) * (1 + zoomIn * 6);
+  const bjS = proj(BJ, center, R, 960, 560);
+  const cx = 960 - (bjS[0] - 960) * zoomIn, cy = 560 - (bjS[1] - 560) * zoomIn;
+  ctx.save(); ctx.globalAlpha = al;
+  // 球体
+  const g = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.3, R * 0.1, cx, cy, R);
+  g.addColorStop(0, '#2a56a8'); g.addColorStop(0.6, COL.blue); g.addColorStop(1, '#0e1f44');
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 3; ctx.stroke();
+  // 经纬网
+  ctx.lineWidth = 1;
+  const drawGeo = (pts) => {
+    ctx.beginPath(); let pen = false;
+    for (const p of pts) { const q = proj(p, center, R, cx, cy); if (q[2] > 0) { pen ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); pen = true; } else pen = false; }
+    ctx.stroke();
+  };
+  ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+  for (let lo = -180; lo < 180; lo += 15) drawGeo(Array.from({ length: 61 }, (_, i) => [-90 + i * 3, lo]));
+  for (let la = -75; la <= 75; la += 15) drawGeo(Array.from({ length: 121 }, (_, i) => [la, -180 + i * 3]));
+  // 航线
+  const N = 120, pts = [];
+  for (let i = 0; i <= N * u; i++) { const k = i / N; pts.push(proj(slerpLatLon(DC, BJ, k), center, R, cx, cy, 0.12 * Math.sin(Math.PI * k))); }
+  if (pts.length > 1) {
+    ctx.strokeStyle = COL.white; ctx.lineWidth = 4; ctx.beginPath();
+    pts.forEach((q, i) => (i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]))); ctx.stroke();
+    const hd = pts[pts.length - 1];
+    if (u < 1) { ctx.beginPath(); ctx.arc(hd[0], hd[1], 9, 0, Math.PI * 2); ctx.fillStyle = COL.red; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); }
+  }
+  // 城市
+  const city = (p, en, sub, t0, side) => {
+    const q = proj(p, center, R, cx, cy); if (q[2] <= 0) return;
+    const ca = prog(t, t0, t0 + 0.4) * clamp(q[2] * 3);
+    const pr = 1 + 0.6 * Math.sin((t - t0) * 6);
+    ctx.save(); ctx.globalAlpha *= ca;
+    ctx.beginPath(); ctx.arc(q[0], q[1], 9 * pr, 0, Math.PI * 2); ctx.fillStyle = COL.red; ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.restore();
+    const al = side > 0 ? 'left' : 'right';
+    text(en, q[0] + side * 26, q[1] - 14, { size: 52, font: FONT_KO, weight: '', align: al, color: COL.white, alpha: ca, spacing: 3 });
+    text(sub, q[0] + side * 28, q[1] + 30, { size: 22, font: FONT_KO, weight: '', align: al, color: COL.light, spacing: 4, alpha: ca });
+  };
+  city(DC, 'WASHINGTON, D.C.', 'USA', a + 0.6, 1);
+  city(BJ, 'BEIJING', 'CHINA', r1 - 0.1, -1);
+  if (u >= 1) { const k = t - r1; ctx.beginPath(); ctx.arc(bjS[0], bjS[1], 10 + k * 260, 0, Math.PI * 2); ctx.strokeStyle = `rgba(255,255,255,${clamp(1 - k / 0.8)})`; ctx.lineWidth = 3; ctx.stroke(); }
+  ctx.restore();
+  // 角标
+  const ha = fade(lt, 0.3, 7.0, 0.5, 0.4);
+  text('1979', 1800, 180, { size: 170, font: FONT_NUMW, color: COL.white, align: 'right', alpha: ha });
+  kicker('U.S.–China diplomatic ties', 1800, 318, { size: 30, align: 'right', alpha: ha * prog(t, 16.9, 17.4), rule: 0 });
+  kicker('Since Jan 1, 1979', 1800, 360, { size: 30, color: COL.light, align: 'right', alpha: ha * prog(t, 17.1, 17.6), rule: 0 });
+  ctx.save(); ctx.globalAlpha = ha * prog(t, 16.9, 17.4); ctx.fillStyle = COL.red; ctx.fillRect(1680, 384, 120, 4); ctx.restore();
+  huazi(t, 19.4, 'WASHINGTON BULLETS', 124, 780, { size: 76, bg: COL.blue, kick: '1978 NBA Champions', hold: a + 7.0 - 19.4 - 0.25 });
+  flash(decay(t, r1, 0.12) * 0.25);
+  black(prog(lt, 7.35, 7.72));
+}
+
+// ================= 1979：北京（生成图 2.5D 推镜） =================
+function filmGate(t, f, amt = 1) {
+  ctx.save();
+  for (let i = 0; i < 3; i++) {
+    if (hash(f, i + 3) > 0.35) continue;
+    const x = hash(f, i) * W;
+    ctx.globalAlpha = 0.12 * amt; ctx.fillStyle = '#fff';
+    ctx.fillRect(x, 0, 1 + hash(f, i + 7) * 1.5, H);
+  }
+  ctx.globalAlpha = 0.05 * amt * hash(f, 9); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+async function sc_bj1979(t, f) {
+  const [a, b] = S.bj1979;
+  const lt = t - a, d = b - a;
+  const x1 = 3.4;
+  const bikes = MAN.wan_bikes ? await clip('wan_bikes', lt) : GEN.bj1979_bikes;
+  const dawn = MAN.wan_dawn ? await clip('wan_dawn', lt - (x1 - 0.4)) : GEN.forbidden_dawn;
+  cover(bikes, { s: lerp(1.02, 1.08, lt / d), fx: 0.5, fy: 0.55, filter: 'sepia(0.25) saturate(0.85) contrast(1.08)', alpha: 1 });
+  cover(dawn, { s: lerp(1.06, 1.02, prog(lt, x1 - 0.4, d)), fx: 0.5, fy: 0.5, filter: 'sepia(0.2) saturate(0.9) contrast(1.08)', alpha: prog(lt, x1 - 0.4, x1 + 0.4) });
+  filmGate(t, f, 1);
+  huazi(t, a + 0.5, 'BEIJING', 124, 780, { size: 88, bg: COL.red, kick: 'Summer 1979', hold: d - 1.3 });
+  black((1 - prog(lt, 0, 0.6)) + prog(lt, d - 0.5, d));
+}
+
+// ================= 1979：2.28 米标尺 =================
+async function sc_ruler(t, f) {
+  const [a, b] = S.ruler;
+  const lt = t - a, d = b - a;
+  const land = EV.rulerLand;
+  // 英制刻度：1 英尺 = 0.3048 m，落点 2.28 m ≈ 7 英尺 6 英寸
+  const PXF = 110;
+  const FT = 2.28 / 0.3048;
+  const hNow = t < land ? 6.4 * easeInOut(prog(t, a + 0.3, land - 0.9)) + (FT - 6.4) * easeIn(prog(t, land - 0.9, land)) : FT;
+  const camY = Math.max(0, hNow * PXF - 520);
+  const floorY = 980 + camY;
+  const X = 860;
+  const al = fade(lt, 0, d, 0.4, 0.5);
+  courtBg(lt, { alpha: al });
+  ctx.save(); ctx.globalAlpha = al;
+  line(X, floorY, X, floorY - 8 * PXF, { color: COL.white, width: 4 });
+  line(360, floorY, 1560, floorY, { color: COL.goldDim, width: 2 });
+  for (let k = 0; k <= 96; k += 3) {
+    const y = floorY - (k / 12) * PXF;
+    if (y < -20 || y > H + 20) continue;
+    const major = k % 12 === 0;
+    line(X, y, X - (major ? 44 : 18), y, { color: major ? COL.white : COL.gold, width: major ? 3 : 1.5, alpha: major ? 1 : 0.6 });
+    if (major) text(`${k / 12}'`, X - 62, y + 3, { size: 34, font: FONT_NUM, color: COL.light, align: 'right' });
+  }
+  const yH = floorY - hNow * PXF;
+  const hit = decay(t, land, 0.15);
+  ctx.save(); ctx.globalAlpha *= 0.9; ctx.fillStyle = COL.red; ctx.fillRect(X - 10, yH - (3 + hit * 4) / 2, 700, 3 + hit * 4); ctx.restore();
+  const inch = Math.min(Math.round(hNow * 12), 90);
+  const big = `${Math.floor(inch / 12)}'${inch % 12}"`;
+  text(big, X + 40, yH - 92, { size: 170, font: FONT_NUMW, color: COL.white, align: 'left', base: 'middle' });
+  text('2.28 M', X + 50 + measure(big, { size: 170, font: FONT_NUMW }) + 24, yH - 62, { size: 54, font: FONT_NUM, color: COL.light, align: 'left', alpha: prog(t, land - 0.1, land + 0.2) });
+  ctx.restore();
+  huazi(t, land + 0.55, 'MU TIEZHU', X + 40, yH + 150, { size: 92, bg: COL.red, kick: 'Bayi Basketball Team', anim: 'slam', hold: b - land - 1.0 });
+  flash(hit * 0.35);
+}
+
+// ================= 1979：档案卡 =================
+async function sc_paper(t, f) {
+  const [a, b] = S.paper;
+  const lt = t - a, d = b - a;
+  const al = fade(lt, 0, d, 0.4, 0.45);
+  const [ty0, ty1] = EV.typing;
+  courtBg(lt, { alpha: al });
+  ctx.save(); ctx.globalAlpha = al;
+  const z = lerp(1.0, 1.05, lt / d);
+  ctx.translate(960, 540); ctx.scale(z, z); ctx.translate(-960, -540);
+  const slide = 1 - easeOut(prog(lt, 0, 0.5));
+  ctx.translate(-260 * slide, 0);
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 14;
+  ctx.fillStyle = COL.paper; ctx.fillRect(400, 210, 1120, 640); ctx.restore();
+  ctx.fillStyle = COL.blue; ctx.fillRect(400, 210, 1120, 96);
+  ctx.fillStyle = COL.red; ctx.fillRect(400, 210, 14, 640);
+  kicker('NBA Archive', 452, 272, { size: 40, rule: 90 });
+  text('No. 1979-08', 1470, 272, { size: 34, font: FONT_NUM, color: COL.light, align: 'right', base: 'alphabetic' });
+  const lines = [['AUGUST 1979', 64, FONT_NUMW, COL.blue], ['Washington Bullets tour China', 54, FONT_UI, COL.ink], ['The first NBA team to visit China', 46, FONT_UI, COL.ink]];
+  const total = lines.reduce((s, l) => s + l[0].length, 0);
+  const typed = Math.floor(total * prog(t, ty0, ty1));
+  let used = 0;
+  lines.forEach(([s, size, font, color], i) => {
+    const n = clamp(typed - used, 0, s.length); used += s.length;
+    text(s.slice(0, n), 470, 420 + i * 120, { size, color, align: 'left', font, weight: font === FONT_UI ? 900 : 'bold' });
+  });
+  ctx.restore();
+  huazi(t, ty1 + 0.3, 'FIRST VISIT', 1290, 790, { size: 80, bg: COL.red, anim: 'slam', align: 'center', hold: b - ty1 - 0.75 });
+  filmGate(t, f, 0.3);
+}
+
+// ================= 1989：传达室与时钟 =================
+async function sc_room(t, f) {
+  const [a, b] = S.room;
+  const lt = t - a, d = b - a;
+  if (MAN.wan_room) cover(await clip('wan_room', lt), { s: lerp(1.02, 1.06, lt / d), fx: 0.42, fy: 0.45, filter: 'saturate(0.85) contrast(1.05)' });
+  else cover(GEN.room1989, { s: lerp(1.03, 1.18, lt / d), fx: 0.42, fy: 0.45, filter: 'saturate(0.85) contrast(1.05)' });
+  filmGate(t, f, 0.7);
+  // 时钟
+  const cx = 1560, cy = 330, R = 150;
+  const al = fade(lt, 0.4, d, 0.6, 0.6);
+  const mins = 58 * easeInOut(prog(lt, 0.6, 7.2));
+  ctx.save(); ctx.globalAlpha = al;
+  ctx.fillStyle = 'rgba(5,6,10,0.55)'; ctx.beginPath(); ctx.arc(cx, cy, R + 40, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = COL.gold; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+  for (let k = 0; k < 60; k++) {
+    const an = (k / 60) * Math.PI * 2, r0 = k % 5 ? R - 10 : R - 22;
+    line(cx + Math.sin(an) * r0, cy - Math.cos(an) * r0, cx + Math.sin(an) * R, cy - Math.cos(an) * R, { color: k % 5 ? COL.goldDim : COL.gold, width: k % 5 ? 1 : 2 });
+  }
+  ctx.save(); ctx.globalAlpha *= 0.35; ctx.fillStyle = COL.gold;
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R - 26, -Math.PI / 2, -Math.PI / 2 + (mins / 60) * Math.PI * 2); ctx.closePath(); ctx.fill();
+  ctx.restore();
+  const ma = (mins / 60) * Math.PI * 2, ha = ((9 + mins / 60) / 12) * Math.PI * 2;
+  line(cx, cy, cx + Math.sin(ma) * (R - 30), cy - Math.cos(ma) * (R - 30), { color: COL.goldHi, width: 4 });
+  line(cx, cy, cx + Math.sin(ha) * (R - 70), cy - Math.cos(ha) * (R - 70), { color: COL.goldHi, width: 6 });
+  ctx.restore();
+  text(String(Math.floor(mins)).padStart(2, '0'), cx - 20, cy + R + 86, { size: 84, font: FONT_NUMW, color: COL.white, alpha: al, align: 'right' });
+  text('MIN', cx - 6, cy + R + 96, { size: 40, font: FONT_KO, weight: '', color: COL.light, alpha: al, align: 'left', spacing: 4 });
+  huazi(t, a + 0.6, 'BEIJING · 1989', 124, 780, { size: 76, bg: COL.blue, kick: 'China Central Television · East gate', hold: 48.3 - a - 0.6 });
+  huazi(t, 48.5, 'DAVID STERN', 124, 780, { size: 84, bg: COL.red, kick: 'NBA Commissioner', hold: b - 48.5 - 0.3 });
+  black(1 - prog(lt, 0, 0.8));
+}
+
+// ================= 1989：录像带 → 电视亮起 =================
+async function sc_vhs(t, f) {
+  const [a, b] = S.vhs;
+  const lt = t - a, d = b - a;
+  const dive = easeIn(prog(t, EV.tapeIn - 0.4, b));
+  const vim = MAN.wan_vhs ? await clip('wan_vhs', lt) : GEN.vhs_macro;
+  cover(vim, { s: (MAN.wan_vhs ? 1.02 : lerp(1.05, 1.2, lt / d)) * (1 + dive * 2.5), fx: 0.5, fy: 0.5, filter: `saturate(0.9) contrast(1.06) blur(${(dive * 8).toFixed(1)}px)`, alpha: prog(lt, 0, 0.5) });
+  filmGate(t, f, 0.6);
+  huazi(t, a + 0.5, 'ONE VIDEOTAPE', 124, 780, { size: 80, bg: COL.red, kick: 'All he had', hold: d - 1.9 });
+  black(dive * 1.1);
+}
+
+// ================= 1990s：电视墙 =================
+function crt(im, x, y, w, h, { on = 1, alpha = 1, bezel = true, glow = 0.15 } = {}) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha *= alpha;
+  if (bezel) { ctx.fillStyle = '#121318'; ctx.beginPath(); ctx.roundRect(x - w * 0.06, y - h * 0.08, w * 1.12, h * 1.16, w * 0.05); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 2; ctx.stroke(); }
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, w * 0.06); ctx.clip();
+  ctx.fillStyle = '#000'; ctx.fillRect(x, y, w, h);
+  if (im && on > 0) {
+    const sy = on < 1 ? Math.max(0.004, easeIn(on)) : 1;
+    ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.scale(1, sy); ctx.translate(-(x + w / 2), -(y + h / 2));
+    ctx.filter = 'saturate(0.75) contrast(1.15) brightness(1.08)';
+    ctx.drawImage(im, x, y, w, h);
+    ctx.filter = 'none';
+    if (on < 1) { ctx.globalAlpha = 1 - on; ctx.fillStyle = '#fff'; ctx.fillRect(x, y, w, h); }
+    ctx.restore();
+  }
+  ctx.globalAlpha = alpha * 0.5; ctx.fillStyle = scanPat; ctx.fillRect(x, y, w, h);
+  const g = ctx.createRadialGradient(x + w / 2, y + h / 2, w * 0.2, x + w / 2, y + h / 2, w * 0.75);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.7)');
+  ctx.globalAlpha = alpha; ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  ctx.globalAlpha = alpha * glow; ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.beginPath(); ctx.ellipse(x + w * 0.3, y + h * 0.2, w * 0.35, h * 0.12, -0.3, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+async function sc_tvwall(t, f) {
+  const [a, b] = S.tvwall;
+  const lt = t - a, d = b - a;
+  const out = easeInOut(prog(lt, 2.6, 6.2));
+  const z = lerp(2.6, 0.62, out);
+  const cols = 7, rows = 5, tw = 260, th = 195, gx = 330, gy = 250;
+  const names = ['tv1', 'tv2', 'tv3', 'tv4', 'tv5', 'tv6', 'tv7'];
+  const ims = await Promise.all(names.map((n, i) => clip(n, (lt + i * 1.3) % 7.6)));
+  ctx.save();
+  ctx.translate(960, 540); ctx.scale(z, z); ctx.translate(-960, -540);
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const i = r * cols + c;
+    const x = 960 + (c - (cols - 1) / 2) * gx - tw / 2, y = 540 + (r - (rows - 1) / 2) * gy - th / 2;
+    const center = r === 2 && c === 3;
+    const on = center ? prog(lt, 0, 0.35) : prog(lt, 2.4 + hash(i, 5) * 1.6, 2.6 + hash(i, 5) * 1.6);
+    const im = center ? ims[0] : ims[(i * 3) % names.length];
+    crt(im, x, y, tw, th, { on, alpha: center ? 1 : prog(lt, 2.2, 2.8) });
+  }
+  ctx.restore();
+  huazi(t, a + 3.2, 'THE NBA ON TAPE', 124, 780, { size: 80, bg: COL.blue, kick: 'China · 1990s', hold: d - 3.2 - 0.5 });
+  flash(decay(lt, 0, 0.12) * 0.6);
+  black(prog(lt, d - 0.35, d));
+}
+
+// ================= 姚明：近景慢放 + 2.26 标尺 + 怒吼 =================
+async function sc_yao(t, f) {
+  const [a, b] = S.yao;
+  const lt = t - a, d = b - a;
+  const roar = EV.yaoRoar;
+  if (t < roar) {
+    const im = await clip('yao_close', lt);
+    panel(im, { s: lerp(1.0, 1.06, lt / 3.9), fx: 0.5, fy: 0.4, alpha: prog(lt, 0, 0.3) });
+    // 标尺沿画面左侧升起
+    // NBA 官方登记身高 7'6"
+    const X = (W - 834) / 2 - 70, floorY = 1040, PXF = 120;
+    const land = EV.yaoRuler;
+    const hv = t < land ? 7.5 * easeOut(prog(t, a + 0.3, land)) : 7.5;
+    line(X, floorY, X, floorY - 7.8 * PXF, { color: COL.white, width: 3, alpha: 0.9 });
+    for (let k = 0; k <= 93; k += 3) { const y = floorY - (k / 12) * PXF; line(X, y, X - (k % 12 ? 14 : 30), y, { color: COL.white, width: k % 12 ? 1 : 2, alpha: k % 12 ? 0.6 : 1 }); }
+    const yH = floorY - hv * PXF;
+    ctx.save(); ctx.fillStyle = COL.red; const lw = 3 + 4 * decay(t, land, 0.15); ctx.fillRect(X - 40, yH - lw / 2, 100, lw); ctx.restore();
+    const inch = Math.min(Math.round(hv * 12), 90);
+    text(`${Math.floor(inch / 12)}'${inch % 12}"`, X - 50, yH - 56, { size: 110, font: FONT_NUMW, color: COL.white, align: 'right' });
+    const ha = prog(lt, 1.6, 2.0);
+    text('11', W - 120, 380, { size: 190, font: FONT_NUMW, color: COL.white, align: 'right', alpha: ha });
+    huazi(t, a + 1.6, 'YAO MING', W - 120, 560, { size: 84, bg: COL.red, kick: 'Houston Rockets', align: 'right', hold: roar - a - 1.6 - 0.05, out: 0.05 });
+    flash(decay(t, land, 0.1) * 0.25);
+  } else {
+    const k = t - roar;
+    const im = await clip('yao_roar', k);
+    const punch = decay(t, roar, 0.25);
+    cover(im, { s: 1.04 + 0.08 * punch + 0.03 * k, fx: 0.5, fy: 0.42 });
+    ctx.save(); ctx.globalAlpha = 0.35; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); ctx.restore();
+    const ta = prog(k, 0.05, 0.2);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    strokeText('NO.1', 960, 470, { size: 420, color: COL.goldHi, width: 3, alpha: ta * 0.9, spacing: 10 });
+    ctx.restore();
+    huazi(t, roar + 0.35, 'NO. 1 OVERALL PICK', 960, 770, { size: 84, bg: COL.red, kick: '2002 NBA Draft', align: 'center', anim: 'slam' });
+    flash(punch * 0.7);
+  }
+  black(prog(lt, d - 0.3, d));
+}
+
+// ================= 2004：票根盖章 + 2004 真实比赛 =================
+function ticket(t, x, y, s, rot, { stampT = null, alpha = 1, typed = 1 } = {}) {
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  const w = 900, h = 380;
+  ctx.fillStyle = COL.paper; ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, 14); ctx.fill();
+  ctx.strokeStyle = 'rgba(42,33,22,0.5)'; ctx.setLineDash([8, 8]); ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(w / 2 - 210, -h / 2 + 20); ctx.lineTo(w / 2 - 210, h / 2 - 20); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = COL.blue; ctx.fillRect(-w / 2, -h / 2, 26, h);
+  ctx.fillStyle = COL.red; ctx.fillRect(-w / 2, -h / 2, 26, 90);
+  const L = [['NBA CHINA GAMES 2004', 34, FONT_KO, 4, ''], ['ROCKETS vs KINGS', 64, FONT_KO, 2, ''], ['OCT 14, 2004 · SHANGHAI', 44, FONT_NUM, 2, 'bold']];
+  const tot = L.reduce((s0, l) => s0 + l[0].length, 0);
+  let left = Math.floor(tot * typed);
+  L.forEach(([str, size, font, sp, wt], i) => {
+    const n = clamp(left, 0, str.length); left -= str.length;
+    text(str.slice(0, n), -w / 2 + 70, -h / 2 + 80 + i * 105, { size, font, weight: wt, color: i === 1 ? COL.blue : COL.ink, align: 'left', spacing: sp });
+  });
+  text('No.', w / 2 - 105, -60, { size: 28, font: FONT_NUM, color: COL.ink });
+  text('0001', w / 2 - 105, 0, { size: 70, font: FONT_NUMW, color: COL.ink });
+  if (stampT !== null && t >= stampT) {
+    const k = prog(t, stampT, stampT + 0.12);
+    ctx.save(); ctx.translate(150, 40); ctx.rotate(-0.22); ctx.scale(lerp(2.2, 1, k), lerp(2.2, 1, k)); ctx.globalAlpha *= k * 0.9;
+    ctx.strokeStyle = COL.red; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(0, 0, 110, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 92, 0, Math.PI * 2); ctx.stroke();
+    text('FIRST', 0, -14, { size: 64, font: FONT_KO, weight: '', color: COL.red, spacing: 4 });
+    text('GAME', 0, 44, { size: 40, font: FONT_KO, weight: '', color: COL.red, spacing: 8 });
+    ctx.restore();
+  }
+  ctx.restore();
+}
+async function sc_ticket(t, f) {
+  const [a, b] = S.ticket;
+  const lt = t - a, d = b - a;
+  const st = EV.stamp;
+  const real0 = st + 0.55;
+  const shake = decay(t, st, 0.08) * 16;
+  const sx = (hash(f, 1) - 0.5) * shake, sy = (hash(f, 2) - 0.5) * shake;
+  if (t < real0 + 0.5) {
+    const k = easeOut(prog(lt, 0, 0.6));
+    const away = easeIn(prog(t, real0 - 0.1, real0 + 0.5));
+    ticket(t, 960 + sx + lerp(0, -560, away), lerp(700, 540, k) + sy + lerp(0, 120, away), lerp(1.1, 1.0, k) * lerp(1, 0.55, away), lerp(0.08, -0.03, k) - 0.12 * away,
+      { stampT: st, typed: prog(t, a + 0.45, st - 0.5), alpha: prog(lt, 0, 0.3) });
+  }
+  if (t >= real0) {
+    const k = t - real0;
+    const im = await clip('mac2004', k);
+    const w = 640, h = 658;
+    const x = lerp(1240, 1000, easeOut(prog(k, 0, 0.5))), y = 211;
+    blurBack(im, { alpha: prog(k, 0, 0.4), dark: 0.25 });
+    ticket(t, 420, 640, 0.55, -0.15, { stampT: st, alpha: 1 });
+    panel(im, { x, y, w, h, back: false, alpha: prog(k, 0, 0.3) });
+    kicker('Rockets vs Kings · Shanghai', x, y + h + 52, { size: 30, alpha: prog(k, 0.3, 0.6), rule: 80 });
+    huazi(t, real0 + 0.4, 'FIRST NBA GAME IN CHINA', 150, 300, { size: 70, bg: COL.red, kick: 'Oct 14, 2004', hold: b - real0 - 0.4 - 0.5 });
+  }
+  flash(decay(t, st, 0.08) * 0.3);
+  black((1 - prog(lt, 0, 0.3)) + prog(lt, d - 0.3, d));
+}
+
+// ================= 2004：一万一千人 =================
+async function sc_crowd(t, f) {
+  const [a, b] = S.crowd;
+  const lt = t - a, d = b - a;
+  const dive = easeIn(prog(lt, d - 0.7, d));
+  const pulse = hitSum(t, EV.chant, 0.18);
+  drawCrowd(t, f, { appear: prog(lt, 0, 1.6) * 1.9, pulse: 0.5 + pulse, scale: 1 + dive * 2.4, alpha: 1 - dive });
+  const ta = prog(lt, 0.4, 0.7) * (1 - prog(lt, d - 0.9, d - 0.6));
+  const n = Math.round(11000 * easeOut(prog(lt, 0.4, 1.6)));
+  text(n.toLocaleString('en-US'), 960, 560, { size: 190, font: FONT_NUMW, color: COL.white, alpha: ta });
+  kicker('fans', 960, 700, { size: 44, align: 'center', rule: 0, alpha: ta, color: COL.light });
+  huazi(t, a + 1.8, 'ONE NAME', 960, 800, { size: 72, bg: COL.red, align: 'center', hold: d - 1.8 - 0.75 });
+}
+
+// ================= 2004：战术板（国王出手不中 → 姚明补扣） =================
+const FT = 16, CX0 = 584, CY0 = 140;
+const cp = (X, Y) => [CX0 + X * FT, CY0 + Y * FT];
+const RIM = cp(41.75, 25);
+const courtPaths = (() => {
+  const P = [];
+  P.push([cp(0, 0), cp(47, 0), cp(47, 50), cp(0, 50), cp(0, 0)]);
+  P.push([cp(47, 17), cp(28, 17), cp(28, 33), cp(47, 33)]);
+  P.push(arcPts(...cp(28, 25), 6 * FT, Math.PI / 2, Math.PI * 1.5));
+  P.push([cp(47, 3), cp(33, 3)]);
+  P.push([cp(47, 47), cp(33, 47)]);
+  const an = Math.asin(22 / 23.75);
+  P.push(arcPts(RIM[0], RIM[1], 23.75 * FT, Math.PI - an, Math.PI + an));
+  P.push(arcPts(RIM[0], RIM[1], 4 * FT, Math.PI / 2, Math.PI * 1.5, 32));
+  P.push(arcPts(...cp(0, 25), 6 * FT, -Math.PI / 2, Math.PI / 2));
+  P.push([cp(43, 22), cp(43, 28)]);
+  return P;
+})();
+function dot(p, { fill = COL.gold, r = 14, label = '', num = '', hollow = false, alpha = 1 } = {}) {
+  ctx.save(); ctx.globalAlpha *= alpha;
+  ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, Math.PI * 2);
+  if (hollow) { ctx.strokeStyle = COL.grey; ctx.lineWidth = 2.5; ctx.stroke(); } else { ctx.fillStyle = fill; ctx.fill(); }
+  ctx.restore();
+  if (num) text(num, p[0], p[1] + 1, { size: 17, font: FONT_NUM, color: COL.white, alpha });
+  if (label) text(label, p[0], p[1] - 34, { size: 30, font: FONT_KO, weight: '', color: COL.white, alpha, spacing: 3 });
+}
+const lerpP = (p, q, u) => [lerp(p[0], q[0], u), lerp(p[1], q[1], u)];
+const YAO_END = cp(40.6, 24.0);
+function boardState(t) {
+  const shot = EV.shot, rimOut = EV.rimOut, pb = EV.putback;
+  const shooter = lerpP(cp(21, 37), cp(24.5, 33.5), easeInOut(prog(t, shot - 1.6, shot - 0.2)));
+  const yao = t < pb ? lerpP(cp(33.5, 31), cp(39.3, 22.6), easeInOut(prog(t, shot + 0.15, pb))) : lerpP(cp(39.3, 22.6), [YAO_END[0], YAO_END[1]], easeOut(prog(t, pb, pb + 0.45)));
+  let ball, bh = 0;
+  if (t < shot) ball = [shooter[0] + 10, shooter[1] - 6];
+  else if (t < rimOut) { const u = prog(t, shot, rimOut); ball = lerpP([shooter[0] + 10, shooter[1] - 6], RIM, u); bh = Math.sin(Math.PI * u); }
+  else if (t < pb) { const u = prog(t, rimOut, pb); ball = lerpP(RIM, cp(39.3, 22.6), u); bh = 0.35 * Math.sin(Math.PI * u); }
+  else ball = lerpP(cp(39.3, 22.6), RIM, easeIn(prog(t, pb, pb + 0.45)));
+  return { shooter, yao, ball, bh };
+}
+async function sc_board(t, f) {
+  const [a, b] = S.board;
+  const lt = t - a;
+  const [z0, z1] = EV.boardZoom;
+  const z = 1 + easeIn(prog(t, z0, z1)) * 5.5;
+  courtBg(lt, { orb: false });
+  const st = boardState(t);
+  const anchor = YAO_END;
+  ctx.save();
+  ctx.globalAlpha = prog(lt, 0, 0.3);
+  ctx.translate(anchor[0], anchor[1]); ctx.scale(z, z); ctx.translate(-anchor[0], -anchor[1]);
+  ctx.strokeStyle = COL.gold; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+  courtPaths.forEach((p, i) => { const s = a + 0.1 + i * 0.06; partialPolyline(p, easeInOut(prog(t, s, s + 0.55))); });
+  ctx.save(); ctx.globalAlpha *= prog(lt, 0.6, 0.9);
+  ctx.beginPath(); ctx.arc(RIM[0], RIM[1], 0.75 * FT, 0, Math.PI * 2); ctx.strokeStyle = COL.goldHi; ctx.lineWidth = 3; ctx.stroke();
+  ctx.restore();
+  const pa = prog(lt, 0.8, 1.1);
+  [[30, 15], [34, 40], [36.5, 27.5], [28, 26]].forEach(([x, y], i) => {
+    const drift = [Math.sin(t * 1.3 + i) * 6, Math.cos(t * 1.1 + i) * 6];
+    const p = cp(x, y); dot([p[0] + drift[0], p[1] + drift[1]], { hollow: true, r: 13, alpha: pa });
+  });
+  dot(st.shooter, { hollow: true, r: 15, alpha: pa });
+  [[18, 40], [38, 45], [26, 10], [32, 6]].forEach(([x, y], i) => { const p = cp(x, y); dot([p[0] + Math.sin(t + i) * 5, p[1]], { r: 12, alpha: pa * 0.55 }); });
+  dot(st.yao, { r: 17, num: '11', label: 'YAO', alpha: pa, fill: COL.red });
+  // 球
+  if (t >= EV.shot - 0.05) {
+    ctx.save(); ctx.globalAlpha *= 0.5; ctx.setLineDash([6, 8]); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    const tr = []; for (let i = 0; i <= 30; i++) { const tt = lerp(EV.shot, Math.min(t, EV.putback + 0.45), i / 30); const s2 = boardState(tt); tr.push([s2.ball[0], s2.ball[1] - s2.bh * 60]); }
+    ctx.beginPath(); tr.forEach((q, i) => (i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]))); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(st.ball[0], st.ball[1] - st.bh * 60, 7 + st.bh * 5, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.globalAlpha = pa; ctx.fill();
+  // 篮筐弹出
+  const ro = t - EV.rimOut;
+  if (ro > 0 && ro < 0.6) { ctx.beginPath(); ctx.arc(RIM[0], RIM[1], 14 + ro * 140, 0, Math.PI * 2); ctx.strokeStyle = `rgba(200,200,210,${1 - ro / 0.6})`; ctx.lineWidth = 2; ctx.stroke(); }
+  const pbk = t - (EV.putback + 0.45);
+  if (pbk > 0 && pbk < 0.7) { ctx.beginPath(); ctx.arc(RIM[0], RIM[1], 16 + pbk * 300, 0, Math.PI * 2); ctx.strokeStyle = `rgba(232,51,79,${1 - pbk / 0.7})`; ctx.lineWidth = 5; ctx.stroke(); }
+  ctx.restore();
+  const call = (s, p, t0, dy = -64) => text(s, p[0], p[1] + dy, { size: 34, font: FONT_KO, weight: '', color: COL.white, spacing: 3, alpha: fade(t, t0, z0 + 0.3, 0.2, 0.3) });
+  if (z < 1.05) {
+    call('KINGS SHOT', st.shooter, EV.shot - 0.1, 56);
+    call('MISS', [RIM[0] + 70, RIM[1] - 50], EV.rimOut, 0);
+    if (t < z0 + 0.3) huazi(t, EV.putback + 0.3, 'YAO DUNK', YAO_END[0] - 320, YAO_END[1] + 80, { size: 52, bg: COL.red, hold: z0 - EV.putback - 0.3, out: 0.3 });
+  }
+  const ha = prog(lt, 0.4, 0.8) * (1 - prog(t, z0, z0 + 0.4));
+  kicker('Oct 14, 2004 · Shanghai', 1840, 96, { size: 32, align: 'right', rule: 0, alpha: ha });
+  kicker('Rockets vs Kings', 1840, 138, { size: 28, align: 'right', rule: 0, alpha: ha, color: COL.light });
+}
+
+// ================= 2004：真实扣篮（预渲染帧，开头从战术板圆形展开） =================
+async function sc_dunk(t, f) {
+  const [a, b] = S.dunk;
+  const lt = t - a;
+  const im = await clip('dunk_en', lt);
+  if (lt < 0.4) {
+    await sc_board(S.board[1] - 1e-3, f);
+    const u = easeOut(lt / 0.4);
+    const r = 30 + 2300 * Math.pow(u, 1.6);
+    ctx.save(); ctx.beginPath(); ctx.arc(YAO_END[0], YAO_END[1], r, 0, Math.PI * 2); ctx.clip();
+    if (im) ctx.drawImage(im, 0, 0, W, H);
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(YAO_END[0], YAO_END[1], r, 0, Math.PI * 2); ctx.strokeStyle = COL.goldHi; ctx.lineWidth = 6; ctx.stroke();
+  } else if (im) ctx.drawImage(im, 0, 0, W, H);
+  // 与 seg_dunk2004.py 的 T_SLAM=2.81、crt_off@4.1 对齐：扣篮瞬间 HUD 闪烁，关机前收掉
+  const dt = lt - 2.81, hit = dt >= 0 ? Math.exp(-dt * 9) : 0;
+  const off = 1 - prog(lt, 4.0, 4.1), flick = 1 - 0.7 * hit * (f % 2);
+  const al = prog(lt, 0.35, 0.8) * off * flick, ar = prog(lt, 1.3, 1.8) * off * flick;
+  kicker('NBA China Games', 122, 400, { size: 26, alpha: al, color: COL.light, rule: 0 });
+  text('2004', 116, 520, { size: 170, font: FONT_NUMW, color: COL.white, align: 'left', alpha: al });
+  text('ROCKETS vs KINGS', 122, 640, { size: 40, font: FONT_KO, weight: '', color: COL.white, align: 'left', spacing: 3, alpha: al });
+  if (al > 0) { ctx.save(); ctx.globalAlpha = al; ctx.fillStyle = COL.red; ctx.fillRect(122, 678, 120, 4); ctx.restore(); }
+  text('11', W - 120, 500, { size: 170, font: FONT_NUMW, color: COL.white, align: 'right', alpha: ar });
+  text('YAO MING', W - 122, 640, { size: 56, font: FONT_KO, weight: '', color: COL.white, align: 'right', spacing: 3, alpha: ar });
+  if (ar > 0) { ctx.save(); ctx.globalAlpha = ar; ctx.fillStyle = COL.red; ctx.fillRect(W - 242, 678, 120, 4); ctx.restore(); }
+  kicker('Houston Rockets', W - 122, 722, { size: 26, alpha: ar, color: COL.light, align: 'right', rule: 0 });
+}
+
+// ================= 2004：计分牌 + 斯特恩一句话 =================
+async function sc_score(t, f) {
+  const [a, b] = S.score;
+  const lt = t - a, d = b - a;
+  const land = EV.flapLand, fs = land - 0.9;
+  const q = TL.vo.find((v) => v.id === 'L18');
+  const shrink = easeInOut(prog(t, q.t - 0.3, q.t + 0.4));
+  const al = prog(lt, 0.05, 0.35) * (1 - prog(lt, d - 0.35, d));
+  ctx.save(); ctx.globalAlpha = al;
+  ctx.translate(960, lerp(480, 300, shrink)); ctx.scale(lerp(1, 0.6, shrink), lerp(1, 0.6, shrink)); ctx.translate(-960, -480);
+  const cx = 960, cy = 480;
+  ctx.save(); ctx.globalAlpha *= 0.92; slab(cx - 600, cy - 170, 1200, 340, COL.ink, 0); ctx.restore();
+  ctx.fillStyle = COL.red; ctx.fillRect(cx - 600, cy - 170, 12, 340);
+  ctx.fillStyle = '#5a2d81'; ctx.fillRect(cx + 588, cy - 170, 12, 340);
+  text('ROCKETS', cx - 470, cy - 22, { size: 76, font: FONT_KO, weight: '', color: COL.white, spacing: 3 });
+  text('HOUSTON', cx - 470, cy + 46, { size: 26, font: FONT_KO, weight: '', color: COL.light, spacing: 6 });
+  text('KINGS', cx + 470, cy - 22, { size: 76, font: FONT_KO, weight: '', color: COL.white, spacing: 3 });
+  text('SACRAMENTO', cx + 470, cy + 46, { size: 26, font: FONT_KO, weight: '', color: COL.light, spacing: 6 });
+  [8, 8, 8, 6].forEach((dg, k) => flapDigit(cx + [-270, -135, 135, 270][k], cy, dg, fs + (land - fs) * (k / 3), t, { seed: k }));
+  text(':', cx, cy, { size: 120, font: FONT_NUMW, color: COL.white });
+  kicker('Oct 14, 2004 · Shanghai · The first NBA China Game', cx, cy + 250, { size: 36, align: 'center', rule: 0, alpha: prog(t, land + 0.3, land + 0.7) * (1 - shrink) });
+  ctx.restore();
+  // 引语：Tad Brown（火箭 CEO），Houston Chronicle 2013
+  const qa = fade(t, q.t, b, 0.4, 0.4);
+  text('“…like a cross between the Beatles', 960, 610, { size: 68, font: FONT_UI, weight: 900, color: COL.white, alpha: qa });
+  text('and Michael Jordan.”', 960, 700, { size: 68, font: FONT_UI, weight: 900, color: COL.white, alpha: qa });
+  const qb = qa * prog(t, q.t + 1.0, q.t + 1.4);
+  kicker('Tad Brown · Rockets CEO', 960, 800, { size: 34, align: 'center', rule: 0, alpha: qb });
+  text('Houston Chronicle, 2013 · on the 2004 China Games', 960, 846, { size: 24, font: FONT_UI, weight: 500, color: COL.light, alpha: qb });
+}
+
+// ================= 此后十五年：时间轴与计数 =================
+const CG_YEARS = [2004, 2007, 2008, 2009, 2010, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019];
+async function sc_span(t, f) {
+  const [a, b] = S.span;
+  const lt = t - a, d = b - a;
+  const al = fade(lt, 0, d, 0.3, 0.25);
+  const x0 = 220, x1 = 1700, y = 420;
+  const draw = easeInOut(prog(lt, 0.2, 2.2));
+  ctx.save(); ctx.globalAlpha = al;
+  line(x0, y, lerp(x0, x1, draw), y, { color: COL.gold, width: 3 });
+  for (let yr = 2004; yr <= 2019; yr++) {
+    const u = (yr - 2004) / 15, x = lerp(x0, x1, u);
+    if (u > draw) continue;
+    const on = CG_YEARS.includes(yr);
+    const pop = decay(lt, 0.2 + u * 2.0, 0.15);
+    ctx.beginPath(); ctx.arc(x, y, on ? 9 + pop * 6 : 4, 0, Math.PI * 2); ctx.fillStyle = on ? COL.goldHi : COL.grey; ctx.fill();
+    if (on || yr % 5 === 4) text(String(yr), x, y - 44, { size: 28, font: FONT_NUM, color: on ? COL.gold : COL.grey });
+  }
+  const [c0, c1] = EV.spanCount;
+  const n1 = Math.round(17 * easeOut(prog(t, c0 - 0.9, c0))), n2 = Math.round(28 * easeOut(prog(t, c1 - 0.9, c1)));
+  text(String(n1), 700, 640, { size: 240, font: FONT_NUMW, color: t >= c0 ? COL.white : COL.light, alpha: prog(t, c0 - 0.9, c0 - 0.7) });
+  huazi(t, c0 - 0.3, 'TEAMS', 700, 800, { size: 60, bg: COL.blue, align: 'center' });
+  text(String(n2), 1220, 640, { size: 240, font: FONT_NUMW, color: t >= c1 ? COL.white : COL.light, alpha: prog(t, c1 - 0.9, c1 - 0.7) });
+  huazi(t, c1 - 0.3, 'GAMES', 1220, 800, { size: 60, bg: COL.red, align: 'center' });
+  ctx.restore();
+  flash((decay(t, c0, 0.1) + decay(t, c1, 0.1)) * 0.2);
+}
+
+// ================= 2007–2019 翻页蒙太奇 =================
+const FLIP_EN = { '魔术': 'MAGIC', '骑士': 'CAVALIERS', '雄鹿': 'BUCKS', '勇士': 'WARRIORS', '掘金': 'NUGGETS', '步行者': 'PACERS', '火箭': 'ROCKETS', '篮网': 'NETS', '热火': 'HEAT', '快船': 'CLIPPERS', '湖人': 'LAKERS', '国王': 'KINGS', '黄蜂': 'HORNETS', '鹈鹕': 'PELICANS', '森林狼': 'TIMBERWOLVES', '76人': '76ERS', '独行侠': 'MAVERICKS' };
+const FLIP_TAG = { 2007: 'LEBRON JAMES', 2012: 'DWYANE WADE', 2013: 'KOBE BRYANT', 2014: 'BEN McLEMORE', 2016: 'JAMES HARDEN', 2017: 'STEPHEN CURRY', 2018: 'DIRK NOWITZKI' };
+const CITY_EN = { '上海': 'SHANGHAI', '澳门': 'MACAU', '广州': 'GUANGZHOU', '北京': 'BEIJING', '深圳': 'SHENZHEN' };
+const cityEn = (s) => s.split(' · ').map((c) => CITY_EN[c] || c).join(' · ');
+function flipBoard(pg, t, { dim = 1 } = {}) {
+  const land = pg.t + 0.14;
+  const ds = String(pg.year).split('').map(Number);
+  ctx.save(); ctx.globalAlpha *= dim;
+  ds.forEach((dg, i) => flapDigit(250 + i * 158, 470, dg, land + i * 0.02, t, { w: 146, h: 210, size: 190, seed: pg.year * 4 + i }));
+  const ta = prog(t, land, land + 0.08);
+  text(`${FLIP_EN[pg.home]}  vs  ${FLIP_EN[pg.away]}`, 487, 680, { size: 64, font: FONT_KO, weight: '', color: COL.white, alpha: ta, spacing: 2 });
+  kicker(cityEn(pg.city), 487, 770, { size: 32, align: 'center', rule: 0, color: COL.light, alpha: ta });
+  ctx.restore();
+}
+async function sc_flip(t, f) {
+  const [a, b] = S.flip;
+  const P = TL.flips;
+  let i = 0; while (i < P.length - 1 && t >= P[i + 1].t) i++;
+  const pg = P[i], lt = t - pg.t;
+  const nb = pg.beats || 4;
+  const pd = nb * 0.53406;
+  const intensity = prog(t, a, b);
+  const kick = decay(t, pg.t, 0.12);
+  const shake = kick * (6 + 14 * intensity);
+  ctx.save(); ctx.translate((hash(f, 1) - 0.5) * shake, (hash(f, 2) - 0.5) * shake);
+  // 右侧：真人片段 / 乔丹致敬 / 队名大字
+  const x = 1060, y = 190, w = 640, h = 700;
+  const cn = 'f' + pg.year;
+  if (pg.year !== 2015 && MAN[cn]) {
+    const im = await clip(cn, lt);
+    blurBack(im, { alpha: 1, dark: 0.22 });
+    const zin = 1 + 0.08 * kick + 0.04 * lt / pd;
+    panel(im, { x, y, w, h, back: false, s: zin });
+    const tag = FLIP_TAG[pg.year];
+    if (tag) {
+      const g = ctx.createLinearGradient(0, y + h - 140, 0, y + h);
+      g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.7)');
+      ctx.fillStyle = g; ctx.fillRect(x, y + h - 140, w, 140);
+      if (lt >= 0.1) { ctx.save(); slab(x + 20, y + h - 82, measure(tag, { size: 40, font: FONT_KO, weight: '', spacing: 2 }) + 40, 54, COL.red); ctx.restore(); }
+      text(tag, x + 40, y + h - 52, { size: 40, font: FONT_KO, weight: '', color: COL.white, align: 'left', spacing: 2, alpha: prog(lt, 0.1, 0.2) });
+    }
+  } else if (pg.year === 2015) {
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    strokeText('23', x + w / 2, y + 300, { size: 520, color: COL.goldHi, width: 3, alpha: prog(lt, 0.05, 0.2) });
+    ctx.restore();
+    text('MICHAEL JORDAN', x + w / 2, y + 620, { size: 60, font: FONT_KO, weight: '', color: COL.white, spacing: 8, alpha: prog(lt, 0.2, 0.35) });
+    kicker('In China as Hornets owner', x + w / 2, y + 700, { size: 32, align: 'center', rule: 0, color: COL.light, alpha: prog(lt, 0.3, 0.45) });
+  } else {
+    strokeText(FLIP_EN[pg.home] || '', x + w / 2, y + 250, { size: 150, color: COL.gold, width: 2, alpha: 0.6 });
+    text('×', x + w / 2, y + 370, { size: 60, font: FONT_NUM, color: COL.grey });
+    strokeText(FLIP_EN[pg.away] || '', x + w / 2, y + 490, { size: 150, color: COL.gold, width: 2, alpha: 0.6 });
+  }
+  flipBoard(pg, t);
+  ctx.restore();
+  kicker('17 teams · 28 games', 1840, 96, { size: 30, align: 'right', rule: 0, color: COL.light });
+  flash(kick * (0.12 + 0.25 * intensity) + decay(t, A.lastHit, 0.1) * 0.5);
+}
+
+// ================= 灯灭 =================
+async function sc_lightsout(t, f) {
+  const [a, b] = S.lightsout;
+  const lt = t - a;
+  const rows = EV.lightsRows;
+  const last = rows[rows.length - 1];
+  const P = TL.flips; const pg = P[P.length - 1];
+  const boardDim = 1 - 0.75 * prog(t, rows[0], last) - 0.25 * prog(t, last + 0.4, last + 1.4);
+  // 顶灯：8 排，由远及近熄灭
+  for (let r = 0; r < rows.length; r++) {
+    const on = t < rows[r] ? 1 : decay(t, rows[r], 0.05) * 0.6;
+    const yy = lerp(70, 300, r / (rows.length - 1)), n = 9 + r, sz = lerp(6, 16, r / (rows.length - 1));
+    for (let k = 0; k < n; k++) {
+      const xx = 960 + (k - (n - 1) / 2) * lerp(120, 200, r / (rows.length - 1));
+      ctx.save(); ctx.globalAlpha = 0.15 + 0.85 * on;
+      ctx.fillStyle = on > 0.3 ? COL.goldHi : '#3a3a40';
+      ctx.beginPath(); ctx.ellipse(xx, yy, sz * 2, sz * 0.7, 0, 0, Math.PI * 2); ctx.fill();
+      if (on > 0.3) { const g = ctx.createRadialGradient(xx, yy, 0, xx, yy, sz * 8); g.addColorStop(0, 'rgba(235,242,255,0.25)'); g.addColorStop(1, 'rgba(235,242,255,0)'); ctx.fillStyle = g; ctx.fillRect(xx - sz * 8, yy - sz * 8, sz * 16, sz * 16); }
+      ctx.restore();
+    }
+  }
+  flipBoard(pg, Math.max(t, pg.t + 1), { dim: boardDim });
+  black(prog(t, last + 1.4, b - 0.2));
+}
+
+// ================= 2190 天 =================
+async function sc_counter(t, f) {
+  const [a, b] = S.counter;
+  const lt = t - a, d = b - a;
+  const [c0, c1] = EV.counter;
+  const n = Math.round(2190 * easeInOut(prog(t, c0, c1)));
+  const al = fade(lt, 0, d, 0.5, 0.5);
+  ctx.save(); ctx.globalAlpha = al;
+  const cols = 73, rows = 30, cs = 15, gx0 = 960 - (cols * cs) / 2, gy0 = 420;
+  for (let i = 0; i < cols * rows; i++) {
+    const c = i % cols, r = Math.floor(i / cols);
+    ctx.fillStyle = i < n ? '#8b9099' : '#1a1c22';
+    ctx.fillRect(gx0 + c * cs, gy0 + r * cs, cs - 4, cs - 4);
+  }
+  const nw = measure(n.toLocaleString('en-US'), { size: 200, font: FONT_NUMW });
+  text(n.toLocaleString('en-US'), 960 - 70, 250, { size: 200, font: FONT_NUMW, color: t >= c1 ? '#d8dbe0' : '#9aa0a8' });
+  text('DAYS', 960 - 70 + nw / 2 + 24, 300, { size: 60, font: FONT_KO, weight: '', color: '#9aa0a8', align: 'left', spacing: 6, alpha: prog(t, c1 - 0.3, c1) });
+  text('OCT 2019', gx0, gy0 + rows * cs + 44, { size: 30, font: FONT_KO, weight: '', color: COL.grey, align: 'left', spacing: 3 });
+  text('OCT 2025', gx0 + cols * cs, gy0 + rows * cs + 44, { size: 30, font: FONT_KO, weight: '', color: COL.grey, align: 'right', spacing: 3 });
+  ctx.restore();
+}
+
+// ================= 冷色空镜 + 心跳 =================
+async function sc_cold(t, f) {
+  const [a, b] = S.cold;
+  const lt = t - a, d = b - a;
+  const beat = hitSum(t, EV.hearts, 0.12);
+  const seq = [['hutong_hoop', 0, 3.5, 'wan_hutong'], ['school_court', 3.4, 6.9, 'wan_school'], ['streetlight_boy', 6.8, d, 'wan_boy']];
+  for (const [nm, s0, s1, wan] of seq) {
+    const al = prog(lt, s0, s0 + 0.4) * (s1 < d ? 1 - prog(lt, s1 - 0.1, s1 + 0.3) : 1);
+    if (al <= 0) continue;
+    const im = MAN[wan] ? await clip(wan, lt - s0) : GEN[nm];
+    cover(im, { s: lerp(1.03, MAN[wan] ? 1.05 : 1.12, prog(lt, s0, s1)) * (1 + 0.012 * beat), fx: 0.5, fy: 0.5, alpha: al, filter: `saturate(${0.35 + 0.15 * beat}) brightness(${0.78 + 0.1 * beat}) contrast(1.1) hue-rotate(-8deg)` });
+  }
+  filmGate(t, f, 0.4);
+  black(1 - prog(lt, 0, 0.8));
+  black(prog(lt, d - 0.25, d) * 0.9);
+}
+
+// ================= 2025 澳门：回归 =================
+async function sc_macau(t, f) {
+  const [a, b] = S.macau;
+  const lt = t - a, d = b - a;
+  const boom = A.boom;
+  if (t < boom) {
+    const im = await clip('mac_cg', lt);
+    const u = prog(t, a, boom);
+    panel(im, { s: 1.02 + 0.05 * u, filter: `saturate(${0.3 + 0.5 * u}) brightness(${0.7 + 0.25 * u})`, dark: 0.18, alpha: prog(lt, 0, 0.4) });
+    drawCrowd(t, f, { alpha: 0.25 + 0.4 * u, pulse: 0.2 + 0.4 * u, tone: '#6f7480', appear: null, scale: 1.25, cy: 540 });
+  } else {
+    const k = t - boom;
+    const names = ['mac_a', 'mac_b', 'mac_c'];
+    const ims = await Promise.all(names.map((n) => clip(n, k)));
+    const pw = 600, gap = 20, x0 = (W - 3 * pw - 2 * gap) / 2;
+    blurBack(ims[1], { dark: 0.25 });
+    ims.forEach((im, i) => {
+      const slide = easeOut5(prog(k, i * 0.07, 0.45 + i * 0.07));
+      panel(im, { x: x0 + i * (pw + gap), y: lerp(i % 2 ? -80 : 80, 0, slide), w: pw, h: H, back: false, alpha: slide, s: 1.06 + 0.06 * decay(k, 0, 0.3) });
+    });
+    const burst = k;
+    if (burst < 1.2) {
+      for (let i = 0; i < 260; i++) {
+        const an = hash(i, 9) * Math.PI * 2, sp = 300 + hash(i, 10) * 1500;
+        const x = 960 + Math.cos(an) * sp * burst, y = 540 + Math.sin(an) * sp * burst * 0.6;
+        ctx.globalAlpha = 1 - burst / 1.2; ctx.fillStyle = hash(i, 12) > 0.5 ? COL.goldHi : '#fff'; ctx.fillRect(x - 2, y - 2, 4, 4);
+      }
+      ctx.globalAlpha = 1;
+    }
+    const ta = prog(k, 0.15, 0.3) * (1 - prog(k, 2.6, 3.1));
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    strokeText('2025', 960, 520, { size: 360, color: COL.goldHi, width: 4, alpha: ta });
+    ctx.restore();
+    if (ta > 0) huazi(t, boom + 0.15, 'MACAU', 960, 770, { size: 80, bg: COL.red, align: 'center', anim: 'slam', kick: 'NBA China Games are back', hold: 2.6 - 0.15, out: 0.3 });
+    flash(decay(t, boom, 0.18));
+  }
+  black(1 - prog(lt, 0, 0.3));
+}
+async function sc_macau2(t, f) {
+  const [a, b] = S.macau2;
+  const lt = t - a, d = b - a;
+  const im = await clip('yao2025', lt);
+  panel(im, { s: 1.02 + 0.04 * lt / d, alpha: prog(lt, 0, 0.25) });
+  const ha = prog(lt, 0.5, 0.9);
+  huazi(t, a + 0.5, 'YAO MING', 140, 560, { size: 80, bg: COL.red, kick: 'Courtside · Macau 2025', hold: d - 0.5 - 0.5 });
+  black(prog(lt, d - 0.25, d));
+}
+
+// ================= 回来的是火箭 =================
+async function sc_rockets(t, f) {
+  const [a, b] = S.rockets;
+  const lt = t - a, d = b - a;
+  const im = await clip('split', lt);
+  panel(im, { s: 1.0 + 0.04 * lt / d, alpha: prog(lt, 0, 0.3) });
+  const l29 = TL.vo.find((v) => v.id === 'L29').t;
+  const ha = prog(lt, 0.4, 0.8);
+  huazi(t, a + 0.4, 'ROCKETS', 230, 500, { size: 110, bg: COL.red, kick: 'Houston', align: 'center', hold: d - 0.4 - 0.3 });
+  text('2004', 1700, 420, { size: 130, font: FONT_NUMW, color: COL.light, alpha: prog(t, l29, l29 + 0.3) });
+  ctx.save(); ctx.globalAlpha = prog(t, l29 + 0.3, l29 + 0.5); ctx.fillStyle = COL.red; ctx.beginPath(); ctx.moveTo(1676, 505); ctx.lineTo(1724, 505); ctx.lineTo(1700, 550); ctx.closePath(); ctx.fill(); ctx.restore();
+  text('2026', 1700, 640, { size: 130, font: FONT_NUMW, color: COL.white, alpha: prog(t, l29 + 0.5, l29 + 0.8) });
+}
+
+// ================= 纯音乐卡点：2026 阵容 =================
+const ROSTER = [
+  ['r_kd1', 'Houston Rockets', 'KEVIN DURANT'], ['r_kd2', 'Houston Rockets', 'KEVIN DURANT'],
+  ['r_amen', 'Houston Rockets', 'AMEN THOMPSON'], ['r_amen2', 'Houston Rockets', 'AMEN THOMPSON'],
+  ['r_flagg', 'Dallas Mavericks', 'COOPER FLAGG'], ['r_kyrie', 'Dallas Mavericks', 'KYRIE IRVING'],
+  ['r_dunk1', '', ''], ['r_dunk2', '', ''],
+  ['card', '', ''], ['card', '', ''],
+  ['y1979', '', ''], ['y2004', '', ''], ['y2026', '', ''],
+];
+async function sc_roster(t, f) {
+  const cuts = EV.rosterCuts;
+  let i = 0; while (i < cuts.length - 1 && t >= cuts[i + 1]) i++;
+  const lt = t - cuts[i];
+  const [name, cn, en] = ROSTER[i];
+  const kick = decay(lt, 0, 0.14);
+  if (name.startsWith('r_')) {
+    const im = MAN[name] ? await clip(name, lt) : null;
+    if (im) {
+      blurBack(im, { dark: 0.3, tint: '#c8202f' });
+      panel(im, { s: 1.04 + 0.1 * kick + 0.05 * lt, fy: 0.42 });
+      if (en) huazi(t, cuts[i] + 0.03, en, 1405, 560, { size: 66, bg: cn.startsWith('Dallas') ? COL.blue : COL.red, kick: cn, anim: 'slam' });
+    }
+  } else if (name === 'card') {
+    const k = t - cuts[8];
+    const sl = easeOut5(prog(k, 0, 0.35));
+    ctx.fillStyle = '#0a0b10'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = COL.red; ctx.fillRect(0, 0, lerp(0, 960, sl), H);
+    ctx.fillStyle = '#0b2e5c'; ctx.fillRect(W - lerp(0, 960, sl), 0, 960, H);
+    text('ROCKETS', 480, 500, { size: 170, font: FONT_KO, weight: '', color: COL.white, alpha: sl, spacing: 4 });
+    text('HOUSTON', 480, 630, { size: 44, font: FONT_KO, weight: '', color: 'rgba(255,255,255,0.8)', spacing: 10, alpha: sl });
+    text('MAVERICKS', 1440, 500, { size: 150, font: FONT_KO, weight: '', color: COL.white, alpha: sl, spacing: 4 });
+    text('DALLAS', 1440, 630, { size: 44, font: FONT_KO, weight: '', color: 'rgba(255,255,255,0.8)', spacing: 10, alpha: sl });
+    const vs = decay(t, cuts[9], 0.2);
+    text('VS', 960, 540, { size: 180 * (1 + 0.3 * vs), font: FONT_NUMW, color: COL.white, alpha: prog(t, cuts[9] - 0.05, cuts[9]) });
+    kicker('NBA China Games 2026 · Macau', 960, 870, { size: 44, align: 'center', rule: 0, alpha: prog(t, cuts[9], cuts[9] + 0.2) });
+  } else {
+    const yr = name.slice(1);
+    const bg = { '1979': GEN.bj1979_bikes, '2004': null, '2026': null }[yr];
+    if (yr === '1979') cover(bg, { s: 1.1 + 0.05 * lt, filter: 'sepia(0.5) contrast(1.1) brightness(0.7)' });
+    if (yr === '2004') { const im = await clip('dunk', 2.83); if (im) cover(im, { s: 1.08 + 0.05 * lt, filter: 'brightness(0.7)' }); }
+    if (yr === '2026') drawCrowd(t, f, { pulse: 1.2, scale: 1.1 });
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    strokeText(yr, 960, 540, { size: 380 * (1 + 0.15 * kick), color: COL.goldHi, width: 4 });
+    ctx.restore();
+  }
+  flash(kick * 0.35);
+}
+
+// ================= 四十七年，球一直在跳 =================
+async function sc_finale(t, f) {
+  const [a, b] = S.finale;
+  const lt = t - a, d = b - a;
+  const hits = EV.endBounces;
+  const blendA = 1 - prog(t, hits[0] - 0.6, hits[0]);
+  if (blendA > 0) {
+    drawCrowd(t, f, { pulse: 0.8, alpha: blendA * 0.8, scale: lerp(1.3, 0.9, lt / d) });
+    const im = await clip('dunk', 2.83);
+    cover(im, { s: 1.15, alpha: blendA * 0.35, filter: 'grayscale(0.6)' });
+    cover(GEN.bj1979_bikes, { s: 1.15, alpha: blendA * 0.25, filter: 'sepia(0.7)' });
+  }
+  text('47', 960, 460, { size: 380, font: FONT_NUMW, color: COL.white, alpha: fade(lt, 0.15, hits[0] - a, 0.3, 0.4) });
+  kicker('years', 960, 680, { size: 64, align: 'center', rule: 0, color: COL.light, alpha: fade(lt, 0.4, hits[0] - a, 0.3, 0.4) });
+  // 一颗球落下：首尾呼应
+  if (t > hits[0] - 1.0) {
+    const h = bounceHeight(t, hits, 560);
+    const fy = 760, r = 46;
+    line(560, fy, 1360, fy, { color: COL.goldDim, width: 2, alpha: prog(t, hits[0] - 1, hits[0] - 0.6) });
+    for (const hit of hits) { const k = t - hit; if (k < 0 || k > 0.9) continue; ctx.beginPath(); ctx.ellipse(960, fy, 60 + k * 900, 8 + k * 60, 0, 0, Math.PI * 2); ctx.strokeStyle = `rgba(120,160,240,${(1 - k / 0.9) * 0.6})`; ctx.lineWidth = 2; ctx.stroke(); }
+    goldBall(960, fy - r - h, r, { rot: t * 2.2, alpha: prog(t, hits[0] - 1, hits[0] - 0.7) });
+  }
+}
+
+// ================= 片尾 =================
+async function sc_end(t, f) {
+  const [a, b] = S.end;
+  const lt = t - a, d = b - a;
+  const hits = EV.endBounces;
+  const fy = 760, r = 46;
+  const h = bounceHeight(t, hits, 560);
+  const up = easeInOut(prog(lt, 1.3, 2.2));
+  goldBall(960, lerp(fy - r - h, 160, up), lerp(r, 28, up), { rot: t * 2.2, alpha: 1 - prog(lt, d - 0.8, d - 0.3) });
+  const ea = prog(lt, 1.6, 2.2) * (1 - prog(lt, d - 0.8, d - 0.3));
+  if (LOGO && ea > 0) { const lh = 150, lw = lh * LOGO.width / LOGO.height; ctx.save(); ctx.globalAlpha = ea; ctx.drawImage(LOGO, 960 - lw / 2, 290 - lh / 2, lw, lh); ctx.restore(); }
+  text('NBA CHINA GAMES', 960, 470, { size: 120, font: FONT_KO, weight: '', color: COL.white, spacing: 12, alpha: ea });
+  ctx.save(); ctx.globalAlpha = ea; ctx.fillStyle = COL.red; ctx.fillRect(900, 540, 120, 5); ctx.restore();
+  text('ROCKETS  vs  MAVERICKS', 960, 610, { size: 54, font: FONT_KO, weight: '', color: COL.white, spacing: 4, alpha: ea });
+  kicker('Oct 9 & 11, 2026 · The Venetian Arena, Macau', 960, 690, { size: 32, align: 'center', rule: 0, color: COL.light, alpha: ea });
+  text('Music: “Five Armies” and “Heroic Age” by Kevin MacLeod (incompetech.com), licensed under CC BY 4.0', 960, 1010, { size: 18, font: FONT_UI, weight: 500, color: COL.grey, alpha: ea * 0.8 });
+}
+
+// ---------- 字幕 ----------
+const NOSUB = new Set(['L18']);
+function subtitles(t) {
+  for (const v of TL.vo) {
+    if (NOSUB.has(v.id)) continue;
+    const a = v.t, b = v.t + v.dur + 0.25;
+    const al = prog(t, a, a + 0.12) * (1 - prog(t, b - 0.15, b));
+    if (al <= 0) continue;
+    for (const [i, s] of wrapSub(v.text).entries()) subLine(s, 980 - (wrapSub(v.text).length - 1 - i) * 62, al);
+  }
+}
+// 英文字幕：超过 1400px 在最接近中间的空格处折成两行
+function wrapSub(s) {
+  ctx.save(); ctx.font = `700 46px ${FONT_UI}`;
+  const fits = ctx.measureText(s).width <= 1400;
+  ctx.restore();
+  if (fits) return [s];
+  let best = -1;
+  for (let i = 0; i < s.length; i++) if (s[i] === ' ' && (best < 0 || Math.abs(i - s.length / 2) < Math.abs(best - s.length / 2))) best = i;
+  return best < 0 ? [s] : [s.slice(0, best), s.slice(best + 1)];
+}
+function subLine(s, y, al) {
+  ctx.save(); ctx.globalAlpha = al;
+  ctx.font = `700 46px ${FONT_UI}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round'; ctx.lineWidth = 8; ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+  ctx.shadowColor = 'rgba(0,0,0,0.75)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
+  ctx.strokeText(s, 960, y); ctx.shadowColor = 'transparent';
+  ctx.fillStyle = COL.white; ctx.fillText(s, 960, y);
+  ctx.restore();
+}
+
+// ---------- 主函数 ----------
+const SCENES = {
+  open: sc_open, map: sc_map, bj1979: sc_bj1979, ruler: sc_ruler, paper: sc_paper, room: sc_room, vhs: sc_vhs,
+  tvwall: sc_tvwall, yao: sc_yao, ticket: sc_ticket, crowd: sc_crowd, board: sc_board, dunk: sc_dunk, score: sc_score,
+  span: sc_span, flip: sc_flip, lightsout: sc_lightsout, counter: sc_counter, cold: sc_cold, macau: sc_macau,
+  macau2: sc_macau2, rockets: sc_rockets, roster: sc_roster, finale: sc_finale, end: sc_end,
+};
+const NO_BLOOM = new Set(['dunk']);
+async function renderH(t) {
+  const f = Math.round(t * FPS);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
+  ctx.fillStyle = COL.bg; ctx.fillRect(0, 0, W, H);
+  let cur = null;
+  for (const [name, [a, b]] of Object.entries(S)) {
+    const start = name === 'roster' ? EV.rosterCuts[0] : a;
+    if (t >= start && t < b) { cur = name; break; }
+  }
+  if (cur === 'rockets' && t >= EV.rosterCuts[0]) cur = 'roster';
+  if (cur) { ctx.save(); await SCENES[cur](t, f); ctx.restore(); }
+  ctx.globalAlpha = 1; ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
+  if (!NO_BLOOM.has(cur)) {
+    bctx.clearRect(0, 0, W / 2, H / 2);
+    bctx.filter = 'blur(9px)'; bctx.drawImage(cv, 0, 0, W / 2, H / 2); bctx.filter = 'none';
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.3; ctx.drawImage(bloomCv, 0, 0, W, H); ctx.restore();
+  }
+  const g = grain[f % 4], ox = -Math.floor(hash(f, 21) * 512), oy = -Math.floor(hash(f, 22) * 512);
+  for (let x = ox; x < W; x += 512) for (let y = oy; y < H; y += 512) ctx.drawImage(g, x, y);
+  ctx.globalAlpha = 0.7; ctx.drawImage(vignette, 0, 0); ctx.globalAlpha = 1;
+  subtitles(t);
+  cornerLogo(cur === 'end' ? 0.92 * (1 - prog(t, S.end[0] + 1.2, S.end[0] + 1.8)) : 0.92);
+}
+
+window.renderFrame = renderH;
+
+window.ready = (async () => {
+  TL = await (await fetch('film_h_en.json')).json();
+  S = TL.scenes; A = TL.anchors; EV = TL.ev;
+  try { MAN = await (await fetch('clips/manifest.json')).json(); } catch (e) { MAN = {}; }
+  try { Object.assign(MAN, await (await fetch('clips/manifest_en.json')).json()); } catch (e) { /* 英文版专用素材可缺省 */ }
+  if (!MAN.dunk) MAN.dunk = { n: 132 };
+  scanPat = ctx.createPattern(scan, 'repeat');
+  await Promise.all(GEN_NAMES.map(async (n) => { GEN[n] = await loadImg(`../assets/gen/${n}.png`); }));
+  LOGO = await loadImg('../assets/brand/logoman.png');
+  window.DURATION = TL.duration;
+  window.FPS = FPS;
+  const noto = new FontFace('NotoSansSC', 'url(../assets/fonts/NotoSansSC.ttf)', { weight: '100 900' });
+  document.fonts.add(await noto.load());
+  await Promise.all([
+    ...[500, 700, 900].map((w) => document.fonts.load(`${w} 100px ${FONT_UI}`, 'Abc')),
+    document.fonts.load(`bold 100px ${FONT_NUM}`), document.fonts.load(`bold 100px ${FONT_NUMW}`), document.fonts.load(`100px ${FONT_KO}`),
+  ]);
+})();
+</script>
+</body>
+</html>

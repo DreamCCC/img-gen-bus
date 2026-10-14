@@ -41,6 +41,7 @@ const browser = await puppeteer.launch({
 const page = await browser.newPage();
 page.on('console', (m) => console.log('[scene]', m.text()));
 page.on('pageerror', (e) => console.error('[scene error]', e.message));
+page.on('response', (r) => { if (r.status() >= 400) console.log('[404]', r.url().replace(BASE, '')); });
 await page.goto(BASE + path.relative(ROOT, path.resolve(scene)) + (process.env.QUERY ? '?' + process.env.QUERY : ''));
 await page.waitForFunction(() => window.ready !== undefined, { timeout: 60000 });
 await page.evaluate(() => window.ready);

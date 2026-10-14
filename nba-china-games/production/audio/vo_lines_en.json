@@ -1,0 +1,228 @@
+[
+ {
+  "id": "L01",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "Tonight. Macau."
+ },
+ {
+  "id": "L02",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "Over ten thousand lights. All for one ball."
+ },
+ {
+  "id": "L03",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "That ball first touched a court in China forty-seven years ago."
+ },
+ {
+  "id": "L04",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "Summer, 1979.",
+  "say": "Summer, nineteen seventy-nine."
+ },
+ {
+  "id": "L05",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "Diplomatic ties: six months old."
+ },
+ {
+  "id": "L06",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "A team of NBA champions stepped off a plane."
+ },
+ {
+  "id": "L07",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "They had seen the biggest arenas. The toughest opponents."
+ },
+ {
+  "id": "L08",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "But in Beijing, they looked up."
+ },
+ {
+  "id": "L09",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "Seven-foot-six. Mu Tiezhu.",
+  "say": "Seven foot six! Mu Tiezhu!"
+ },
+ {
+  "id": "L10",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "Ten years later, an American waited nearly an hour in a guard booth at China's state television."
+ },
+ {
+  "id": "L11",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "His name: David Stern."
+ },
+ {
+  "id": "L12",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "All he had was a videotape."
+ },
+ {
+  "id": "L13",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "And a generation discovered basketball on tape."
+ },
+ {
+  "id": "L14",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "In 2002, that generation produced a giant.",
+  "say": "In two thousand two, that generation produced a giant!"
+ },
+ {
+  "id": "L15",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "October 14, 2004. Shanghai.",
+  "say": "October fourteenth, two thousand four. Shanghai."
+ },
+ {
+  "id": "L16",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "The first NBA game ever played in China.",
+  "say": "The first NBA game ever played in China!"
+ },
+ {
+  "id": "L18",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "A Rockets executive called it the Beatles meets Michael Jordan.",
+  "say": "A Rockets executive called it, the Beatles meets Michael Jordan!"
+ },
+ {
+  "id": "L19",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "The next fifteen years.",
+  "say": "The next fifteen years!"
+ },
+ {
+  "id": "L20",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "Seventeen teams. Twenty-eight games.",
+  "say": "Seventeen teams! Twenty-eight games!"
+ },
+ {
+  "id": "L21a",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "LeBron came.",
+  "say": "LeBron came!"
+ },
+ {
+  "id": "L21b",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "Kobe came.",
+  "say": "Kobe came!"
+ },
+ {
+  "id": "L22",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "Even Michael Jordan came.",
+  "say": "Even Michael Jordan came!"
+ },
+ {
+  "id": "L23",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "quiet",
+  "text": "Then, the lights went out."
+ },
+ {
+  "id": "L24",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "quiet",
+  "text": "2,190 days. Not a single China Game.",
+  "say": "Two thousand one hundred ninety days. Not a single China Game."
+ },
+ {
+  "id": "L25",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "quiet",
+  "text": "But the ball never stopped bouncing."
+ },
+ {
+  "id": "L26",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "2025. Macau.",
+  "say": "Twenty twenty-five. Macau!"
+ },
+ {
+  "id": "L27",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "It's back.",
+  "say": "It's back!"
+ },
+ {
+  "id": "L28",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "This year, the Rockets return.",
+  "say": "This year, the Rockets return!"
+ },
+ {
+  "id": "L29",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "hype",
+  "text": "The team that started it all.",
+  "say": "The team that started it all!"
+ },
+ {
+  "id": "L30",
+  "voice": "Aiden",
+  "lang": "en",
+  "mood": "normal",
+  "text": "Forty-seven years. And the ball keeps bouncing."
+ }
+]

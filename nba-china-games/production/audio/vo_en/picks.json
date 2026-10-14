@@ -1,0 +1,992 @@
+{
+ "L01": {
+  "seed": 1,
+  "room": 1.6,
+  "takes": [
+   {
+    "dur": 1.24,
+    "f0": 216.2,
+    "dyn": 4.2,
+    "bright": -17.6,
+    "seed": 1,
+    "heard": "Tonight Macau.",
+    "ok": true
+   },
+   {
+    "dur": 2.24,
+    "f0": 116.5,
+    "dyn": 7.1,
+    "bright": -17.8,
+    "seed": 2,
+    "heard": "Tonight, Macau.",
+    "ok": true
+   },
+   {
+    "dur": 1.48,
+    "f0": 202.9,
+    "dyn": 8.9,
+    "bright": -17.5,
+    "seed": 3,
+    "heard": "Tonight, Macau.",
+    "ok": true
+   }
+  ]
+ },
+ "L02": {
+  "seed": 2,
+  "room": 4.1,
+  "takes": [
+   {
+    "dur": 2.6,
+    "f0": 162.9,
+    "dyn": 4.2,
+    "bright": -22.6,
+    "seed": 1,
+    "heard": "Over ten thousand lights, all for one ball.",
+    "ok": true
+   },
+   {
+    "dur": 2.75,
+    "f0": 188.2,
+    "dyn": 6.1,
+    "bright": -23.0,
+    "seed": 2,
+    "heard": "Over ten thousand lights, all for one ball.",
+    "ok": true
+   },
+   {
+    "dur": 4.04,
+    "f0": 185.0,
+    "dyn": 8.8,
+    "bright": -23.1,
+    "seed": 3,
+    "heard": "Over ten thousand lights, all for one ball.",
+    "ok": true
+   }
+  ]
+ },
+ "L03": {
+  "seed": 3,
+  "room": 4.9,
+  "takes": [
+   {
+    "dur": 4.2,
+    "f0": 137.0,
+    "dyn": 12.1,
+    "bright": -21.3,
+    "seed": 1,
+    "heard": "That ball first touched a court in China forty-seven years ago.",
+    "ok": true
+   },
+   {
+    "dur": 4.35,
+    "f0": 200.0,
+    "dyn": 10.4,
+    "bright": -19.5,
+    "seed": 2,
+    "heard": "That ball first touched a court in China forty-seven years ago.",
+    "ok": true
+   },
+   {
+    "dur": 4.68,
+    "f0": 147.7,
+    "dyn": 8.0,
+    "bright": -20.5,
+    "seed": 3,
+    "heard": "That ball first touched a court in China forty-seven years ago.",
+    "ok": true
+   }
+  ]
+ },
+ "L04": {
+  "seed": 2,
+  "room": 2.3,
+  "takes": [
+   {
+    "dur": 3.33,
+    "f0": 161.0,
+    "dyn": 8.9,
+    "bright": -24.0,
+    "seed": 1,
+    "heard": "Summer, nineteen seventy nine.",
+    "ok": true
+   },
+   {
+    "dur": 2.12,
+    "f0": 131.6,
+    "dyn": 10.5,
+    "bright": -20.4,
+    "seed": 2,
+    "heard": "Summer, nineteen seventy nine.",
+    "ok": true
+   },
+   {
+    "dur": 2.68,
+    "f0": 134.6,
+    "dyn": 7.1,
+    "bright": -21.3,
+    "seed": 3,
+    "heard": "Summer, nineteen seventy-nine.",
+    "ok": true
+   }
+  ]
+ },
+ "L05": {
+  "seed": 1,
+  "room": 2.5,
+  "takes": [
+   {
+    "dur": 2.13,
+    "f0": 138.6,
+    "dyn": 12.0,
+    "bright": -21.0,
+    "seed": 1,
+    "heard": "Diplomatic ties, six months old.",
+    "ok": true
+   },
+   {
+    "dur": 2.29,
+    "f0": 129.3,
+    "dyn": 8.8,
+    "bright": -18.8,
+    "seed": 2,
+    "heard": "Diplomatic ties, six months old.",
+    "ok": true
+   },
+   {
+    "dur": 2.12,
+    "f0": 166.3,
+    "dyn": 12.2,
+    "bright": -21.1,
+    "seed": 3,
+    "heard": "Diplomatic ties, six months old.",
+    "ok": true
+   }
+  ]
+ },
+ "L06": {
+  "seed": 1,
+  "room": 3.2,
+  "takes": [
+   {
+    "dur": 3.0,
+    "f0": 139.8,
+    "dyn": 7.9,
+    "bright": -18.2,
+    "seed": 1,
+    "heard": "A team of NBA champions stepped off a plane.",
+    "ok": true
+   },
+   {
+    "dur": 2.67,
+    "f0": 126.4,
+    "dyn": 11.2,
+    "bright": -17.7,
+    "seed": 2,
+    "heard": "A team of NBA champions stepped off a plane.",
+    "ok": true
+   },
+   {
+    "dur": 3.4,
+    "f0": 135.8,
+    "dyn": 8.5,
+    "bright": -20.6,
+    "seed": 3,
+    "heard": "A team of NBA champions stepped off a plane.",
+    "ok": true
+   }
+  ]
+ },
+ "L07": {
+  "seed": 2,
+  "room": 6.2,
+  "takes": [
+   {
+    "dur": 3.08,
+    "f0": 167.7,
+    "dyn": 9.4,
+    "bright": -19.5,
+    "seed": 1,
+    "heard": "They had seen the biggest arenas, the toughest opponents.",
+    "ok": true
+   },
+   {
+    "dur": 3.56,
+    "f0": 146.0,
+    "dyn": 13.1,
+    "bright": -18.8,
+    "seed": 2,
+    "heard": "They had seen the biggest arenas, the toughest opponents.",
+    "ok": true
+   },
+   {
+    "dur": 3.64,
+    "f0": 113.2,
+    "dyn": 13.1,
+    "bright": -20.6,
+    "seed": 3,
+    "heard": "They had seen the biggest arenas, the toughest opponents.",
+    "ok": true
+   }
+  ]
+ },
+ "L08": {
+  "seed": 3,
+  "room": 3.4,
+  "takes": [
+   {
+    "dur": 1.56,
+    "f0": 210.7,
+    "dyn": 4.6,
+    "bright": -15.4,
+    "seed": 1,
+    "heard": "But in Beijing, they looked up.",
+    "ok": true
+   },
+   {
+    "dur": 2.36,
+    "f0": 134.6,
+    "dyn": 7.9,
+    "bright": -19.3,
+    "seed": 2,
+    "heard": "But in Beijing, they looked up.",
+    "ok": true
+   },
+   {
+    "dur": 1.71,
+    "f0": 192.6,
+    "dyn": 9.3,
+    "bright": -16.8,
+    "seed": 3,
+    "heard": "But in Beijing, they looked up.",
+    "ok": true
+   }
+  ]
+ },
+ "L09": {
+  "seed": 3,
+  "room": 9.6,
+  "takes": [
+   {
+    "dur": 2.68,
+    "f0": 161.0,
+    "dyn": 13.9,
+    "bright": -18.6,
+    "seed": 1,
+    "heard": "Seven foot six, Mutiaju.",
+    "ok": false
+   },
+   {
+    "dur": 2.36,
+    "f0": 151.1,
+    "dyn": 14.9,
+    "bright": -19.2,
+    "seed": 2,
+    "heard": "Seven foot six Mu Tsu.",
+    "ok": false
+   },
+   {
+    "dur": 2.83,
+    "f0": 196.0,
+    "dyn": 13.7,
+    "bright": -23.9,
+    "seed": 3,
+    "heard": "Seven foot six Mu Tiezhu.",
+    "ok": true
+   }
+  ]
+ },
+ "L10": {
+  "seed": 3,
+  "room": 6.8,
+  "takes": [
+   {
+    "dur": 5.24,
+    "f0": 144.3,
+    "dyn": 7.8,
+    "bright": -18.5,
+    "seed": 1,
+    "heard": "Ten years later, an American waited nearly an hour in a guard booth at China's state television.",
+    "ok": true
+   },
+   {
+    "dur": 6.93,
+    "f0": 127.1,
+    "dyn": 7.7,
+    "bright": -21.8,
+    "seed": 2,
+    "heard": "Ten years later, an American waited nearly an hour in a guard booth at China's state television.",
+    "ok": true
+   },
+   {
+    "dur": 5.8,
+    "f0": 146.0,
+    "dyn": 7.7,
+    "bright": -19.6,
+    "seed": 3,
+    "heard": "Ten years later, an American waited nearly an hour in a guard booth at China's state television.",
+    "ok": true
+   }
+  ]
+ },
+ "L11": {
+  "seed": 2,
+  "room": 2.8,
+  "takes": [
+   {
+    "dur": 2.28,
+    "f0": 128.2,
+    "dyn": 9.5,
+    "bright": -18.5,
+    "seed": 1,
+    "heard": "His name, David Stern.",
+    "ok": true
+   },
+   {
+    "dur": 1.97,
+    "f0": 156.5,
+    "dyn": 10.2,
+    "bright": -20.0,
+    "seed": 2,
+    "heard": "His name, David Stern.",
+    "ok": true
+   },
+   {
+    "dur": 2.12,
+    "f0": 186.1,
+    "dyn": 9.6,
+    "bright": -18.6,
+    "seed": 3,
+    "heard": "His name, David Stern.",
+    "ok": true
+   }
+  ]
+ },
+ "L12": {
+  "seed": 1,
+  "room": 7.88,
+  "takes": [
+   {
+    "dur": 1.48,
+    "f0": 125.6,
+    "dyn": 9.0,
+    "bright": -21.4,
+    "seed": 1,
+    "heard": "All he had was a videotape.",
+    "ok": true
+   },
+   {
+    "dur": 1.87,
+    "f0": 121.4,
+    "dyn": 9.7,
+    "bright": -18.9,
+    "seed": 2,
+    "heard": "All he had was a videotape.",
+    "ok": true
+   },
+   {
+    "dur": 1.23,
+    "f0": 137.8,
+    "dyn": 9.3,
+    "bright": -16.6,
+    "seed": 3,
+    "heard": "All the ad was a videotape.",
+    "ok": false
+   }
+  ]
+ },
+ "L13": {
+  "seed": 2,
+  "room": 7.2,
+  "takes": [
+   {
+    "dur": 2.91,
+    "f0": 110.0,
+    "dyn": 9.6,
+    "bright": -18.2,
+    "seed": 1,
+    "heard": "And a generation discovered basketball on tape.",
+    "ok": true
+   },
+   {
+    "dur": 3.07,
+    "f0": 127.1,
+    "dyn": 8.2,
+    "bright": -16.8,
+    "seed": 2,
+    "heard": "And a generation discovered basketball on tape.",
+    "ok": true
+   },
+   {
+    "dur": 2.67,
+    "f0": 142.7,
+    "dyn": 10.0,
+    "bright": -16.6,
+    "seed": 3,
+    "heard": "And a generation discovered basketball on tape.",
+    "ok": true
+   }
+  ]
+ },
+ "L14": {
+  "seed": 1,
+  "room": 7.2,
+  "takes": [
+   {
+    "dur": 3.8,
+    "f0": 160.1,
+    "dyn": 11.3,
+    "bright": -18.1,
+    "seed": 1,
+    "heard": "In two thousand and two, that generation produced a giant.",
+    "ok": true
+   },
+   {
+    "dur": 3.96,
+    "f0": 129.7,
+    "dyn": 10.2,
+    "bright": -18.8,
+    "seed": 2,
+    "heard": "In two thousand two, that generation produced a giant.",
+    "ok": true
+   },
+   {
+    "dur": 2.67,
+    "f0": 131.6,
+    "dyn": 10.6,
+    "bright": -18.8,
+    "seed": 3,
+    "heard": "In two thousand and two, that generation produced a giant.",
+    "ok": true
+   }
+  ]
+ },
+ "L15": {
+  "seed": 3,
+  "room": 4.0,
+  "takes": [
+   {
+    "dur": 4.04,
+    "f0": 160.1,
+    "dyn": 13.0,
+    "bright": -21.9,
+    "seed": 1,
+    "heard": "October fourteenth, two thousand four, Shanghai.",
+    "ok": true
+   },
+   {
+    "dur": 3.64,
+    "f0": 129.7,
+    "dyn": 14.2,
+    "bright": -19.8,
+    "seed": 2,
+    "heard": "October fourteenth, two thousand four, Shanghai.",
+    "ok": true
+   },
+   {
+    "dur": 3.88,
+    "f0": 151.1,
+    "dyn": 9.4,
+    "bright": -21.2,
+    "seed": 3,
+    "heard": "October fourteenth, two thousand four, Shanghai.",
+    "ok": true
+   }
+  ]
+ },
+ "L16": {
+  "seed": 2,
+  "room": 21.96,
+  "takes": [
+   {
+    "dur": 2.27,
+    "f0": 123.5,
+    "dyn": 8.5,
+    "bright": -19.5,
+    "seed": 1,
+    "heard": "The first NBA game ever played in China.",
+    "ok": true
+   },
+   {
+    "dur": 2.68,
+    "f0": 122.1,
+    "dyn": 10.8,
+    "bright": -18.6,
+    "seed": 2,
+    "heard": "The first NBA game ever played in China.",
+    "ok": true
+   },
+   {
+    "dur": 2.27,
+    "f0": 142.7,
+    "dyn": 6.4,
+    "bright": -18.7,
+    "seed": 3,
+    "heard": "The first NBA game ever played in China.",
+    "ok": true
+   }
+  ]
+ },
+ "L18": {
+  "seed": 3,
+  "room": 4.9,
+  "takes": [
+   {
+    "dur": 3.87,
+    "f0": 141.4,
+    "dyn": 7.8,
+    "bright": -19.4,
+    "seed": 1,
+    "heard": "A Rockets executive called it the Beatles meets Michael Jordan.",
+    "ok": true
+   },
+   {
+    "dur": 4.2,
+    "f0": 130.4,
+    "dyn": 9.2,
+    "bright": -21.0,
+    "seed": 2,
+    "heard": "A Rockets executive called it, \"The Beatles meets Michael Jordan.\"",
+    "ok": true
+   },
+   {
+    "dur": 3.72,
+    "f0": 167.7,
+    "dyn": 9.4,
+    "bright": -19.8,
+    "seed": 3,
+    "heard": "A Rockets executive called it the Beatles meets Michael Jordan.",
+    "ok": true
+   }
+  ]
+ },
+ "L19": {
+  "seed": 1,
+  "room": 2.1,
+  "takes": [
+   {
+    "dur": 1.16,
+    "f0": 185.0,
+    "dyn": 13.5,
+    "bright": -17.7,
+    "seed": 1,
+    "heard": "The next fifteen years.",
+    "ok": true
+   },
+   {
+    "dur": 1.31,
+    "f0": 194.3,
+    "dyn": 12.0,
+    "bright": -18.2,
+    "seed": 2,
+    "heard": "The next fifteen years.",
+    "ok": true
+   },
+   {
+    "dur": 1.32,
+    "f0": 152.9,
+    "dyn": 9.4,
+    "bright": -17.7,
+    "seed": 3,
+    "heard": "The next fifteen years.",
+    "ok": true
+   }
+  ]
+ },
+ "L20": {
+  "seed": 2,
+  "room": 4.87,
+  "takes": [
+   {
+    "dur": 2.85,
+    "f0": 156.5,
+    "dyn": 9.5,
+    "bright": -17.6,
+    "seed": 1,
+    "heard": "Seventeen teams, twenty-eight games.",
+    "ok": true
+   },
+   {
+    "dur": 2.29,
+    "f0": 169.6,
+    "dyn": 11.5,
+    "bright": -17.2,
+    "seed": 2,
+    "heard": "Seventeen teams, twenty-eight games.",
+    "ok": true
+   },
+   {
+    "dur": 2.52,
+    "f0": 157.4,
+    "dyn": 9.7,
+    "bright": -16.9,
+    "seed": 3,
+    "heard": "Seventeen teams, twenty-eight games.",
+    "ok": true
+   }
+  ]
+ },
+ "L21a": {
+  "seed": 1,
+  "room": 7.48,
+  "takes": [
+   {
+    "dur": 1.0,
+    "f0": 102.0,
+    "dyn": 8.9,
+    "bright": -22.2,
+    "seed": 1,
+    "heard": "LeBron came.",
+    "ok": true
+   },
+   {
+    "dur": 1.24,
+    "f0": 174.6,
+    "dyn": 4.4,
+    "bright": -22.5,
+    "seed": 2,
+    "heard": "LeBron came.",
+    "ok": true
+   },
+   {
+    "dur": 1.09,
+    "f0": 148.5,
+    "dyn": 7.3,
+    "bright": -22.8,
+    "seed": 3,
+    "heard": "LeBron came.",
+    "ok": true
+   }
+  ]
+ },
+ "L21b": {
+  "seed": 2,
+  "room": 3.2,
+  "takes": [
+   {
+    "dur": 0.84,
+    "f0": 176.6,
+    "dyn": 9.9,
+    "bright": -20.6,
+    "seed": 1,
+    "heard": "Kobe came.",
+    "ok": true
+   },
+   {
+    "dur": 0.92,
+    "f0": 191.0,
+    "dyn": 9.9,
+    "bright": -19.0,
+    "seed": 2,
+    "heard": "Kobe came.",
+    "ok": true
+   },
+   {
+    "dur": 0.84,
+    "f0": 105.6,
+    "dyn": 11.3,
+    "bright": -25.2,
+    "seed": 3,
+    "heard": "Go became.",
+    "ok": false
+   }
+  ]
+ },
+ "L22": {
+  "seed": 1,
+  "room": 9.23,
+  "takes": [
+   {
+    "dur": 1.72,
+    "f0": 134.3,
+    "dyn": 5.3,
+    "bright": -17.2,
+    "seed": 1,
+    "heard": "Even Michael Jordan came.",
+    "ok": true
+   },
+   {
+    "dur": 1.48,
+    "f0": 139.4,
+    "dyn": 9.0,
+    "bright": -20.2,
+    "seed": 2,
+    "heard": "Even Michael Jordan came.",
+    "ok": true
+   },
+   {
+    "dur": 1.56,
+    "f0": 196.0,
+    "dyn": 7.5,
+    "bright": -22.4,
+    "seed": 3,
+    "heard": "Even Michael Jordan came.",
+    "ok": true
+   }
+  ]
+ },
+ "L23": {
+  "seed": 3,
+  "room": 9.3,
+  "takes": [
+   {
+    "dur": 1.16,
+    "f0": 192.1,
+    "dyn": 5.0,
+    "bright": -16.2,
+    "seed": 1,
+    "heard": "Then the lights went out.",
+    "ok": true
+   },
+   {
+    "dur": 1.55,
+    "f0": 198.3,
+    "dyn": 5.6,
+    "bright": -17.5,
+    "seed": 2,
+    "heard": "Then the lights went out.",
+    "ok": true
+   },
+   {
+    "dur": 1.48,
+    "f0": 162.0,
+    "dyn": 6.8,
+    "bright": -17.7,
+    "seed": 3,
+    "heard": "Then the lights went out.",
+    "ok": true
+   }
+  ]
+ },
+ "L24": {
+  "seed": 3,
+  "room": 7.4,
+  "takes": [
+   {
+    "dur": 4.05,
+    "f0": 117.9,
+    "dyn": 9.3,
+    "bright": -22.8,
+    "seed": 1,
+    "heard": "Two thousand one hundred ninety days, not a single China game.",
+    "ok": true
+   },
+   {
+    "dur": 4.52,
+    "f0": 127.8,
+    "dyn": 9.9,
+    "bright": -21.0,
+    "seed": 2,
+    "heard": "Two thousand one hundred ninety days, not a single China game.",
+    "ok": true
+   },
+   {
+    "dur": 3.72,
+    "f0": 111.9,
+    "dyn": 9.6,
+    "bright": -19.0,
+    "seed": 3,
+    "heard": "Two thousand one hundred and ninety days. Not a single China game.",
+    "ok": true
+   }
+  ]
+ },
+ "L25": {
+  "seed": 3,
+  "room": 6.2,
+  "takes": [
+   {
+    "dur": 1.88,
+    "f0": 234.4,
+    "dyn": 12.6,
+    "bright": -21.2,
+    "seed": 1,
+    "heard": "But the ball never stopped bouncing.",
+    "ok": true
+   },
+   {
+    "dur": 2.28,
+    "f0": 149.4,
+    "dyn": 10.5,
+    "bright": -20.2,
+    "seed": 2,
+    "heard": "But the ball never stopped bouncing.",
+    "ok": true
+   },
+   {
+    "dur": 1.79,
+    "f0": 118.6,
+    "dyn": 9.5,
+    "bright": -23.6,
+    "seed": 3,
+    "heard": "But the ball never stopped bouncing.",
+    "ok": true
+   }
+  ]
+ },
+ "L26": {
+  "seed": 3,
+  "room": 3.28,
+  "takes": [
+   {
+    "dur": 1.8,
+    "f0": 142.7,
+    "dyn": 14.2,
+    "bright": -18.3,
+    "seed": 1,
+    "heard": "Twenty twenty five Macau.",
+    "ok": true
+   },
+   {
+    "dur": 1.87,
+    "f0": 129.3,
+    "dyn": 8.8,
+    "bright": -18.7,
+    "seed": 2,
+    "heard": "Twenty twenty five Macau.",
+    "ok": true
+   },
+   {
+    "dur": 2.19,
+    "f0": 120.7,
+    "dyn": 13.5,
+    "bright": -17.9,
+    "seed": 3,
+    "heard": "Twenty twenty five Macau.",
+    "ok": true
+   }
+  ]
+ },
+ "L27": {
+  "seed": 2,
+  "room": 11.72,
+  "takes": [
+   {
+    "dur": 0.52,
+    "f0": 150.3,
+    "dyn": 8.1,
+    "bright": -16.1,
+    "seed": 1,
+    "heard": "It's back.",
+    "ok": true
+   },
+   {
+    "dur": 0.5,
+    "f0": 248.4,
+    "dyn": 6.4,
+    "bright": -15.0,
+    "seed": 2,
+    "heard": "It's back.",
+    "ok": true
+   },
+   {
+    "dur": 0.51,
+    "f0": 144.3,
+    "dyn": 10.9,
+    "bright": -17.6,
+    "seed": 3,
+    "heard": "It's back.",
+    "ok": true
+   }
+  ]
+ },
+ "L28": {
+  "seed": 1,
+  "room": 3.4,
+  "takes": [
+   {
+    "dur": 1.88,
+    "f0": 126.4,
+    "dyn": 13.7,
+    "bright": -18.9,
+    "seed": 1,
+    "heard": "This year, the rockets return.",
+    "ok": true
+   },
+   {
+    "dur": 1.72,
+    "f0": 142.7,
+    "dyn": 9.4,
+    "bright": -20.0,
+    "seed": 2,
+    "heard": "This year the rockets return.",
+    "ok": true
+   },
+   {
+    "dur": 1.8,
+    "f0": 198.3,
+    "dyn": 9.4,
+    "bright": -17.7,
+    "seed": 3,
+    "heard": "This year, the rockets return.",
+    "ok": true
+   }
+  ]
+ },
+ "L29": {
+  "seed": 3,
+  "room": 14.85,
+  "takes": [
+   {
+    "dur": 1.32,
+    "f0": 156.0,
+    "dyn": 8.3,
+    "bright": -20.0,
+    "seed": 1,
+    "heard": "The team that started it all.",
+    "ok": true
+   },
+   {
+    "dur": 1.32,
+    "f0": 170.6,
+    "dyn": 6.7,
+    "bright": -19.2,
+    "seed": 2,
+    "heard": "The team that started it all.",
+    "ok": true
+   },
+   {
+    "dur": 1.4,
+    "f0": 130.1,
+    "dyn": 10.1,
+    "bright": -19.7,
+    "seed": 3,
+    "heard": "The team that started it all.",
+    "ok": true
+   }
+  ]
+ },
+ "L30": {
+  "seed": 3,
+  "room": 9.2,
+  "takes": [
+   {
+    "dur": 3.01,
+    "f0": 164.3,
+    "dyn": 10.2,
+    "bright": -21.4,
+    "seed": 1,
+    "heard": "Forty-seven years, and the ball keeps bouncing.",
+    "ok": true
+   },
+   {
+    "dur": 3.15,
+    "f0": 128.9,
+    "dyn": 9.5,
+    "bright": -21.6,
+    "seed": 2,
+    "heard": "Forty-seven years, and the ball keeps bouncing.",
+    "ok": true
+   },
+   {
+    "dur": 3.0,
+    "f0": 141.8,
+    "dyn": 11.0,
+    "bright": -22.9,
+    "seed": 3,
+    "heard": "Forty-seven years and the ball keeps bouncing.",
+    "ok": true
+   }
+  ]
+ }
+}

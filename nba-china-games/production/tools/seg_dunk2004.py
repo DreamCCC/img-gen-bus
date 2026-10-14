@@ -6,6 +6,7 @@ Inputs:
   out/sample2d_shift.mp4  code page; its last tactic-board frame is the iris source
 usage: python tools/seg_dunk2004.py out/dunk2004.mp4 [--stills 0.2,1.5,2.82,3.4,4.2]
        NOIRIS=1 python tools/seg_dunk2004.py scenes/clips/dunk/   (frame sequence; the page draws the iris)
+       EN=1 NOIRIS=1 python tools/seg_dunk2004.py scenes/clips/dunk_en/   (no baked HUD, NBA colours; film_en.html draws the HUD)
 """
 import os, subprocess, sys
 from pathlib import Path
@@ -16,6 +17,7 @@ import fx
 out_path = sys.argv[1]
 stills = [float(s) for s in sys.argv[3].split(',')] if len(sys.argv) > 3 and sys.argv[2] == '--stills' else None
 NOIRIS = bool(os.environ.get('NOIRIS'))
+EN = bool(os.environ.get('EN'))
 
 FPS, W, H = 30, 1920, 1080
 DUR, T_SLAM = 4.4, 2.81
@@ -71,12 +73,12 @@ hud_r = (fx.TextLayer(W, H)
          .line([(W - 400, 690), (W - 122, 690)], color=fx.GOLD, width=2, alpha=150).done())
 frame_lines = fx.TextLayer(W, H)
 for x in (PX - 1, PX + PW):
-    frame_lines.line([(x, 0), (x, H)], color=fx.GOLD, width=2, alpha=170)
+    frame_lines.line([(x, 0), (x, H)], color=(211, 206, 195) if EN else fx.GOLD, width=2, alpha=120 if EN else 170)
 frame_lines.done()
 
 VIG = fx.vignette(H, W, 0.5)
 rng = np.random.default_rng(2004)
-GOLDF = np.array(fx.GOLD_HI, np.float32) / 255
+GOLDF = np.array((255, 235, 215) if EN else fx.GOLD_HI, np.float32) / 255
 
 def compose(n):
     t = n / FPS
@@ -97,8 +99,9 @@ def compose(n):
     img = bg
     img[:, PX:PX + PW] = p
     img = frame_lines.over(img, 1.0)
-    img = hud_l.over(img, fx.prog(t, 0.35, 0.8) * (1 - 0.7 * hit * (n % 2)))
-    img = hud_r.over(img, fx.prog(t, 1.3, 1.8) * (1 - 0.7 * hit * (n % 2)))
+    if not EN:
+        img = hud_l.over(img, fx.prog(t, 0.35, 0.8) * (1 - 0.7 * hit * (n % 2)))
+        img = hud_r.over(img, fx.prog(t, 1.3, 1.8) * (1 - 0.7 * hit * (n % 2)))
 
     # suck-in before the slam, then impact
     if 2.56 <= t < T_SLAM:
