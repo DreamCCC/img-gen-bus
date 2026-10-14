@@ -358,7 +358,7 @@ e = put_quote("v_q_barkley", "assets/footage/inside_barkley_ext.mp4", 51.6, 59.8
 a = e
 e = say("b8", a + 0.6)
 kz = K("b8", "你领先")
-shot("s2_inside2", "assets/footage/inside_barkley.mp4", a, kz, t0=44.0, gain=-14, cx=680, bug=False)
+shot("s2_inside2", "assets/footage/inside_barkley.mp4", a, kz, t0=44.0, gain=-14, cx=880, bug=False)
 shot("s2_run", Q3R, kz, e + 0.6, ev=185.6, tail=0.6, gain=-6)
 seg3 = e + 0.6
 m2 = bgm("Impact_Prelude.mp3", 100.0 - (mont0 - seg2), seg2, -16)
