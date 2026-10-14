@@ -1,0 +1,314 @@
+[
+ {
+  "id": "q2_1",
+  "after": "s2_05",
+  "who": "文班",
+  "en": "Of course I'm going to be more — I mean, I'm going to be more careful, but it's not going to change much.",
+  "ref": "发布会 40:30",
+  "src": "online/presser/qqPT01jE5S0.mp4",
+  "in": 2435.58,
+  "out": 2441.447,
+  "dur": 5.867,
+  "file": "assets/footage/quotes/q2_1.mp4",
+  "zh": "当然，我会更注意一点，但不会有太大改变。",
+  "chunks": [
+   {
+    "zh": "当然，我会更注意一点，",
+    "en": "Of course I'm going to be more — I mean, I'm going to be more careful,",
+    "a": 0.2,
+    "b": 4.02
+   },
+   {
+    "zh": "但不会有太大改变。",
+    "en": "but it's not going to change much.",
+    "a": 4.02,
+    "b": 5.57
+   }
+  ]
+ },
+ {
+  "id": "q3_1",
+  "after": "s3_06",
+  "who": "迈克·布朗",
+  "en": "Defensively, we just did it harder for longer stretches, and we were really in tune to what we were supposed to be doing.",
+  "ref": "31:00",
+  "src": "online/presser/qqPT01jE5S0.mp4",
+  "in": 1871.9,
+  "out": 1881.167,
+  "dur": 9.267,
+  "file": "assets/footage/quotes/q3_1.mp4",
+  "zh": "防守上，我们就是做得更狠、坚持得更久，而且大家都很清楚自己该干什么。",
+  "chunks": [
+   {
+    "zh": "防守上，我们就是做得更狠、坚持得更久，",
+    "en": "Defensively, we just did it harder for longer stretches,",
+    "a": 0.1,
+    "b": 5.32
+   },
+   {
+    "zh": "而且大家都很清楚自己该干什么。",
+    "en": "and we were really in tune to what we were supposed to be doing.",
+    "a": 6.02,
+    "b": 8.98
+   }
+  ]
+ },
+ {
+  "id": "q3_2",
+  "after": "s3_07",
+  "who": "米奇·约翰逊",
+  "en": "We got away from what got us the 76 points in the first half, just in terms of putting pressure on the rim, rolling after screens, running, continuing to find the paint, whether it's for ourselves or for a teammate. We got on our heels and, you know, missed some shots, and then, you know, you don't get as many free throws and high, high-percentage looks when you play on your heels like that.",
+  "ref": "19:00",
+  "src": "online/presser/qqPT01jE5S0.mp4",
+  "in": 1150.8,
+  "out": 1176.167,
+  "dur": 25.367,
+  "file": "assets/footage/quotes/q3_2.mp4",
+  "zh": "上半场拿76分靠的那套东西，我们丢了，就是冲击篮筐、挡拆后顺下，打快攻，一直往禁区里打，不管是自己打，还是给队友做机会。后来我们打得畏手畏脚，也丢了些球，这样一来，罚球就少了，好的出手机会也少了。打得这么被动，就会这样。",
+  "chunks": [
+   {
+    "zh": "上半场拿76分靠的那套东西，我们丢了，",
+    "en": "We got away from what got us the 76 points in the first half,",
+    "a": 0.2,
+    "b": 6.7
+   },
+   {
+    "zh": "就是冲击篮筐、挡拆后顺下，",
+    "en": "just in terms of putting pressure on the rim, rolling after screens,",
+    "a": 6.7,
+    "b": 11.54
+   },
+   {
+    "zh": "打快攻，一直往禁区里打，",
+    "en": "running, continuing to find the paint,",
+    "a": 11.54,
+    "b": 14.6
+   },
+   {
+    "zh": "不管是自己打，还是给队友做机会。",
+    "en": "whether it's for ourselves or for a teammate.",
+    "a": 14.6,
+    "b": 16.14
+   },
+   {
+    "zh": "后来我们打得畏手畏脚，也丢了些球，",
+    "en": "We got on our heels and, you know, missed some shots,",
+    "a": 16.14,
+    "b": 19.66
+   },
+   {
+    "zh": "这样一来，罚球就少了，",
+    "en": "and then, you know, you don't get as many free throws",
+    "a": 19.66,
+    "b": 21.34
+   },
+   {
+    "zh": "好的出手机会也少了。打得这么被动，就会这样。",
+    "en": "and high, high-percentage looks when you play on your heels like that.",
+    "a": 21.34,
+    "b": 25.05
+   }
+  ]
+ },
+ {
+  "id": "q4_1",
+  "after": "s4_11",
+  "who": "文班",
+  "en": "What was going through my mind? I mean, same thing as always, it's just a shot. You might work on your form hours and hours, at the end of the day it's just a shot, so you need to shoot it the normal way.",
+  "ref": "39:30",
+  "src": "online/presser/qqPT01jE5S0.mp4",
+  "in": 2373.89,
+  "out": 2386.757,
+  "dur": 12.867,
+  "file": "assets/footage/quotes/q4_1.mp4",
+  "zh": "我当时在想什么？跟平时一样，就是一次投篮而已。投篮动作你可以练上无数个小时，但说到底，也就是一次投篮，所以就该照平常那样投。",
+  "chunks": [
+   {
+    "zh": "我当时在想什么？",
+    "en": "What was going through my mind?",
+    "a": 0.2,
+    "b": 1.01
+   },
+   {
+    "zh": "跟平时一样，就是一次投篮而已。",
+    "en": "I mean, same thing as always, it's just a shot.",
+    "a": 1.13,
+    "b": 3.81
+   },
+   {
+    "zh": "投篮动作你可以练上无数个小时，",
+    "en": "You might work on your form hours and hours,",
+    "a": 5.81,
+    "b": 9.61
+   },
+   {
+    "zh": "但说到底，也就是一次投篮，",
+    "en": "at the end of the day it's just a shot,",
+    "a": 9.75,
+    "b": 10.79
+   },
+   {
+    "zh": "所以就该照平常那样投。",
+    "en": "so you need to shoot it the normal way.",
+    "a": 10.91,
+    "b": 12.56
+   }
+  ]
+ },
+ {
+  "id": "q4_2",
+  "after": "s4_23",
+  "who": "迈克·布朗",
+  "en": "You know, again, on that action, you never know what a player's thinking, you know. Maybe he was going to drive and wanted to keep the dribble to run out the clock. I don't know. You would have to ask him.",
+  "ref": "35:00",
+  "src": "online/presser/qqPT01jE5S0.mp4",
+  "in": 2109.25,
+  "out": 2122.517,
+  "dur": 13.267,
+  "file": "assets/footage/quotes/q4_2.mp4",
+  "zh": "那个回合嘛，你永远不知道球员当时在想什么。可能他是想突破，想一直运着球，把时间耗完。我不知道，你们得去问他。",
+  "chunks": [
+   {
+    "zh": "那个回合嘛，",
+    "en": "You know, again, on that action,",
+    "a": 0.2,
+    "b": 2.75
+   },
+   {
+    "zh": "你永远不知道球员当时在想什么。",
+    "en": "you never know what a player's thinking, you know.",
+    "a": 2.91,
+    "b": 5.43
+   },
+   {
+    "zh": "可能他是想突破，",
+    "en": "Maybe he was going to drive",
+    "a": 5.59,
+    "b": 7.15
+   },
+   {
+    "zh": "想一直运着球，把时间耗完。",
+    "en": "and wanted to keep the dribble to run out the clock.",
+    "a": 7.15,
+    "b": 10.75
+   },
+   {
+    "zh": "我不知道，你们得去问他。",
+    "en": "I don't know. You would have to ask him.",
+    "a": 11.01,
+    "b": 12.95
+   }
+  ]
+ },
+ {
+  "id": "q4_3",
+  "after": "s4_25",
+  "who": "文班",
+  "en": "I fell on the floor. I couldn't really see. I don't know. I just saw the block.",
+  "ref": "14:30",
+  "src": "online/presser/qqPT01jE5S0.mp4",
+  "in": 883.15,
+  "out": 890.05,
+  "dur": 6.9,
+  "file": "assets/footage/quotes/q4_3.mp4",
+  "zh": "我当时摔在地上了，没怎么看清，我也说不好。就只看到那记封盖。",
+  "chunks": [
+   {
+    "zh": "我当时摔在地上了，",
+    "en": "I fell on the floor.",
+    "a": 0.2,
+    "b": 1.25
+   },
+   {
+    "zh": "没怎么看清，我也说不好。",
+    "en": "I couldn't really see. I don't know.",
+    "a": 3.43,
+    "b": 5.45
+   },
+   {
+    "zh": "就只看到那记封盖。",
+    "en": "I just saw the block.",
+    "a": 5.81,
+    "b": 6.6
+   }
+  ]
+ },
+ {
+  "id": "q4_4",
+  "after": "s4_33",
+  "who": "迈克·布朗",
+  "en": "I told OG, as big, as strong, as athletic as he is, he's got to be a monster on the offensive glass tonight.",
+  "ref": "23:30",
+  "src": "online/presser/qqPT01jE5S0.mp4",
+  "in": 1425.2,
+  "out": 1434.467,
+  "dur": 9.267,
+  "file": "assets/footage/quotes/q4_4.mp4",
+  "zh": "我跟阿努诺比说，你块头这么大、这么壮、运动能力这么好，今晚的前场篮板，你得给我抢疯了。",
+  "chunks": [
+   {
+    "zh": "我跟阿努诺比说，你块头这么大、这么壮、运动能力这么好，",
+    "en": "I told OG, as big, as strong, as athletic as he is,",
+    "a": 0.2,
+    "b": 5.18
+   },
+   {
+    "zh": "今晚的前场篮板，你得给我抢疯了。",
+    "en": "he's got to be a monster on the offensive glass tonight.",
+    "a": 6.34,
+    "b": 8.95
+   }
+  ]
+ },
+ {
+  "id": "q5_1",
+  "after": "s5_04",
+  "who": "文班",
+  "en": "What's going through my mind right now? I think it's going to go one of two ways. One of two ways, and a bad one and a good one. And I know the bad one would be giving up, the good one would be getting stronger through this, getting more together. And I know this is what we're going to do.",
+  "ref": "37:30",
+  "src": "online/presser/qqPT01jE5S0.mp4",
+  "in": 2258.92,
+  "out": 2273.587,
+  "dur": 14.667,
+  "file": "assets/footage/quotes/q5_1.mp4",
+  "zh": "我现在在想什么？我觉得接下来只有两条路。两条路，一条坏的，一条好的。坏的那条，是就此放弃；好的那条，是经历这一场，变得更强、更抱团。我知道，我们会走好的那条路。",
+  "chunks": [
+   {
+    "zh": "我现在在想什么？",
+    "en": "What's going through my mind right now?",
+    "a": 0.2,
+    "b": 1.16
+   },
+   {
+    "zh": "我觉得接下来只有两条路。",
+    "en": "I think it's going to go one of two ways.",
+    "a": 1.26,
+    "b": 2.52
+   },
+   {
+    "zh": "两条路，一条坏的，一条好的。",
+    "en": "One of two ways, and a bad one and a good one.",
+    "a": 4.02,
+    "b": 6.66
+   },
+   {
+    "zh": "坏的那条，是就此放弃；",
+    "en": "And I know the bad one would be giving up,",
+    "a": 6.8,
+    "b": 9.78
+   },
+   {
+    "zh": "好的那条，是经历这一场，变得更强、更抱团。",
+    "en": "the good one would be getting stronger through this, getting more together.",
+    "a": 9.94,
+    "b": 12.96
+   },
+   {
+    "zh": "我知道，我们会走好的那条路。",
+    "en": "And I know this is what we're going to do.",
+    "a": 13.16,
+    "b": 14.38
+   }
+  ]
+ }
+]

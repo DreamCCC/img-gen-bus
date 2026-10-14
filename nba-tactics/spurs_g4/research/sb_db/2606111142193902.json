@@ -1,0 +1,178 @@
+[
+{
+"t": 0.0,
+"period": 4,
+"clock": "18.8",
+"shot": 12,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 0.5,
+"period": 4,
+"clock": "18.3",
+"shot": 12,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 1.0,
+"period": 4,
+"clock": "17.8",
+"shot": 11,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 1.5,
+"period": 4,
+"clock": "17.3",
+"shot": 11,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 2.0,
+"period": 4,
+"clock": "16.8",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 2.5,
+"period": 4,
+"clock": "16.3",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 3.0,
+"period": 4,
+"clock": "15.8",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 3.5,
+"period": 4,
+"clock": "15.3",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 4.0,
+"period": 4,
+"clock": "14.8",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 4.5,
+"period": 4,
+"clock": "14.3",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 5.0,
+"period": 4,
+"clock": "13.8",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 5.5,
+"period": 4,
+"clock": "13.3",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 6.0,
+"period": 4,
+"clock": "12.8",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 6.5,
+"period": 4,
+"clock": "12.3",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 7.0,
+"period": 4,
+"clock": "11.8",
+"shot": 0,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 7.5,
+"period": 4,
+"clock": "11.3",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 8.0,
+"period": 4,
+"clock": "10.8",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 8.5,
+"period": 4,
+"clock": "10.3",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 9.0,
+"period": 4,
+"clock": "9.8",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 9.5,
+"period": 4,
+"clock": "9.3",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 10.0,
+"period": 4,
+"clock": "8.8",
+"shot": null,
+"sa": 106,
+"ny": 105
+},
+{
+"t": 10.5,
+"period": 4,
+"clock": "8.3",
+"shot": null,
+"sa": 106,
+"ny": 105
+}
+]

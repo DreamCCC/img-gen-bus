@@ -1,0 +1,12 @@
+[
+  {"name": "tip_live", "src": "../raw/2606111142181002.mp4", "t0": 1.6, "t1": 4.07, "size": [1920, 1080], "dur": 2.47,
+   "grade": {"contrast": 1.08, "sat": 1.0, "bloom": 0.1}, "sharpen": 0.3},
+  {"name": "tip_rest", "src": "../raw/2606111142181002.mp4", "t0": 4.07, "t1": 7.4, "size": [1920, 1080], "dur": 3.33,
+   "grade": {"contrast": 1.08, "sat": 1.0, "bloom": 0.1}, "sharpen": 0.3},
+  {"name": "crowd", "src": "../online/sOQKRjP3ZJk.mp4", "t0": 15.25, "t1": 17.78, "size": [1920, 1080], "dur": 2.53,
+   "grade": {"contrast": 1.1, "sat": 1.05, "bloom": 0.15}, "sharpen": 0.3},
+  {"name": "inside", "src": "../online/qIyBGPb7Xdg.mp4", "t0": 340.4, "t1": 345.4, "size": [1920, 1080], "dur": 5.0,
+   "grade": {"contrast": 1.05, "sat": 0.9, "bloom": 0.05}, "sharpen": 0.2},
+  {"name": "top_slow", "src": "../online/sOQKRjP3ZJk.mp4", "t0": 30.3, "t1": 38.8, "size": [1920, 1080], "dur": 8.5,
+   "grade": {"contrast": 1.1, "sat": 1.0, "bloom": 0.15}, "sharpen": 0.3}
+]

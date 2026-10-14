@@ -1,0 +1,32 @@
+/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/nba-tactics/tools/render_play.py:1307: UserWarning: PySoundFile failed. Trying audioread instead.
+  orig, _ = librosa.load(str(r.base / r.edl["audio_src"]), sr=sr, mono=True)
+/Users/mmeng/mgs-code/mgsOwn/img-gen-bus/nba-tactics/.venv/lib/python3.11/site-packages/librosa/core/audio.py:184: FutureWarning: librosa.core.audio.__audioread_load
+	Deprecated as of librosa version 0.10.0.
+	It will be removed in librosa version 1.0.
+  y, sr_native = __audioread_load(path, offset, duration, dtype)
+1230 帧 / 41.00 秒
+  live   play      0.00–  5.80s
+  A      freeze    5.80– 28.73s
+  drive  play     28.73– 31.40s
+  B      freeze   31.40– 35.20s
+  blk    play     35.20– 36.80s
+  rew    rewind   36.80– 37.50s
+  real   play     37.50– 41.00s
+  旁白 s4_15   0.25–  5.35s
+  旁白 s4_16   6.20–  7.49s
+  旁白 s4_17   7.79– 15.48s
+  旁白 s4_18  15.78– 17.11s
+  旁白 s4_19  17.41– 28.24s
+  旁白 s4_20  28.78– 33.08s
+  旁白 s4_21  33.38– 34.85s
+  旁白 s4_22  37.70– 39.97s
+  0/1230
+  150/1230
+  300/1230
+  450/1230
+  600/1230
+  750/1230
+  900/1230
+  1050/1230
+  1200/1230
+-> /Users/mmeng/mgs-code/mgsOwn/img-gen-bus/nba-tactics/spurs_g4/film/work/bd/e715.mp4

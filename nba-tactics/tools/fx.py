@@ -158,6 +158,30 @@ def flow_under(cv, pts, col, k, al):
     cv.line(pts, col, 12 * k + 3, al * 0.22)
 
 
+def chevrons(cv, pts, col, th, size, step, al, shift=0.0):
+    """沿线排一串 > 形箭头，shift 随时间增长时整串往前走。末端留出一个间距给大箭头。"""
+    pts = np.asarray(pts, float)
+    if len(pts) < 2:
+        return
+    seg = np.linalg.norm(np.diff(pts, axis=0), axis=1)
+    cum = np.r_[0, np.cumsum(seg)]
+    end = cum[-1] - step * 0.9
+    if end <= size:
+        return
+    for t in np.arange(size + shift % step, end, step):
+        p = np.array([np.interp(t, cum, pts[:, 0]), np.interp(t, cum, pts[:, 1])])
+        q = np.array([np.interp(t - 4, cum, pts[:, 0]), np.interp(t - 4, cum, pts[:, 1])])
+        d = p - q
+        n = np.linalg.norm(d)
+        if n < 1e-3:
+            continue
+        d /= n
+        nrm = np.array([-d[1], d[0]])
+        v = [p - d * size * 0.7 + nrm * size * 0.6, p, p - d * size * 0.7 - nrm * size * 0.6]
+        cv.line(v, (10, 10, 10), th + 4, al * 0.45)
+        cv.line(v, col, th, al)
+
+
 def flow_over(cv, pts, col, k, al, T, p):
     """画线时的领头光点；画完后沿线循环的流光。"""
     if len(pts) < 2:

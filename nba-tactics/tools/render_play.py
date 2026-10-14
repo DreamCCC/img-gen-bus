@@ -24,6 +24,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, str(Path(__file__).parent))
+sys.modules.setdefault("render_play", sys.modules[__name__])  # fx 里 from render_play import COL 要拿到被 EDL 改过的同一份
 from court import RIM, Cam, device  # noqa: E402
 import fx  # noqa: E402
 
@@ -39,12 +40,22 @@ def ease(x: float) -> float:
     return x * x * (3 - 2 * x)
 
 
+FONT_SPEC = {"zh": (FONTS / "NotoSansSC-Bold.otf", None), "zhr": (FONTS / "NotoSansSC-Regular.otf", None),
+             "num": (FONTS / "BarlowCondensed-SemiBold.ttf", None)}
+
+
 def font(size: int, kind: str = "zh") -> ImageFont.FreeTypeFont:
-    name = {"zh": "NotoSansSC-Bold.otf", "zhr": "NotoSansSC-Regular.otf", "num": "BarlowCondensed-SemiBold.ttf"}[kind]
-    return _font_cache.setdefault((size, kind), ImageFont.truetype(str(FONTS / name), size))
+    if (size, kind) not in _font_cache:
+        path, var = FONT_SPEC[kind]
+        f = ImageFont.truetype(str(path), size)
+        if var:
+            f.set_variation_by_name(var)
+        _font_cache[(size, kind)] = f
+    return _font_cache[(size, kind)]
 
 
 _font_cache: dict = {}
+NBA_SKEW = -0.21
 
 
 # ---------------------------------------------------------------- 时间轴
@@ -57,6 +68,7 @@ class Timeline:
         self.vo_dir = base / edl["vo"]["dir"]
         dur = json.load(open(self.vo_dir / "durations.json"))
         self.segs, self.vo = [], {}
+        gap = edl.get("vo_gap", GAP)
         frame, last = 0, -1.0
         for sg in edl["segments"]:
             st = frame / self.fps
@@ -70,7 +82,7 @@ class Timeline:
                     t = st + off["end"] - dur[vid]
                 else:
                     t = st + off
-                t = max(t, last + GAP)
+                t = max(t, last + gap)
                 self.vo[vid] = (t, t + dur[vid])
                 last = t + dur[vid]
             if n is None:
@@ -270,6 +282,11 @@ class Canvas:
         for cx, cy in ((x1 + r, y1 + r), (x2 - r, y1 + r), (x1 + r, y2 - r), (x2 - r, y2 - r)):
             self.disc((cx, cy), r, col, alpha)
 
+    def slab(self, x1, y1, x2, y2, col, alpha, skew=NBA_SKEW):
+        """NBA 图文的斜切色块（平行四边形），和 film.html 的 slab 同一斜率。"""
+        k = (y2 - y1) * skew / 2
+        self.fill([(x1 - k, y1), (x2 - k, y1), (x2 + k, y2), (x1 + k, y2)], col, alpha)
+
     def arrow(self, pts, col, size, alpha):
         pts = np.asarray(pts, float)
         if len(pts) < 2:
@@ -284,7 +301,7 @@ class Canvas:
         q = np.array([-d[1], d[0]])
         self.fill([tip + d * size * 0.35, tip - d * size + q * size * 0.62, tip - d * size - q * size * 0.62], col, alpha)
 
-    def dashed(self, pts, col, th, alpha, on=22.0, off=13.0):
+    def dashed(self, pts, col, th, alpha, on=22.0, off=13.0, shift=0.0):
         pts = np.asarray(pts, float)
         if len(pts) < 2:
             return
@@ -296,7 +313,7 @@ class Canvas:
         xs = np.interp(ts, cum, pts[:, 0])
         ys = np.interp(ts, cum, pts[:, 1])
         period = on + off
-        phase = ts % period < on
+        phase = (ts - shift) % period < on
         start = None
         for i, v in enumerate(phase):
             if v and start is None:
@@ -395,6 +412,12 @@ class Renderer:
     def __init__(self, edl_path: Path):
         self.base = edl_path.parent
         self.edl = json.load(open(edl_path))
+        for k, (path, var) in self.edl.get("fonts", {}).items():
+            FONT_SPEC[k] = (Path(path).expanduser() if Path(path).expanduser().is_absolute() else self.base / path, var)
+        _font_cache.clear()
+        COL.update({k: tuple(v) for k, v in self.edl.get("colors", {}).items()})
+        TEAM.update({k: tuple(v) for k, v in self.edl.get("teams", {}).items()})
+        self.nba = self.edl.get("chrome") == "nba"
         self.tl = Timeline(self.edl, self.base)
         self.work = self.base / self.edl["work"]
         self.cam = Cam(self.work / "cam.json")
@@ -468,8 +491,15 @@ class Renderer:
         return ease((T - a) / max(1e-3, b - a))
 
     # ---- 地板图层（同一套代码画在画面和战术板上）
-    ZORDER = {"space": -1, "hull": 0, "radius": 0, "shotline": 0, "cone": 0.5, "path": 1, "pass": 2, "tether": 3,
-              "wave": 3.5, "ring": 4}
+    ZORDER = {"space": -1, "zone": -0.5, "hull": 0, "radius": 0, "shotline": 0, "cone": 0.5, "path": 1, "pass": 2,
+              "tether": 3, "wave": 3.5, "ring": 4}
+
+    @staticmethod
+    def zone_poly(ly):
+        if "lane" in ly:
+            u0, u1, hw = ly["lane"]
+            return np.array([(u0, -hw), (u1, -hw), (u1, hw), (u0, hw)], float)
+        return np.array(ly["poly"], float)
 
     def floor_layers(self):
         return sorted((ly for ly in self.layers if ly["type"] in self.ZORDER), key=lambda ly: self.ZORDER[ly["type"]])
@@ -488,12 +518,27 @@ class Renderer:
             if not board:
                 fx.draw_wave(self, cv, proj, ly, s, T)
             return
+        if t == "zone":
+            p = self.anim(ly, T)
+            if "lane" in ly:
+                u0, u1, hw = ly["lane"]
+                poly = self.zone_poly({"lane": [u0, u0 + (u1 - u0) * max(p, 0.02), hw]})
+            else:
+                poly = self.zone_poly(ly)
+                poly = poly.mean(0) + (poly - poly.mean(0)) * max(p, 0.02)
+            dense = np.vstack([np.linspace(poly[i], poly[(i + 1) % len(poly)], 12, endpoint=False) for i in range(len(poly))])
+            im = proj(dense)
+            col = COL[ly.get("color", "gold")]
+            cv.fill(im, col, al * ly.get("fill", 0.22))
+            stroke_line(cv, np.r_[im, im[:1]], col, 3 * k + 1, al, dash=True)
+            return
         if t == "ring":
             for key in ly["keys"]:
                 u = self.P.uv(key, s)
                 if u is None:
                     continue
-                col = COL[self.edl["style"][key]]
+                sty = self.edl["style"][key]
+                col = COL[sty] if sty in COL else TEAM[self.P.d[key]["team"]]
                 r = ly.get("r", 2.1)
                 if board:
                     if ly.get("r"):
@@ -549,10 +594,37 @@ class Renderer:
                            np.convolve(np.pad(uvs[:, 1], 2, mode="edge"), ker, "valid")]
                 sm[0], sm[-1] = uvs[0], uvs[-1]
                 uvs = sm
-            pts = proj(uvs)
             col = COL[ly.get("color", "white")]
-            stroke_line(cv, pts, col, 6 * k + (0 if board else 1), al)
-            cv.arrow(pts, col, 28 * k, al)
+            w, head = ly.get("w", 1.0), ly.get("head", 1.0)
+            if ly.get("origin") and not board:
+                o = proj.circle(uvs[0], 1.1)
+                cv.line(o, (10, 10, 10), 7 * w, al * 0.45, closed=True)
+                cv.line(o, col, 4 * w, al, closed=True)
+            gap = ly.get("gap", 0.0)
+            if gap > 0:
+                seg = np.linalg.norm(np.diff(uvs, axis=0), axis=1)
+                cum = np.r_[0, np.cumsum(seg)]
+                L = cum[-1] - gap
+                if L <= 1.0:
+                    return
+                i = int(np.searchsorted(cum, L, side="right")) - 1
+                t = (L - cum[i]) / max(1e-6, seg[i])
+                uvs = np.r_[uvs[:i + 1], [uvs[i] + (uvs[i + 1] - uvs[i]) * t]]
+            pts = proj(uvs)
+            th = (6 * k + (0 if board else 1)) * w
+            style = "solid" if board else ly.get("style", "solid")
+            if style in ("dash", "flow"):
+                on, off = 26 * w, 16 * w
+                shift = (T * 90 * w) % (on + off) if style == "flow" else 0.0
+                cv.dashed(pts, (10, 10, 10), th + 4, al * 0.45, on, off, shift)
+                cv.dashed(pts, col, th, al, on, off, shift)
+            elif style == "chevron":
+                fx.chevrons(cv, pts, col, th, 18 * w, 34 * w, al, T * 70 * w)
+            else:
+                stroke_line(cv, pts, col, th, al)
+            if head != 1.0 and not board:
+                cv.arrow(pts, (10, 10, 10), 28 * k * head + 8, al * 0.5)
+            cv.arrow(pts, col, 28 * k * head, al)
         elif t == "hull":
             pts = []
             for key in ly["keys"]:
@@ -592,7 +664,7 @@ class Renderer:
             if p > 0.95:
                 stroke_line(cv, proj(np.linspace(c, self.P.uv(near, s), 20)), COL["white"], 3 * k + 1, al)
         elif t == "shotline":
-            c = self.P.uv(ly["key"], s)
+            c = self.P.uv(ly["key"], ly.get("at", s))
             if c is None:
                 return
             tl = proj(three_line())
@@ -604,7 +676,7 @@ class Renderer:
         """地板图层附带的文字：返回 [(画面像素, 文字, 颜色)]。"""
         t = ly["type"]
         out = []
-        if t == "tether":
+        if t == "tether" and ly.get("label", True):
             A, B = self.P.uv(ly["a"], s), self.P.uv(ly["b"], s)
             if A is not None and B is not None:
                 m = self.cam.to_img(s, [(A + B) / 2])[0]
@@ -622,9 +694,10 @@ class Renderer:
             m = self.cam.to_img(s, [(c + self.P.uv(near, s)) / 2])[0]
             out.append((m + [0, 0], f"最近防守人 {r * 0.3048:.1f} 米", "gold"))
         elif t == "shotline":
-            c = self.P.uv(ly["key"], s)
-            m = self.cam.to_img(s, [RIM * 0.45 + c * 0.55])[0]
-            out.append((m + [0, 34], ly["label"], "gold"))
+            c = self.P.uv(ly["key"], ly.get("at", s))
+            if c is not None:
+                m = self.cam.to_img(s, [RIM * 0.45 + c * 0.55])[0]
+                out.append((m + [0, 34], ly["label"], "gold"))
         elif t == "space" and ly.get("label") and self.anim(ly, T) > 0.6:
             lb = fx.space_label(self, ly, s)
             if lb:
@@ -633,6 +706,9 @@ class Renderer:
             lb = fx.cone_label(self, ly, s, T)
             if lb:
                 out.append(lb)
+        elif t == "zone" and ly.get("label") and self.anim(ly, T) > 0.9:
+            c = np.array(ly["label_uv"], float) if "label_uv" in ly else self.zone_poly(ly).mean(0)
+            out.append((self.cam.to_img(s, [c])[0], ly["label"], ly.get("color", "gold")))
         elif t == "path" and ly.get("label") and s > ly["from"] + 4:
             u = self.P.uv(ly["key"], min(s, ly["to"]))
             if u is not None:
@@ -743,7 +819,7 @@ class Renderer:
                     continue
                 sc = 0.6 + 0.6 * ease(age / 0.25) - 0.15 * ease((age - 0.25) / 0.3)
                 txt(rim + [0, -120], ly["text"], font(int(150 * sc), "num"), COL["gold"], stroke=8, a=al)
-            elif ly["type"] in ("tether", "hull", "radius", "shotline", "path", "space", "cone") and T < ly["_imgoff"]:
+            elif ly["type"] in ("tether", "hull", "radius", "shotline", "path", "space", "cone", "zone") and T < ly["_imgoff"]:
                 for p, text, c in self.floor_labels(ly, s, T):
                     want(zt(p), text, (25, 30, 45) if c == "white" else COL[c], al, f=font(28), dark=c == "gold",
                          prio=4 if ly["type"] != "hull" else 2, lift=0)
@@ -752,7 +828,8 @@ class Renderer:
             elif ly["type"] == "board":
                 self._board(cv, texts, ly, s if "s" not in ly else ly["s"], T, al)
         # 名牌避让：按优先级落位，和已放的重叠就往上推，推开了画一根引线指回球员
-        placed = [(W / 2, H - 172, font(54).getlength(c) + 40, 84) for a, b, c in self.subs if a <= T < b]
+        sub_y, sub_f = self.edl.get("sub_y", H - 172), font(self.edl.get("sub_size", 54))
+        placed = [(W / 2, sub_y, sub_f.getlength(c) + 40, sub_f.size * 1.55) for a, b, c in self.subs if a <= T < b]
         panels = [pn["rect"] for pn in self._panels if pn["a"] > 0]
 
         def off_panels(cx, cy, w, h):
@@ -790,14 +867,20 @@ class Renderer:
                                               moved=float(np.hypot(p["cx"] - cx, p["cy"] - cy))))
             if np.hypot(p["cx"] - cx, p["cy"] - cy) > 10:
                 cv.line([(cx, cy + h / 2), (p["anchor"][0], p["anchor"][1] - 8)], (255, 255, 255), 2, p["a"] * 0.8)
-            cv.rrect(cx - w / 2 + 2, cy - h / 2 + 3, cx + w / 2 + 2, cy + h / 2 + 3, 12, (0, 0, 0), p["a"] * 0.35)
-            cv.rrect(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2, 12, p["col"], p["a"] * 0.92)
+            if self.nba:
+                cv.slab(cx - w / 2 + 3, cy - h / 2 + 4, cx + w / 2 + 3, cy + h / 2 + 4, (0, 0, 0), p["a"] * 0.35)
+                cv.slab(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2, p["col"], p["a"] * 0.95)
+                acc = COL["blue"] if p["col"] == COL["red"] else COL["red"]
+                cv.slab(cx + w / 2 - 9, cy - h / 2, cx + w / 2, cy + h / 2, acc, p["a"])
+            else:
+                cv.rrect(cx - w / 2 + 2, cy - h / 2 + 3, cx + w / 2 + 2, cy + h / 2 + 3, 12, (0, 0, 0), p["a"] * 0.35)
+                cv.rrect(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2, 12, p["col"], p["a"] * 0.92)
             texts.append((cx, cy - 1, p["text"], p["f"], (20, 20, 20) if p["dark"] else (255, 255, 255), p["a"]))
         # 段角标
         if sg.get("badge"):
             self._badge(cv, txt, sg, j)
-        # 字幕
-        for a, b, c in self.subs:
+        # 字幕（subs=false 时字幕交给成片时间线，这里只保留上面的避让位）
+        for a, b, c in self.subs if self.edl.get("subs", True) else []:
             if a <= T < b:
                 al = min(1.0, (T - a) / 0.12, (b - T) / 0.12)
                 txt((W / 2, H - 172), c, font(54), stroke=6, a=al)
@@ -829,13 +912,17 @@ class Renderer:
         txt((x + 34, y + 138), lines[2], font(34), COL["gold"], anchor="lm", stroke=0, a=al)
 
     def _badge(self, cv, txt, sg, j):
-        x, y = 48, 44
+        x, y = self.edl.get("badge_xy", (48, 44))
         label = sg["badge"]
         f = font(34)
         w = 70 + int(f.getlength(label))
         a = min(1.0, j / 0.2)
         self._panels.append(dict(name="角标", a=float(a), rect=[x, y, x + w, y + 58]))
-        cv.rrect(x, y, x + w, y + 58, 14, COL["navy"], 0.8 * a)
+        if self.nba:
+            cv.slab(x, y, x + w, y + 58, COL["navy"], 0.88 * a)
+            cv.slab(x, y, x + 9, y + 58, COL["red"], a)
+        else:
+            cv.rrect(x, y, x + w, y + 58, 14, COL["navy"], 0.8 * a)
         cx, cy = x + 30, y + 29
         if sg["kind"] in ("freeze",):
             cv.fill([(cx - 9, cy - 12), (cx - 3, cy - 12), (cx - 3, cy + 12), (cx - 9, cy + 12)], COL["gold"], a)
@@ -994,6 +1081,7 @@ class Renderer:
         if sg.get("stop"):
             d = sg["n"] / self.tl.fps
             stop = min(ease(j / 0.3), ease((d - j) / 0.22))
+            src = img
             if sg.get("glow"):
                 img = fx.glow_freeze(self, img, sg, s, stop)
             else:
@@ -1003,6 +1091,12 @@ class Renderer:
                 fg = np.clip(img * 1.06, 0, 255)
                 ts = bg * (1 - spot[..., None]) + fg * spot[..., None]
                 img = img * (1 - stop) + ts * stop
+            if self.edl.get("keep"):
+                km = np.zeros((H, W), np.float32)
+                for x1, y1, x2, y2 in self.edl["keep"]:
+                    km[y1:y2, x1:x2] = 1.0
+                km = cv2.GaussianBlur(km, (0, 0), 4)[..., None]
+                img = img * (1 - km) + src * km
 
         if sg["kind"] != "card":
             occ = self.M.everyone(s, img.shape)
@@ -1012,7 +1106,7 @@ class Renderer:
             for ly in self.floor_layers():
                 al = self.vis(ly, T, s)
                 if al > 0 and T < ly["_imgoff"]:
-                    self.floor_layer(floor, proj, ly, s, T, al)
+                    self.floor_layer(scr if ly.get("top") else floor, proj, ly, s, T, al)
             for ly in self.layers:
                 al = self.vis(ly, T, s)
                 if al > 0 and ly["type"] in ("ball", "arc"):
@@ -1217,6 +1311,7 @@ def mix(r: Renderer, out_wav: Path):
         sig = sig[: max(0, len(buf) - a)]
         buf[a:a + len(sig)] += sig * 10 ** (gain_db / 20)
 
+    live = np.zeros_like(buf)
     for sg in tl.segs:
         if sg["kind"] == "play" and sg["speed"] == 1 and "audio_db" in sg:
             a = int(sg["from"] / tl.fps * sr)
@@ -1224,7 +1319,24 @@ def mix(r: Renderer, out_wav: Path):
             fade = int(0.12 * sr)
             seg[:fade] *= np.linspace(0, 1, fade)
             seg[-fade:] *= np.linspace(1, 0, fade)
-            put(seg, sg["start"], sg["audio_db"])
+            b = int(sg["start"] * sr)
+            seg = seg[: len(live) - b]
+            live[b:b + len(seg)] += seg * 10 ** (sg["audio_db"] / 20)
+    uv = r.edl.get("under_vo")
+    if uv:
+        # 旁白期间原声让位：压低并削掉人声频段（转播解说），旁白前后各留一点过渡
+        from scipy.signal import butter, sosfiltfilt
+        speech = sosfiltfilt(butter(4, [250, 4000], "bandpass", fs=sr, output="sos"), live)
+        under = (live - uv.get("carve", 0.75) * speech) * 10 ** (uv.get("db", -16) / 20)
+        m = np.zeros_like(live)
+        pre, post = uv.get("pad", [0.25, 0.35])
+        for vid, (a, b) in tl.vo.items():
+            m[max(0, int((a - pre) * sr)):int((b + uv.get("post", {}).get(vid, post)) * sr)] = 1.0
+        k = int(0.25 * sr)
+        m = np.convolve(m, np.ones(k) / k, "same")
+        live = live * (1 - m) + under * m
+    buf += live
+    for sg in tl.segs:
         if sg.get("sfx"):
             put(sfx(sg["sfx"]), sg["start"] - (0.05 if sg["sfx"] == "stop" else 0), -6)
         if sg.get("stop"):
@@ -1240,14 +1352,27 @@ def mix(r: Renderer, out_wav: Path):
             put(sfx("boom"), r._src_time(ly["src_on"], ly["_on"]) - 0.02, -7)
         elif ly["type"] == "wave":
             put(sfx("wave"), ly["_on"], -9)
-    for vid, (a, b) in tl.vo.items():
+    bed = r.edl.get("bed", False)
+    for vid, (a, b) in ([] if bed else tl.vo.items()):
         y, _ = librosa.load(str(tl.vo_dir / f"{vid}.wav"), sr=sr, mono=True)
         put(y, a, 0)
     buf = buf[: int((total + 0.1) * sr)]
     peak = np.abs(buf).max()
-    buf = buf / peak * 10 ** (-1.0 / 20)
+    if not bed:
+        buf = buf / peak * 10 ** (-1.0 / 20)
+    elif peak > 0.98:
+        buf *= 0.98 / peak
     import soundfile as sf
     sf.write(str(out_wav), buf.astype(np.float32), sr)
+
+
+def manifest(r: Renderer, out: Path):
+    """成片时间线要用的清单：片段里每段、每句旁白的相对时刻（秒）。"""
+    tl = r.tl
+    d = {"duration": round(tl.n / tl.fps, 3), "fps": tl.fps,
+         "segments": [{k: sg[k] for k in ("id", "kind", "start", "end") } | {"badge": sg.get("badge")} for sg in tl.segs],
+         "vo": [{"id": vid, "t": round(a, 3), "end": round(b, 3)} for vid, (a, b) in tl.vo.items()]}
+    out.write_text(json.dumps(d, ensure_ascii=False, indent=1))
 
 
 # ---------------------------------------------------------------- 入口
@@ -1272,6 +1397,7 @@ def main():
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--out")
     ap.add_argument("--range", help="只渲染这段输出帧 a,b（含声音），用于局部小样")
+    ap.add_argument("--audio-only", action="store_true", help="画面不动，只重混声音并换进已有成片")
     a = ap.parse_args()
     edl = Path(a.edl).resolve()
     r = Renderer(edl)
@@ -1306,12 +1432,21 @@ def main():
         return
     out = Path(a.out) if a.out else edl.parent / r.edl["out"]
     out.parent.mkdir(parents=True, exist_ok=True)
-    wav = r.work / "mix.wav"
+    manifest(r, out.with_suffix(".json"))
+    wav = out.with_suffix(".wav") if r.edl.get("bed") else r.work / "mix.wav"
     mix(r, wav)
+    if a.audio_only:
+        tmp = out.with_name(out.stem + "_a" + out.suffix)
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(out), "-i", str(wav), "-map", "0:v", "-map", "1:a",
+                        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(tmp)],
+                       check=True)
+        tmp.replace(out)
+        print(f"-> {out}（只换声音）")
+        return
     f0, f1 = (int(x) for x in a.range.split(",")) if a.range else (0, tl.n)
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{r.W}x{r.H}",
            "-r", str(tl.fps), "-i", "-", "-ss", f"{f0 / tl.fps:.4f}", "-i", str(wav), "-map", "0:v", "-map", "1:a",
-           "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-maxrate", "40M", "-bufsize", "80M",
+           "-c:v", "libx264", "-preset", "medium", "-crf", str(r.edl.get("crf", 18)), "-maxrate", "40M", "-bufsize", "80M",
            "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(out)]
     ff = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     with ProcessPoolExecutor(a.workers, initializer=_init, initargs=(str(edl),)) as ex:

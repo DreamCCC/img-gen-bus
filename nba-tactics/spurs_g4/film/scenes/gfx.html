@@ -1,0 +1,474 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// 代码画面（数据图卡）。工具函数与 film.html 保持一致，sc_xxx 场景函数只依赖 T / S / GD，可直接搬进 film.html。
+// 时间线：?tl=xxx.json 指定，默认 gfx_preview.json；数据：gfx_data.json（tools/gfx_data.py 生成）。
+const W = 1920, H = 1080, FPS = 30;
+const mk = (w, h) => Object.assign(document.createElement('canvas'), { width: w, height: h });
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+
+const COL = {
+  bg: '#231f20', ink: '#231f20', blue: '#1d428a', red: '#c8102e', white: '#ffffff', grey: '#c3ced3',
+  mid: '#7f7f7f', light: '#d5d9dd', sas: '#c4ced4', nyk: '#006bb6', nykOr: '#f58426',
+};
+const F = {
+  ui: '"PingFang SC", sans-serif',
+  hd: '"NotoSansSC", "PingFang SC", sans-serif',
+  num: '"Action NBA Condensed", "DIN Condensed", sans-serif',
+  numW: '"Action NBA", "Action NBA Condensed", sans-serif',
+  ko: '"Knockout", "Action NBA Condensed", sans-serif',
+};
+const SKEW = -0.21;
+
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const hash = (a, b = 0) => { const s = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return s - Math.floor(s); };
+const pad = (k) => String(k).padStart(5, '0');
+const decay = (t, t0, tau) => (t >= t0 ? Math.exp(-(t - t0) / tau) : 0);
+const signed = (v) => (v > 0 ? `+${v}` : String(v));
+
+let TL, T, S, GD, MAN = {}, LOGO = null;
+
+// ---------- 素材帧 ----------
+const imgCache = new Map();
+function loadImg(src) {
+  if (!imgCache.has(src)) {
+    const im = new Image();
+    im.src = src;
+    imgCache.set(src, im.decode().then(() => im).catch(() => null));
+    if (imgCache.size > 200) imgCache.delete(imgCache.keys().next().value);
+  }
+  return imgCache.get(src);
+}
+async function clip(name, lt) {
+  const m = MAN[name];
+  if (!m) return null;
+  const k = clamp(Math.floor(lt * FPS + 1e-4), 0, m.n - 1);
+  if (k + 1 < m.n) loadImg(`clips/${name}/${pad(k + 1)}.jpg`);
+  return loadImg(`clips/${name}/${pad(k)}.jpg`);
+}
+function draw(im, { z = 1, fx = W / 2, fy = H / 2, filter = 'none', alpha = 1, dx = 0, dy = 0 } = {}) {
+  if (!im) return;
+  ctx.save();
+  ctx.globalAlpha = alpha; ctx.filter = filter;
+  ctx.translate(fx + dx, fy + dy); ctx.scale(z, z); ctx.translate(-fx, -fy);
+  ctx.drawImage(im, 0, 0, W, H);
+  ctx.restore();
+}
+
+// ---------- 颗粒与暗角 ----------
+const grain = [];
+for (let k = 0; k < 4; k++) {
+  const g = mk(512, 512), gx = g.getContext('2d'), id = gx.createImageData(512, 512);
+  for (let i = 0; i < id.data.length; i += 4) { const v = hash(i, k) * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 14; }
+  gx.putImageData(id, 0, 0); grain.push(g);
+}
+function vignette(a) {
+  const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 1.0);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${a})`);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+function veil(a, color = '#000') { if (a <= 0) return; ctx.save(); ctx.globalAlpha = clamp(a); ctx.fillStyle = color; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+
+// ---------- 文字 ----------
+function txt(s, x, y, { size = 48, font = F.ui, weight = 'bold', color = COL.white, align = 'center', alpha = 1, base = 'middle', stroke = 0, strokeColor = '#000', shadow = 0, spacing = 0 } = {}) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = clamp(alpha);
+  ctx.font = `${weight} ${size}px ${font}`;
+  ctx.textAlign = align; ctx.textBaseline = base;
+  if (spacing) ctx.letterSpacing = `${spacing}px`;
+  if (shadow) { ctx.shadowColor = 'rgba(0,0,0,0.75)'; ctx.shadowBlur = shadow; ctx.shadowOffsetY = shadow * 0.25; }
+  if (stroke) { ctx.lineJoin = 'round'; ctx.lineWidth = stroke; ctx.strokeStyle = strokeColor; ctx.strokeText(s, x, y); ctx.shadowColor = 'transparent'; }
+  ctx.fillStyle = color; ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function measure(s, { size = 48, font = F.ui, weight = 'bold', spacing = 0 } = {}) {
+  ctx.save(); ctx.font = `${weight} ${size}px ${font}`; if (spacing) ctx.letterSpacing = `${spacing}px`;
+  const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+// 一行多段不同字体的文字，整体按 align 对齐；parts: [[文字, txt 选项], ...]
+function runs(parts, x, y, { align = 'center', alpha = 1, gap = 0 } = {}) {
+  const ws = parts.map(([s, o]) => measure(s, o));
+  const total = ws.reduce((a, b) => a + b, 0) + gap * (parts.length - 1);
+  let cx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+  parts.forEach(([s, o], i) => { txt(s, cx, y, { ...o, align: 'left', alpha: alpha * (o.alpha ?? 1) }); cx += ws[i] + gap; });
+}
+function slab(x, y, w, h, color, skew = SKEW) {
+  const k = h * skew / 2;
+  ctx.beginPath();
+  ctx.moveTo(x - k, y); ctx.lineTo(x + w - k, y); ctx.lineTo(x + w + k, y + h); ctx.lineTo(x + k, y + h);
+  ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+// 斜切色块 + 居中文字的小标签
+function tag(s, cx, cy, { size = 34, bg = COL.red, fg = COL.white, font = F.hd, weight = 900, alpha = 1, align = 'center', padX = 0.55 } = {}) {
+  if (alpha <= 0) return 0;
+  const w = measure(s, { size, font, weight }) + size * padX * 2, h = size * 1.5;
+  const x0 = align === 'center' ? cx - w / 2 : align === 'right' ? cx - w : cx;
+  ctx.save(); ctx.globalAlpha = clamp(alpha); slab(x0, cy - h / 2, w, h, bg); ctx.restore();
+  txt(s, x0 + w / 2, cy + size * 0.04, { size, font, weight, color: fg, alpha });
+  return w;
+}
+
+// orb=false：去掉右下蓝色大圆，给需要整幅宽度的图表用
+function courtBg(u, { orb = true } = {}) {
+  ctx.fillStyle = COL.ink; ctx.fillRect(0, 0, W, H);
+  const d = easeOut(clamp(u / 0.8));
+  ctx.save();
+  if (orb) {
+    ctx.fillStyle = COL.blue; ctx.beginPath(); ctx.arc(W + 900, H + 400, 1500, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 12;
+    ctx.beginPath(); ctx.arc(W + 900, H + 400, 1530, Math.PI, Math.PI + 0.9 * d); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 10;
+  ctx.beginPath(); ctx.arc(560, -380, 640, 0.15, Math.PI - 0.15); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = 'rgba(35,31,32,0.55)'; ctx.fillRect(0, 0, W, H);
+}
+
+// 图卡左上标题（与 sc_stat 同款）：红竖条 + 英文 kicker + 中文标题，从左擦入
+function cardHead(t, t0, kicker, title, { x = 160, alpha = 1 } = {}) {
+  const e = easeOut(prog(t, t0, t0 + 0.45)) * alpha;
+  if (e <= 0) return;
+  const dx = (1 - e) * -30;
+  ctx.save(); ctx.globalAlpha = e; ctx.fillStyle = COL.red; ctx.fillRect(x, 128, 10, 56); ctx.restore();
+  txt(kicker, x + 30 + dx, 145, { size: 30, font: F.ko, weight: 'normal', align: 'left', alpha: e, color: COL.grey, spacing: 3 });
+  txt(title, x + 30 + dx, 186, { size: 52, font: F.hd, weight: 900, align: 'left', alpha: e });
+}
+
+// ---------- 字幕 ----------
+function subtitles(t) {
+  for (const v of TL.vo || []) {
+    for (const c of v.chunks) {
+      const a = v.t + c.a, b = v.t + c.b + (c === v.chunks[v.chunks.length - 1] ? 0.2 : 0);
+      if (t < a || t >= b) continue;
+      txt(c.text.replace(/[：:]/g, '  '), W / 2, 880, { size: 50, font: F.ui, stroke: 9, strokeColor: 'rgba(0,0,0,0.85)', shadow: 6 });
+    }
+  }
+}
+
+// =====================================================================
+// 组件：分差曲线
+// marginChart(t, g, box, { m, alpha, reveal })
+//   g      画到比赛第几秒（0–2880，第一节开场为 0）
+//   box    绘图区 {x, y, w, h}；纵轴固定 -10..+38，所以小窗和全屏、前后段落之间刻度不跳
+//   m      0 = 角落小窗字号 / 1 = 全屏字号，中间值用于放大过渡
+//   reveal (gm) => 0..1，标注点出现的进度；默认曲线画过就出现
+// =====================================================================
+const MG = { yMin: -10, yMax: 38, end: 2880 };
+const marginAt = (g) => { let v = 0; for (const [s, a, h] of GD.margin) { if (s > g) break; v = a - h; } return v; };
+function marginChart(t, g, box, { m = 1, alpha = 1, reveal = null } = {}) {
+  const X = (s) => box.x + box.w * s / MG.end;
+  const Y = (v) => box.y + box.h * (MG.yMax - v) / (MG.yMax - MG.yMin);
+  const fs = (a, b) => lerp(a, b, m);
+  const rv = reveal || ((gm) => (g >= gm ? 1 : 0));
+  if (alpha <= 0) return { X, Y, cur: 0 };
+
+  ctx.save(); ctx.globalAlpha = alpha;
+  for (const v of [-10, 10, 20, 30]) { ctx.fillStyle = 'rgba(255,255,255,0.09)'; ctx.fillRect(box.x, Y(v), box.w, 1); }
+  for (const q of [720, 1440, 2160]) { ctx.fillStyle = q === 1440 ? 'rgba(255,255,255,0.26)' : 'rgba(255,255,255,0.1)'; ctx.fillRect(X(q), box.y, q === 1440 ? 2 : 1, box.h); }
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.fillRect(box.x, Y(0) - 1, box.w, 2);
+  ctx.restore();
+  for (const v of [-10, 0, 10, 20, 30]) txt(v ? signed(v) : '0', box.x - fs(10, 18), Y(v) + 2, { size: fs(18, 26), font: F.num, align: 'right', color: COL.grey, alpha: alpha * 0.85 });
+  ['第一节', '第二节', '第三节', '第四节'].forEach((s, q) => txt(s, X(q * 720 + 360), box.y + box.h + fs(16, 30), { size: fs(16, 26), font: F.hd, weight: 500, color: COL.grey, alpha: alpha * 0.85 }));
+
+  // 阶梯折线：比分只在得分那一刻变化
+  const pts = [];
+  let cur = 0;
+  for (const [s, a, h] of GD.margin) {
+    if (s > g) break;
+    pts.push([X(s), Y(cur)], [X(s), Y(a - h)]);
+    cur = a - h;
+  }
+  pts.push([X(g), Y(cur)]);
+  const line = new Path2D(), area = new Path2D();
+  line.moveTo(...pts[0]); area.moveTo(X(0), Y(0));
+  for (const p of pts) { line.lineTo(...p); area.lineTo(...p); }
+  area.lineTo(X(g), Y(0)); area.closePath();
+  const z0 = Y(0) + 3;
+  for (const [y0, y1, fill, stroke] of [[box.y - 200, z0, 'rgba(196,206,212,0.2)', COL.sas], [z0, box.y + box.h + 200, 'rgba(0,107,182,0.55)', COL.nykOr]]) {
+    ctx.save(); ctx.globalAlpha = alpha;
+    ctx.beginPath(); ctx.rect(box.x - 60, y0, box.w + 120, y1 - y0); ctx.clip();
+    ctx.fillStyle = fill; ctx.fill(area);
+    ctx.lineWidth = fs(3, 5); ctx.lineJoin = 'round'; ctx.strokeStyle = stroke; ctx.stroke(line);
+    ctx.restore();
+  }
+  const dot = (x, y, r, c, a) => {
+    if (a <= 0) return;
+    ctx.save(); ctx.globalAlpha = alpha * clamp(a); ctx.fillStyle = c; ctx.strokeStyle = COL.ink; ctx.lineWidth = r * 0.45;
+    ctx.beginPath(); ctx.arc(x, y, r * lerp(1.8, 1, easeOut(clamp(a))), 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.restore();
+  };
+
+  // 标注：最大领先（可能多次）、半场、终场
+  const { peaks, half, final, top } = GD.marks;
+  const pa = rv(peaks[0].g);
+  peaks.forEach((p) => dot(X(p.g), Y(top), fs(6, 10), COL.red, rv(p.g)));
+  if (pa > 0) {
+    const p0 = peaks[0];
+    const mc = clamp(m * 2), mf = clamp(m * 2 - 1);
+    tag(`+${top}`, X(p0.g) - 14, Y(top) - 26, { size: 22, font: F.numW, weight: 'bold', align: 'right', alpha: alpha * pa * (1 - mc) });
+    if (mf > 0) {
+      const xs = peaks.map((p) => X(p.g)), cx = (xs[0] + xs[xs.length - 1]) / 2, cy = Y(top) - 76;
+      ctx.save(); ctx.strokeStyle = COL.red; ctx.lineWidth = 2;
+      peaks.forEach((p, i) => { const a = rv(p.g); if (a <= 0) return; ctx.globalAlpha = alpha * mf * a; ctx.beginPath(); ctx.moveTo(cx, cy + 22); ctx.lineTo(xs[i], Y(top) - 12); ctx.stroke(); });
+      ctx.restore();
+      const w = tag(`最大领先 +${top}`, cx, cy, { size: 34, alpha: alpha * mf * pa });
+      const sub = peaks.filter((p) => rv(p.g) > 0).map((p) => `${p.label}（${p.sas}:${p.nyk}）`).join(' · ');
+      txt(sub, cx + w / 2 + 26, cy + 2, { size: 24, font: F.hd, weight: 500, align: 'left', color: COL.grey, alpha: alpha * mf * pa });
+    }
+  }
+  const ha = rv(half[0]) * m;
+  if (ha > 0) {
+    const x = X(half[0]), y = Y(half[1] - half[2]);
+    ctx.save(); ctx.globalAlpha = alpha * ha; ctx.fillStyle = COL.white; ctx.fillRect(x - 1, y + 10, 2, 50); ctx.restore();
+    tag(`半场 ${signed(half[1] - half[2])}`, x, y + 84, { size: 30, bg: COL.blue, alpha: alpha * ha });
+    txt(`${half[1]}:${half[2]}`, x, y + 134, { size: 30, font: F.num, color: COL.grey, alpha: alpha * ha });
+    dot(x, y, 8, COL.white, ha);
+  }
+  const fa = rv(final[0] - 0.01) * m;
+  if (fa > 0) {
+    const x = X(final[0]), y = Y(final[1] - final[2]);
+    const w = tag(`终场 ${signed(final[1] - final[2])}`, x + 8, y + 56, { size: 30, bg: COL.nyk, align: 'right', alpha: alpha * fa });
+    txt(`${final[1]}:${final[2]}`, x + 8 - w - 20, y + 58, { size: 30, font: F.num, align: 'right', color: COL.grey, alpha: alpha * fa });
+  }
+  // 曲线头
+  const hx = X(g), hy = Y(cur);
+  if (g < MG.end - 0.01) {
+    ctx.save(); ctx.globalAlpha = alpha * 0.35 * (0.6 + 0.4 * Math.sin(t * 9)); ctx.fillStyle = cur < 0 ? COL.nykOr : COL.white;
+    ctx.beginPath(); ctx.arc(hx, hy, fs(11, 18), 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  }
+  dot(hx, hy, fs(5, 8), cur < 0 ? COL.nykOr : COL.white, 1);
+  return { X, Y, cur };
+}
+
+// 分段驱动的比赛时间：segs = [[t0, t1, g0, g1], ...]，段内 easeInOut；返回 g(t) 和反查 tOf(g)
+function gameClock(segs) {
+  const g = (t) => {
+    let v = segs[0][2];
+    for (const [a, b, g0, g1] of segs) { if (t >= a) v = lerp(g0, g1, easeInOut(prog(t, a, b))); }
+    return v;
+  };
+  const tOf = (gm) => {
+    const seg = segs.find(([, , g0, g1]) => gm >= g0 && gm <= g1) || segs[segs.length - 1];
+    let lo = seg[0], hi = seg[1];
+    for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; if (g(mid) >= gm) hi = mid; else lo = mid; }
+    return hi;
+  };
+  return { g, tOf };
+}
+
+// 样张①：角落小窗爬到 +29 → 放大成全屏 → 继续画到终场 -1
+const MG_CORNER = { x: 1356, y: 48, w: 516, h: 312 };
+const MG_FULL = { x: 230, y: 270, w: 1530, h: 470 };
+const mgBox = (P) => ({ x: P.x + 58, y: P.y + 76, w: P.w - 82, h: P.h - 76 - 46 });
+async function sc_margin(t) {
+  const u = t - S.margin[0];
+  const G1 = GD.marks.peaks[0].g + 8;
+  const clk = gameClock([[T.m_climb, T.m_peak, 0, G1], [T.m_full, T.m_end, G1, MG.end]]);
+  const g = clk.g(t);
+  const m = easeInOut(prog(t, T.m_expand, T.m_expand + 0.8));
+
+  if (m < 1) {
+    draw(await clip('top_slow', u), { z: 1.04, filter: 'brightness(0.85) saturate(0.9)' });
+    vignette(0.4);
+  }
+
+  // 小窗整体放大成全屏：窗口矩形插值，底色在窗内从半透明过渡到图卡底
+  const P = { x: lerp(MG_CORNER.x, 0, m), y: lerp(MG_CORNER.y, 0, m), w: lerp(MG_CORNER.w, W, m), h: lerp(MG_CORNER.h, H, m) };
+  const box = Object.fromEntries(Object.keys(MG_FULL).map((k) => [k, lerp(mgBox(MG_CORNER)[k], MG_FULL[k], m)]));
+  const ein = easeOut(prog(t, T.m_in, T.m_in + 0.4));
+  ctx.save();
+  if (ein < 1) { ctx.beginPath(); ctx.rect(P.x - 20, P.y - 20, (P.w + 40) * ein, P.h + 40); ctx.clip(); }
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 24 * (1 - m); ctx.shadowOffsetY = 6;
+  ctx.fillStyle = `rgba(35,31,32,${lerp(0.88, 1, m)})`; ctx.fillRect(P.x, P.y, P.w, P.h);
+  ctx.restore();
+  if (m > 0) {
+    ctx.save(); ctx.beginPath(); ctx.rect(P.x, P.y, P.w, P.h); ctx.clip();
+    ctx.globalAlpha = m; courtBg(t - T.m_expand, { orb: false }); ctx.restore();
+  }
+  if (m < 1) {
+    ctx.save(); ctx.globalAlpha = 1 - m;
+    ctx.fillStyle = COL.blue; ctx.fillRect(P.x, P.y, P.w, 54);
+    ctx.fillStyle = COL.red; ctx.fillRect(P.x, P.y, 8, P.h);
+    ctx.restore();
+    txt('马刺领先', P.x + 26, P.y + 28, { size: 28, font: F.hd, weight: 900, align: 'left', alpha: 1 - m });
+    txt('SPURS LEAD', P.x + 148, P.y + 30, { size: 22, font: F.ko, weight: 'normal', align: 'left', alpha: (1 - m) * 0.8, color: COL.grey, spacing: 2 });
+  }
+  const res = marginChart(t, g, box, {
+    m, reveal: (gm) => (g >= gm ? clamp((t - clk.tOf(gm)) / 0.3) : 0),
+  });
+  const lead = res.cur;
+  const cx = lerp(P.x + P.w - 22, 1760, m), cy = lerp(P.y + 30, 168, m);
+  txt(signed(lead), cx, cy, { size: lerp(46, 132, m), font: F.numW, align: 'right', color: lead < 0 ? COL.nykOr : COL.white });
+  ctx.restore();
+  txt('SPURS LEAD', 1760, 82, { size: 26, font: F.ko, weight: 'normal', align: 'right', color: COL.grey, alpha: m, spacing: 3 });
+  cardHead(t, T.m_expand + 0.4, 'SAN ANTONIO · GAME FLOW', '马刺领先分差走势');
+  txt('纵轴为马刺领先分，负值 = 尼克斯领先；比分按 马刺:尼克斯', 190, 236,
+    { size: 24, font: F.hd, weight: 500, align: 'left', color: COL.grey, alpha: easeOut(prog(t, T.m_expand + 0.6, T.m_expand + 1)) * 0.85 });
+}
+
+// =====================================================================
+// 组件：数据卡（大号 命中/出手 + 命中率 + 每次出手一格的时间序列）
+// =====================================================================
+function statCard(t, t0, x, y, w, h, { color, label, kicker, seq }) {
+  const e = easeOut(prog(t, t0, t0 + 0.45));
+  if (e <= 0) return;
+  const made = seq.filter((s) => s).length, att = seq.length;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(x - 40, y - 40, (w + 80) * e, h + 80); ctx.clip();
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
+  ctx.fillStyle = 'rgba(35,31,32,0.92)'; ctx.fillRect(x, y, w, h); ctx.restore();
+  ctx.fillStyle = color; ctx.fillRect(x, y, 12, h);
+  slab(x + 52, y + 34, 160, 62, color);
+  txt(label, x + 132, y + 66, { size: 40, font: F.hd, weight: 900 });
+  txt(kicker, x + 236, y + 68, { size: 26, font: F.ko, weight: 'normal', align: 'left', color: COL.grey, spacing: 3 });
+
+  // 每次出手一格，按时间先后依次点亮；大数字跟着已点亮的命中格计数
+  const lit = (t - t0 - 0.3) / 1.05 * att;
+  const n = seq.slice(0, clamp(Math.floor(lit), 0, att)).filter((s) => s).length;
+  const nx = x + 52, by = y + 282, mw = measure(String(made), { size: 240, font: F.numW });
+  txt(String(n), nx + mw, by, { size: 240, font: F.numW, align: 'right', base: 'alphabetic' });
+  txt(`/${att}`, nx + mw + 10, by, { size: 120, font: F.numW, align: 'left', base: 'alphabetic', color: COL.mid });
+
+  const pa = easeOut(prog(t, t0 + 1.25, t0 + 1.6));
+  const pct = (made / att * 100).toFixed(1) + '%';
+  runs([['命中率', { size: 28, font: F.hd, weight: 500, color: COL.grey, base: 'alphabetic' }], [pct, { size: 76, font: F.numW, color: COL.white, base: 'alphabetic' }]],
+    x + w - 44, y + 96, { align: 'right', alpha: pa, gap: 16 });
+
+  const pitch = 14, ty = y + 314;
+  seq.forEach((s, i) => {
+    const a = clamp(lit - i);
+    ctx.globalAlpha = 1;
+    slab(nx + i * pitch, ty, 8, 46, 'rgba(255,255,255,0.1)', -0.3);
+    if (a > 0) { ctx.globalAlpha = a; slab(nx + i * pitch, ty, 8, 46, s ? COL.white : 'rgba(127,127,127,0.75)', -0.3); }
+  });
+  ctx.globalAlpha = pa;
+  slab(nx, y + 386, 8, 22, COL.white, -0.3); slab(nx + 120, y + 386, 8, 22, 'rgba(127,127,127,0.75)', -0.3);
+  ctx.restore();
+  txt('命中', nx + 20, y + 397, { size: 22, font: F.hd, weight: 500, align: 'left', color: COL.grey, alpha: pa });
+  txt('不中', nx + 140, y + 397, { size: 22, font: F.hd, weight: 500, align: 'left', color: COL.grey, alpha: pa });
+  txt('每格一次出手 · 按时间先后', x + w - 44, y + 397, { size: 22, font: F.hd, weight: 500, align: 'right', color: COL.grey, alpha: pa * 0.8 });
+}
+
+// 样张②：上半场投篮 28/47、三分 14/26
+async function sc_fgcard(t) {
+  const u = t - S.fgcard[0];
+  courtBg(u);
+  veil(1 - clamp(u / 0.25));
+  const f = GD.fg['1H'];
+  cardHead(t, S.fgcard[0] + 0.1, 'SAN ANTONIO · FIRST HALF', '马刺上半场投篮');
+  statCard(t, T.fg, 160, 258, 760, 430, { color: COL.blue, label: '投篮', kicker: 'FIELD GOALS', seq: f.seq.map(([, made]) => made) });
+  statCard(t, T.fg3, 1000, 258, 760, 430, { color: COL.red, label: '三分', kicker: '3-POINTERS', seq: f.seq.filter(([three]) => three).map(([, made]) => made) });
+  const na = easeOut(prog(t, T.fg_note, T.fg_note + 0.4));
+  const o = { size: 32, font: F.hd, weight: 700, color: COL.grey };
+  const n = { size: 50, font: F.numW, color: COL.white };
+  runs([['投篮得分', o], [String(f.fgm * 2 + f.fg3m), n], ['=', o], [`${f.fgm}`, n], ['个进球 × 2 分 +', o], [`${f.fg3m}`, n], ['个三分各多 1 分', o]],
+    W / 2, 748 + (1 - na) * 20, { alpha: na, gap: 12 });
+}
+
+// =====================================================================
+// 组件：应得 / 实得 柱状图（按半场分组，可只放一组 = 第一次出现的两柱版）
+// =====================================================================
+const XB = { base: 690, k: 340 / 70, bw: 170, gap: 28 };
+function xbarGroup(t, gr) {
+  const { cx, label, slabColor, xp, pts, tExp, tReal, tDiff, realColor, diffNote } = gr;
+  const Yv = (v) => XB.base - v * XB.k;
+  const xe = cx - XB.gap / 2 - XB.bw, xr = cx + XB.gap / 2;
+  const ge = easeOut(prog(t, tExp, tExp + 0.6)), gr2 = easeOut(prog(t, tReal, tReal + 0.8));
+  const la = clamp((t - tExp) / 0.3);
+  if (la <= 0) return;
+  ctx.save(); ctx.globalAlpha = la; slab(cx - 130, 750, 260, 58, slabColor); ctx.restore();
+  txt(label, cx, 780, { size: 38, font: F.hd, weight: 900, alpha: la });
+  txt('应得', xe + XB.bw / 2, 720, { size: 30, font: F.hd, weight: 700, color: COL.grey, alpha: la });
+  txt('实得', xr + XB.bw / 2, 720, { size: 30, font: F.hd, weight: 700, alpha: clamp((t - tReal) / 0.3) });
+
+  const bar = (x, v, g, c) => { if (g <= 0) return; ctx.fillStyle = c; ctx.fillRect(x, Yv(v * g), XB.bw, v * g * XB.k); };
+  bar(xe, xp, ge, COL.mid);
+  bar(xr, pts, gr2, realColor);
+  if (ge > 0) txt(String(Math.round(Math.round(xp) * ge)), xe + XB.bw / 2, Yv(xp * ge) - 40, { size: 76, font: F.numW, color: COL.light });
+  if (gr2 > 0) txt(String(Math.round(pts * gr2)), xr + XB.bw / 2, Yv(pts * gr2) - 40, { size: 76, font: F.numW, color: realColor === COL.red ? COL.red : COL.white });
+
+  // 差额：应得水平虚线 + 括号 + 差值
+  const da = easeOut(prog(t, tDiff, tDiff + 0.4));
+  if (da <= 0) return;
+  const d = Math.round(pts - xp);
+  const hiV = Math.max(xp, pts), loV = Math.min(xp, pts);
+  ctx.save(); ctx.globalAlpha = da;
+  ctx.setLineDash([10, 8]); ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+  ctx.beginPath(); ctx.moveTo(xe, Yv(xp)); ctx.lineTo(xr + XB.bw + 14, Yv(xp)); ctx.stroke();
+  if (pts < xp) { ctx.strokeStyle = COL.red; ctx.strokeRect(xr + 1.5, Yv(xp), XB.bw - 3, (xp - pts) * XB.k); }
+  ctx.setLineDash([]);
+  const bx = xr + XB.bw + 22, c = d > 0 ? COL.white : COL.red;
+  ctx.strokeStyle = c; ctx.lineWidth = 4;
+  const y0 = Yv(hiV), y1 = lerp(Yv(hiV), Yv(loV), da);
+  ctx.beginPath(); ctx.moveTo(bx - 10, y0); ctx.lineTo(bx, y0); ctx.lineTo(bx, y1); ctx.lineTo(bx - 10, y1); ctx.stroke();
+  ctx.restore();
+  const my = (Yv(hiV) + Yv(loV)) / 2;
+  txt(signed(d), bx + 20, my - 14 + (1 - da) * 16, { size: 84, font: F.numW, align: 'left', color: c, alpha: da });
+  txt(diffNote, bx + 22, my + 46, { size: 28, font: F.hd, weight: 700, align: 'left', color: COL.grey, alpha: da });
+}
+
+// 样张③：手感柱状图第二次出现（四柱）
+async function sc_xbars(t) {
+  const u = t - S.xbars[0];
+  courtBg(u);
+  veil(1 - clamp(u / 0.25));
+  cardHead(t, T.xb, 'SAN ANTONIO · EXPECTED vs ACTUAL POINTS', '马刺投篮得分：应得 vs 实得');
+  txt('应得 = 每次出手按追踪数据估算的命中率 × 分值（2 或 3 分）求和，不含罚球', 190, 236,
+    { size: 24, font: F.hd, weight: 500, align: 'left', color: COL.grey, alpha: easeOut(prog(t, T.xb + 0.2, T.xb + 0.6)) * 0.85 });
+  ctx.save(); ctx.globalAlpha = easeOut(prog(t, T.xb, T.xb + 0.5)); ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fillRect(410, XB.base, 1080, 3); ctx.restore();
+  const x1 = GD.xpts['1H'], x2 = GD.xpts['2H'];
+  xbarGroup(t, { cx: 640, label: '上半场', slabColor: COL.blue, xp: x1.xpts, pts: x1.pts, tExp: T.xb + 0.2, tReal: T.xb + 0.45, tDiff: T.xb_diff, realColor: COL.sas, diffNote: '手感多给' });
+  xbarGroup(t, { cx: 1180, label: '下半场', slabColor: COL.red, xp: x2.xpts, pts: x2.pts, tExp: T.xb_2h, tReal: T.xb_2h_real, tDiff: T.xb_diff + 0.5, realColor: COL.red, diffNote: '少进' });
+}
+
+const SCENES = { margin: sc_margin, fgcard: sc_fgcard, xbars: sc_xbars };
+
+window.renderFrame = async (t) => {
+  const f = Math.round(t * FPS);
+  ctx.globalAlpha = 1; ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  for (const [name, [a, b]] of Object.entries(S)) {
+    if (t >= a && t < b) { ctx.save(); await SCENES[name](t, f); ctx.restore(); break; }
+  }
+  subtitles(t);
+  if (LOGO) {
+    const lh = 96, lw = lh * LOGO.width / LOGO.height;
+    ctx.save(); ctx.globalAlpha = 0.92; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 2;
+    ctx.imageSmoothingQuality = 'high'; ctx.drawImage(LOGO, 56, 46, lw, lh); ctx.restore();
+  }
+  const g = grain[f % 4], ox = -Math.floor(hash(f, 21) * 512), oy = -Math.floor(hash(f, 22) * 512);
+  for (let x = ox; x < W; x += 512) for (let y = oy; y < H; y += 512) ctx.drawImage(g, x, y);
+};
+
+window.ready = (async () => {
+  const tl = new URLSearchParams(location.search).get('tl') || 'gfx_preview.json';
+  TL = await (await fetch(tl)).json();
+  T = TL.T; S = TL.scenes;
+  GD = await (await fetch('gfx_data.json')).json();
+  MAN = await (await fetch('clips/manifest.json')).json();
+  window.DURATION = TL.duration;
+  window.FPS = FPS;
+  LOGO = await loadImg('../assets/logoman.png');
+  const noto = new FontFace('NotoSansSC', 'url(../assets/fonts/NotoSansSC.ttf)', { weight: '100 900' });
+  document.fonts.add(await noto.load());
+  await Promise.all([
+    ...[500, 700, 900].map((w) => document.fonts.load(`${w} 100px ${F.hd}`, '马刺尼克斯')),
+    document.fonts.load(`bold 100px ${F.num}`), document.fonts.load(`bold 100px ${F.numW}`), document.fonts.load(`100px ${F.ko}`),
+  ]);
+})();
+</script>
+</body>
+</html>

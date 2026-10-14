@@ -1,0 +1,12 @@
+{
+ "file": "Long_Note_Three.mp3",
+ "duration": 192.05,
+ "catalog_bpm": null,
+ "bpm_measured": null,
+ "cue_points": [
+  16.788,
+  190.497,
+  192.006
+ ],
+ "note": "arhythmic pad: no beat grid, cue_points = strongest onsets"
+}
