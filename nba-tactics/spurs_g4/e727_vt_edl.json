@@ -1,0 +1,372 @@
+{
+ "_note": "竖屏版（文稿_竖屏5min_v2）：同 e727_edl.json 的画面和跟踪，旁白换成 audio/vo_vt。拆④ 布伦森 31 英尺不中、阿努诺比补进（事件 725/727）。只出画面 + 原声/音效底轨，字幕、旁白由成片时间线叠加（读同名 .json 清单）。from/to/at 是原片帧号（30fps）；计分牌 f118=4.4 出手，f156–160 3.1–3.0 砸框，f186=2.1 点球，f200–205 进网。阿努诺比 f162 后跟丢，补篮慢放段不画他的地面圈。",
+ "work": "work/e727",
+ "fps": 30,
+ "size": [
+  1920,
+  1080
+ ],
+ "orig": "work/e727/fr/orig",
+ "slow": {
+  "dir": "work/e727/fr/slow",
+  "from": 110,
+  "mul": 4
+ },
+ "audio_src": "raw/2606111142181002.mp4",
+ "vo": {
+  "lines": "film/audio/vo_vt.json",
+  "dir": "film/audio/vo_vt"
+ },
+ "vo_gap": 0.3,
+ "out": "film/work/bd/e727_vt.mp4",
+ "bed": true,
+ "under_vo": {
+  "db": -5,
+  "carve": 0.75,
+  "pad": [
+   0.25,
+   0.35
+  ],
+  "post": {
+   "d17": 0.08
+  }
+ },
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "badge_xy": [
+  130,
+  52
+ ],
+ "sub_y": 880,
+ "sub_size": 50,
+ "fonts": {
+  "zh": [
+   "film/assets/fonts/NotoSansSC.ttf",
+   "Black"
+  ],
+  "zhr": [
+   "film/assets/fonts/NotoSansSC.ttf",
+   "Medium"
+  ],
+  "num": [
+   "~/Library/Fonts/Action NBA Condensed-Bold.otf",
+   null
+  ]
+ },
+ "colors": {
+  "gold": [
+   232,
+   236,
+   240
+  ],
+  "orange": [
+   245,
+   132,
+   38
+  ],
+  "navy": [
+   35,
+   31,
+   32
+  ],
+  "red": [
+   200,
+   16,
+   46
+  ],
+  "blue": [
+   29,
+   66,
+   138
+  ]
+ },
+ "teams": {
+  "SAS": [
+   196,
+   206,
+   212
+  ],
+  "NYK": [
+   0,
+   107,
+   182
+  ]
+ },
+ "style": {
+  "OG": "orange",
+  "WB": "gold",
+  "FX": "gold",
+  "BR": "team",
+  "CA": "team",
+  "HP": "team",
+  "VS": "team"
+ },
+ "anchors": {
+  "rim": [
+   163,
+   1349,
+   273
+  ]
+ },
+ "keep": [
+  [
+   465,
+   945,
+   1465,
+   1060
+  ]
+ ],
+ "mask_box": {
+  "110": {
+   "FX": [
+    512,
+    484,
+    648,
+    600
+   ],
+   "BR": [
+    520,
+    545,
+    620,
+    706
+   ],
+   "CA": [
+    850,
+    326,
+    936,
+    498
+   ]
+  },
+  "158": {
+   "FX": [
+    735,
+    440,
+    820,
+    688
+   ],
+   "WB": [
+    780,
+    460,
+    863,
+    663
+   ]
+  }
+ },
+ "segments": [
+  {
+   "id": "live",
+   "kind": "play",
+   "from": 0,
+   "to": 110,
+   "speed": 1,
+   "audio_db": -2
+  },
+  {
+   "id": "A",
+   "kind": "freeze",
+   "at": 110,
+   "stop": true,
+   "spot": [
+    "OG",
+    "WB",
+    "FX",
+    "BR",
+    "CA"
+   ],
+   "focus": "OG",
+   "badge": "时停",
+   "sfx": "stop",
+   "glow": true,
+   "zoom": [
+    1.06,
+    "OG"
+   ],
+   "pad": 0.6,
+   "dur": 1.6
+  },
+  {
+   "id": "shot",
+   "kind": "play",
+   "from": 110,
+   "to": 150,
+   "speed": 0.5,
+   "badge": "慢放 ×0.5",
+   "sfx": "resume",
+   "zoom": [
+    1.0,
+    null
+   ],
+   "vo": [
+    [
+     "d16",
+     0.1
+    ]
+   ]
+  },
+  {
+   "id": "rim",
+   "kind": "play",
+   "from": 150,
+   "to": 158,
+   "speed": 0.25,
+   "badge": "慢放 ×0.25"
+  },
+  {
+   "id": "B",
+   "kind": "freeze",
+   "at": 158,
+   "stop": true,
+   "spot": [
+    "OG",
+    "WB",
+    "FX"
+   ],
+   "focus": "OG",
+   "badge": "时停",
+   "sfx": "stop",
+   "glow": true,
+   "zoom": [
+    1.06,
+    "OG"
+   ],
+   "vo": [
+    [
+     "d16b",
+     0.25
+    ]
+   ],
+   "pad": 0.9
+  },
+  {
+   "id": "tip",
+   "kind": "play",
+   "from": 158,
+   "to": 206,
+   "speed": 0.5,
+   "badge": "慢放 ×0.5",
+   "sfx": "resume",
+   "zoom": [
+    1.0,
+    null
+   ]
+  },
+  {
+   "id": "rew",
+   "kind": "rewind",
+   "from": 206,
+   "to": 110,
+   "dur": 0.7,
+   "badge": "倒回",
+   "sfx": "rewind"
+  },
+  {
+   "id": "real",
+   "kind": "play",
+   "from": 110,
+   "to": 300,
+   "speed": 1,
+   "audio_db": 2,
+   "badge": "原速",
+   "vo": [
+    [
+     "d17",
+     2.9
+    ]
+   ]
+  }
+ ],
+ "layers": [
+  {
+   "type": "ring",
+   "keys": [
+    "OG"
+   ],
+   "on": "A+0.3",
+   "off": "tip+0.25"
+  },
+  {
+   "type": "tag",
+   "keys": [
+    "OG"
+   ],
+   "on": "A+0.3",
+   "off": "tip+0.25"
+  },
+  {
+   "type": "tag",
+   "keys": [
+    "BR"
+   ],
+   "on": "A+0.3",
+   "off": "B"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WB",
+    "FX"
+   ],
+   "on": "B+0.3",
+   "off": "tip"
+  },
+  {
+   "type": "tag",
+   "keys": [
+    "WB",
+    "FX"
+   ],
+   "on": "B+0.3",
+   "off": "tip"
+  },
+  {
+   "type": "note",
+   "key": "BR",
+   "text": "31 英尺出手",
+   "color": "gold",
+   "on": "shot+0.5",
+   "off": "B"
+  },
+  {
+   "id": "pOG",
+   "type": "path",
+   "key": "OG",
+   "from": 118,
+   "to": 158,
+   "color": "orange",
+   "style": "flow",
+   "top": true,
+   "w": 1.4,
+   "head": 1.6,
+   "gap": 2.6,
+   "origin": true,
+   "on": "shot+0.5",
+   "off": "tip+0.25"
+  },
+  {
+   "type": "note",
+   "key": "OG",
+   "text": "没人管",
+   "color": "orange",
+   "on": "d16b+0.9",
+   "off": "tip"
+  },
+  {
+   "type": "radius",
+   "key": "OG",
+   "defs": [
+    "WB",
+    "FX",
+    "CA",
+    "HP",
+    "VS"
+   ],
+   "on": "d16b+0.8",
+   "anim": [
+    "d16b+0.8",
+    "d16b+1.5"
+   ],
+   "off": "tip"
+  }
+ ]
+}

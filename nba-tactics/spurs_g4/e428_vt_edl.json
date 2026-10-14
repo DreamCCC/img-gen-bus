@@ -1,0 +1,425 @@
+{
+ "_note": "竖屏版（文稿_竖屏5min_v2）：同 e428_edl.json 的画面和跟踪，旁白换成 audio/vo_vt。拆① 阿努诺比空切扣篮（事件 428，哈特助攻）。只出画面 + 原声/音效底轨，字幕、旁白由成片时间线叠加（读同名 .json 清单）。from/to/at 是原片帧号（30fps）；计分牌 f84=8:49/19，f112=8:48/18；f110 哈特出手传球，f116 接球，f133 起跳，f138 扣进，f150 起进攻时钟复位。f98–f114 禁区里没有马刺球员。",
+ "work": "work/e428",
+ "fps": 30,
+ "size": [
+  1920,
+  1080
+ ],
+ "orig": "work/e428/fr/orig",
+ "slow": {
+  "dir": "work/e428/fr/slow",
+  "from": 52,
+  "mul": 4
+ },
+ "audio_src": "raw/2606111033189202.mp4",
+ "vo": {
+  "lines": "film/audio/vo_vt.json",
+  "dir": "film/audio/vo_vt"
+ },
+ "vo_gap": 0.3,
+ "out": "film/work/bd/e428_vt.mp4",
+ "bed": true,
+ "under_vo": {
+  "db": -5,
+  "carve": 0.75,
+  "pad": [
+   0.25,
+   0.35
+  ]
+ },
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "badge_xy": [
+  130,
+  52
+ ],
+ "sub_y": 880,
+ "sub_size": 50,
+ "fonts": {
+  "zh": [
+   "film/assets/fonts/NotoSansSC.ttf",
+   "Black"
+  ],
+  "zhr": [
+   "film/assets/fonts/NotoSansSC.ttf",
+   "Medium"
+  ],
+  "num": [
+   "~/Library/Fonts/Action NBA Condensed-Bold.otf",
+   null
+  ]
+ },
+ "colors": {
+  "gold": [
+   232,
+   236,
+   240
+  ],
+  "orange": [
+   245,
+   132,
+   38
+  ],
+  "navy": [
+   35,
+   31,
+   32
+  ],
+  "red": [
+   200,
+   16,
+   46
+  ],
+  "blue": [
+   29,
+   66,
+   138
+  ]
+ },
+ "teams": {
+  "SAS": [
+   196,
+   206,
+   212
+  ],
+  "NYK": [
+   0,
+   107,
+   182
+  ]
+ },
+ "style": {
+  "OG": "orange",
+  "KJ": "gold",
+  "WB": "gold",
+  "FX": "team",
+  "VS": "team",
+  "JC": "team",
+  "HA": "team",
+  "KT": "team",
+  "BR": "team",
+  "MB": "team"
+ },
+ "anchors": {
+  "rim": [
+   99,
+   1435,
+   287
+  ]
+ },
+ "keep": [
+  [
+   465,
+   945,
+   1465,
+   1060
+  ]
+ ],
+ "mask_box": {
+  "99": {
+   "WB": [
+    927,
+    330,
+    1020,
+    525
+   ]
+  }
+ },
+ "segments": [
+  {
+   "id": "live",
+   "kind": "play",
+   "from": 0,
+   "to": 56,
+   "speed": 1,
+   "audio_db": -2
+  },
+  {
+   "id": "run",
+   "kind": "play",
+   "from": 56,
+   "to": 99,
+   "speed": 0.5,
+   "badge": "慢放 ×0.5"
+  },
+  {
+   "id": "A",
+   "kind": "freeze",
+   "at": 99,
+   "stop": true,
+   "spot": [
+    "OG",
+    "KJ",
+    "WB",
+    "FX",
+    "VS",
+    "JC",
+    "HA",
+    "KT",
+    "MB",
+    "BR"
+   ],
+   "focus": "OG",
+   "badge": "时停",
+   "sfx": "stop",
+   "glow": true,
+   "pad": 0.9,
+   "vo": [
+    [
+     "b5",
+     0.3
+    ]
+   ]
+  },
+  {
+   "id": "cut",
+   "kind": "play",
+   "from": 99,
+   "to": 106,
+   "speed": 0.25,
+   "badge": "慢放 ×0.25",
+   "sfx": "resume"
+  },
+  {
+   "id": "cut2",
+   "kind": "play",
+   "from": 106,
+   "to": 116,
+   "speed": 0.15
+  },
+  {
+   "id": "B",
+   "kind": "freeze",
+   "at": 116,
+   "stop": true,
+   "spot": [
+    "OG",
+    "WB",
+    "HA"
+   ],
+   "focus": "OG",
+   "badge": "时停",
+   "sfx": "stop",
+   "glow": true,
+   "zoom": [
+    1.06,
+    "OG"
+   ],
+   "pad": 0.4,
+   "dur": 1.5
+  },
+  {
+   "id": "dunk",
+   "kind": "play",
+   "from": 116,
+   "to": 148,
+   "speed": 0.4,
+   "badge": "慢放 ×0.4",
+   "sfx": "resume",
+   "zoom": [
+    1.0,
+    null
+   ],
+   "vo": [
+    [
+     "b6",
+     {
+      "end": 2.15
+     }
+    ]
+   ]
+  },
+  {
+   "id": "rew",
+   "kind": "rewind",
+   "from": 148,
+   "to": 84,
+   "dur": 0.7,
+   "badge": "倒回",
+   "sfx": "rewind"
+  },
+  {
+   "id": "real",
+   "kind": "play",
+   "from": 84,
+   "to": 200,
+   "speed": 1,
+   "audio_db": 2,
+   "badge": "原速"
+  }
+ ],
+ "layers": [
+  {
+   "type": "ring",
+   "keys": [
+    "OG"
+   ],
+   "on": "A+0.2",
+   "off": "dunk+1.5"
+  },
+  {
+   "type": "tag",
+   "keys": [
+    "OG"
+   ],
+   "on": "A+0.2",
+   "off": "dunk+1.5"
+  },
+  {
+   "id": "pRun",
+   "type": "path",
+   "key": "OG",
+   "from": 56,
+   "to": 99,
+   "color": "orange",
+   "style": "flow",
+   "top": true,
+   "w": 1.2,
+   "head": 1.4,
+   "gap": 2.6,
+   "origin": true,
+   "on": "A+0.3",
+   "off": "b5+2.0"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WB",
+    "FX",
+    "VS",
+    "JC"
+   ],
+   "on": "b5+0.8",
+   "off": "cut"
+  },
+  {
+   "type": "tag",
+   "keys": [
+    "WB",
+    "FX",
+    "VS",
+    "JC"
+   ],
+   "on": "b5+0.8",
+   "off": "cut"
+  },
+  {
+   "type": "tether",
+   "a": "VS",
+   "b": "HA",
+   "label": false,
+   "on": "b5+2.0",
+   "off": "cut"
+  },
+  {
+   "type": "tether",
+   "a": "FX",
+   "b": "KT",
+   "label": false,
+   "on": "b5+2.0",
+   "off": "cut"
+  },
+  {
+   "type": "tether",
+   "a": "JC",
+   "b": "MB",
+   "label": false,
+   "on": "b5+2.0",
+   "off": "cut"
+  },
+  {
+   "type": "zone",
+   "lane": [
+    0,
+    19,
+    6
+   ],
+   "color": "orange",
+   "fill": 0.24,
+   "label": "中路没人",
+   "label_uv": [
+    11,
+    -1
+   ],
+   "on": "b5+2.7",
+   "anim": [
+    "b5+2.7",
+    "b5+3.5"
+   ],
+   "off": "B"
+  },
+  {
+   "id": "pCut",
+   "type": "path",
+   "key": "OG",
+   "from": 99,
+   "to": 137,
+   "color": "orange",
+   "style": "flow",
+   "top": true,
+   "w": 1.4,
+   "head": 1.6,
+   "gap": 2.6,
+   "origin": true,
+   "on": "cut+0.1",
+   "off": "dunk+1.5"
+  },
+  {
+   "type": "pass",
+   "a": [
+    "HA",
+    110
+   ],
+   "b": [
+    "OG",
+    116
+   ],
+   "flow": true,
+   "on": "cut2",
+   "off": "dunk"
+  },
+  {
+   "type": "radius",
+   "key": "OG",
+   "defs": [
+    "WB",
+    "KJ",
+    "FX",
+    "VS",
+    "JC"
+   ],
+   "on": "B+0.5",
+   "anim": [
+    "B+0.5",
+    "B+1.2"
+   ],
+   "off": "dunk+0.3"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WB"
+   ],
+   "on": "B+0.9",
+   "off": "dunk+1.5"
+  },
+  {
+   "type": "tag",
+   "keys": [
+    "WB"
+   ],
+   "on": "B+0.9",
+   "off": "dunk+0.6"
+  },
+  {
+   "type": "note",
+   "key": "OG",
+   "text": "单手扣进！",
+   "color": "orange",
+   "on": "dunk+1.85",
+   "off": "rew"
+  }
+ ]
+}

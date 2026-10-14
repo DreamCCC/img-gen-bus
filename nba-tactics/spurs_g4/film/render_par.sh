@@ -1,11 +1,11 @@
 #!/bin/bash
-# 并行分段渲染再拼接：./render_par.sh <h|v> <段数> <输出.mp4> <混音.wav>
+# 并行分段渲染再拼接：./render_par.sh <h|v|f|vt> <段数> <输出.mp4> <混音.wav>
 # 分段文件留在 out/parts/，供 rerender_part.sh 局部重渲；交付压制用 deliver.sh。
 set -e
 shopt -s nullglob
 cd "$(dirname "$0")"
 mode=$1; parts=$2; out=$3; audio=$4
-query=""; [[ $mode == v ]] && query="v=1"; [[ $mode == f ]] && query="m=f"
+query=""; [[ $mode == v ]] && query="v=1"; [[ $mode == f ]] && query="m=f"; [[ $mode == vt ]] && query="m=vt"
 total=$(node -e "const j=require('./scenes/film_${mode}.json');console.log(Math.round(j.duration*30))")
 step=$(( (total + parts - 1) / parts ))
 mkdir -p out/parts

@@ -5,6 +5,7 @@ usage:
   python tools/vo_minimax.py audio/vo_full.json audio/vo_full [takes=2]
 音色 id 在 work/xjy/voices.json["minimax"]；MiniMax key 读 nba_auto_video/.env。
 情绪：EMO 里没列的句子不传 emotion，由模型按文本自己判断；TAGGED 里的句子用带停顿 / 语气标签的合成文本。
+台词 JSON 里也可以直接写 emotion / tag 字段，作用同 EMO / TAGGED（字典优先）。
 Takes 写 <out>/takes/<id>_m<k>.wav，选中的复制到 <out>/<id>.wav，另写 durations.json / picks.json。
 """
 import json
@@ -79,7 +80,7 @@ def take(job):
     ln, k, d = job
     p = d / "takes" / f"{ln['id']}_m{k}.wav"
     if not p.exists():
-        synth(p, TAGGED.get(ln["id"], ln.get("say", ln["text"])), EMO.get(ln["id"]))
+        synth(p, TAGGED.get(ln["id"], ln.get("tag", ln.get("say", ln["text"]))), EMO.get(ln["id"], ln.get("emotion")))
     cache = p.with_suffix(".asr.txt")
     if cache.exists() and cache.stat().st_mtime >= p.stat().st_mtime:
         heard = cache.read_text()
@@ -92,9 +93,9 @@ def take(job):
     return ln["id"], m
 
 
-def pick(lid, takes):
+def pick(ln, takes):
     pool = [t for t in takes if t["ok"]] or [min(takes, key=lambda t: t["err"])]
-    if lid in HYPE:
+    if ln["id"] in HYPE or ln.get("mood") == "hype":
         return max(pool, key=lambda t: t["bright"] + 0.5 * t["dyn"])
     return max(pool, key=lambda t: t["dyn"])
 
@@ -114,10 +115,10 @@ if __name__ == "__main__":
     durs, picks, bad = {}, {}, []
     for ln in lines:
         lid = ln["id"]
-        best = pick(lid, res[lid])
+        best = pick(ln, res[lid])
         shutil.copy(d / "takes" / f"{lid}_m{best['take']}.wav", d / f"{lid}.wav")
         durs[lid] = best["dur"]
-        picks[lid] = {"take": best["take"], "emotion": EMO.get(lid), "takes": res[lid]}
+        picks[lid] = {"take": best["take"], "emotion": EMO.get(lid, ln.get("emotion")), "takes": res[lid]}
         print(f"{lid:6s} 选 m{best['take']} {best['dur']:.2f}s  " + "  ".join(
             f"m{t['take']}:{t['dur']:.2f}{'' if t['ok'] else '✗' + str(t['err'])}" for t in res[lid]))
         if not best["ok"]:

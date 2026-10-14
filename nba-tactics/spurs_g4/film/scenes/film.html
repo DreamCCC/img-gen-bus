@@ -7,7 +7,9 @@
 <body>
 <canvas id="c" width="1920" height="1080"></canvas>
 <script>
-const W = 1920, H = 1080, FPS = 30;
+// W / H：横版画布尺寸；竖版（?m=vt）里横版绘制函数仍按 1920×1080 画，竖版自己的函数用 VW / VH
+let W = 1920, H = 1080;
+const FPS = 30;
 const MODE = new URLSearchParams(location.search).get('m') || 'h';
 const mk = (w, h) => Object.assign(document.createElement('canvas'), { width: w, height: h });
 const cv = document.getElementById('c');
@@ -391,7 +393,7 @@ const note = (s, t, t0, y = 236, x = 190) =>
 // ---------- 分差曲线 ----------
 // marginChart(t, g, box, { m, alpha, reveal })：g 画到比赛第几秒（0–2880）；m 0 = 小窗字号 / 1 = 全屏字号
 const MG = { yMin: -10, yMax: 38, end: 2880 };
-function marginChart(t, g, box, { m = 1, alpha = 1, reveal = null } = {}) {
+function marginChart(t, g, box, { m = 1, alpha = 1, reveal = null, peakSub = true } = {}) {
   const X = (s) => box.x + box.w * s / MG.end;
   const Y = (v) => box.y + box.h * (MG.yMax - v) / (MG.yMax - MG.yMin);
   const fs = (a, b) => lerp(a, b, m);
@@ -443,7 +445,7 @@ function marginChart(t, g, box, { m = 1, alpha = 1, reveal = null } = {}) {
   ctx.restore();
       const w = tag(`最大领先 +${top}`, cx, cy, { size: 34, alpha: alpha * mf * pa });
       const sub = peaks.filter((p) => rv(p.g) > 0).map((p) => `${p.label}（${p.sas}:${p.nyk}）`).join(' · ');
-      txt(sub, cx + w / 2 + 26, cy + 2, { size: 24, font: F.hd, weight: 500, align: 'left', color: COL.grey, alpha: alpha * mf * pa });
+      if (peakSub) txt(sub, cx + w / 2 + 26, cy + 2, { size: 24, font: F.hd, weight: 500, align: 'left', color: COL.grey, alpha: alpha * mf * pa });
     }
   }
   const ha = rv(half[0]) * m;
@@ -983,10 +985,628 @@ function ov_flow(t, ov) {
 const SH = { clip: sh_clip, quote: sh_quote, board: sh_board, mfull: sh_mfull, fgcard: sh_fgcard, xbars: sh_xbars, shotmix: sh_shotmix,
   defdist: sh_defdist, tl13: sh_tl13, summary: sh_summary, end: sh_end, black: sh_black };
 const OV = { mcorner: ov_mcorner, score: ov_score, run: ov_run, fpts: ov_fpts, huazi: ov_huazi, chapter: ov_chapter, dual: ov_dual, flow: ov_flow, shotcard: ov_shotcard };
+// =====================================================================
+// 竖版（?m=vt）：1080×1920。上方 285px 标题条，中间 1080×1350（4:5）视频窗口，下方装饰条。
+// 镜头 sh.lay：crop = 比赛画面按跟拍路径裁 4:5；quote = 发布会人物 4:5 + 名牌；panel = 16:9 整幅放进窗口（战术拆解）；
+// 没有 lay 的按 sh.sc 调竖版图卡 SHV。跟拍数据 track_vt.json（tools/track_vt.py）：每帧裁切中心 cx（素材像素）、计分牌可见度 bug。
+// 字幕固定在 SUB_Y，图卡内容避开 SUB_Y ± 45 这一条。
+// =====================================================================
+const VT = MODE === 'vt';
+const VW = 1080, VH = 1920;
+const WIN = { x: 0, y: 285, w: 1080, h: 1350 };
+const Y0 = WIN.y, WB = WIN.y + WIN.h;
+const CROP_W = 1080 * WIN.w / WIN.h;
+const BUGBOX = [436, 930, 1464, 1010];
+const SUB_Y = 1372;
+let TRK = {};
+if (VT) { cv.width = VW; cv.height = VH; }
+
+function withWH(w, h, fn) { const pw = W, ph = H; W = w; H = h; try { return fn(); } finally { W = pw; H = ph; } }
+function winRect() { ctx.beginPath(); ctx.rect(WIN.x, WIN.y, WIN.w, WIN.h); }
+function winVeil(a, color = '#000') { if (a <= 0) return; ctx.save(); ctx.globalAlpha = clamp(a); ctx.fillStyle = color; ctx.fillRect(WIN.x, WIN.y, WIN.w, WIN.h); ctx.restore(); }
+function winVignette(a) {
+  const cx = WIN.x + WIN.w / 2, cy = WIN.y + WIN.h / 2;
+  const g = ctx.createRadialGradient(cx, cy, WIN.h * 0.3, cx, cy, WIN.h * 0.85);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${a})`);
+  ctx.fillStyle = g; ctx.fillRect(WIN.x, WIN.y, WIN.w, WIN.h);
+}
+// 窗口版 courtBg：右下蓝色大圆 + 白色弧线 + 左上淡弧
+function winBg(u, { orb = true } = {}) {
+  ctx.fillStyle = COL.ink; ctx.fillRect(WIN.x, WIN.y, WIN.w, WIN.h);
+  const d = easeOut(clamp(u / 0.8));
+  ctx.save(); winRect(); ctx.clip();
+  if (orb) {
+    const ox = VW + 420, oy = WB + 300;
+    ctx.fillStyle = COL.blue; ctx.beginPath(); ctx.arc(ox, oy, 900, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 10;
+    ctx.beginPath(); ctx.arc(ox, oy, 922, Math.PI, Math.PI + 0.9 * d); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 9;
+  ctx.beginPath(); ctx.arc(300, Y0 - 230, 420, 0.15, Math.PI - 0.15); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = 'rgba(35,31,32,0.55)'; ctx.fillRect(WIN.x, WIN.y, WIN.w, WIN.h);
+}
+// 16:9 画面铺满窗口（按高度缩放，fx = 窗口中心对准的素材横向位置 0–1）
+function drawCover(im, { z = 1, fx = 0.5, filter = 'none', alpha = 1, dx = 0, dy = 0 } = {}) {
+  if (!im) return;
+  const s = WIN.h / im.height * z, w = im.width * s, h = im.height * s;
+  const x = clamp(WIN.x + WIN.w / 2 - fx * w, WIN.x + WIN.w - w, WIN.x), y = WIN.y + WIN.h / 2 - h / 2;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.filter = filter;
+  ctx.drawImage(im, x + dx, y + dy, w, h);
+  ctx.restore();
+}
+// 便宜的虚化铺底：先缩到 240×135 再放大
+const SMALL = mk(240, 135), smallCtx = SMALL.getContext('2d');
+function blurCover(im, { z = 1.08, bright = 0.4, sat = 0.7 } = {}) {
+  if (!im) return;
+  smallCtx.filter = 'blur(2px)'; smallCtx.drawImage(im, 0, 0, 240, 135); smallCtx.filter = 'none';
+  drawCover(SMALL, { z, filter: `brightness(${bright}) saturate(${sat})` });
+}
+function keyed(ks, u) {
+  if (u <= ks[0][0]) return ks[0][1];
+  for (let i = 1; i < ks.length; i++) {
+    if (u < ks[i][0]) return lerp(ks[i - 1][1], ks[i][1], easeInOut((u - ks[i - 1][0]) / (ks[i][0] - ks[i - 1][0])));
+  }
+  return ks[ks.length - 1][1];
+}
+function trk(sh, t, key, dflt) {
+  const a = TRK[sh.clip] && TRK[sh.clip][key];
+  if (!a || !a.length) return dflt;
+  const q = (t - sh.a) * FPS, i = clamp(Math.floor(q), 0, a.length - 1), j = Math.min(i + 1, a.length - 1);
+  return lerp(a[i], a[j], clamp(q - i));
+}
+
+async function shv_crop(t, sh) {
+  const im = await clip(sh.clip, t - sh.a);
+  if (!im) return;
+  const z = kb(sh, t);
+  if (im.width < im.height) {
+    // 已按 4:5 裁好的素材（发布会人物）
+    ctx.save(); ctx.filter = sh.filter || 'none';
+    ctx.translate(WIN.x + WIN.w / 2, WIN.y + WIN.h / 2); ctx.scale(z, z);
+    ctx.drawImage(im, -WIN.w / 2, -WIN.h / 2, WIN.w, WIN.h);
+    ctx.restore();
+    if (sh.vig !== 0) winVignette(sh.vig ?? 0.3);
+    return;
+  }
+  const cx = sh.cxk ? keyed(sh.cxk, t - sh.a) : (sh.cx ?? trk(sh, t, 'cx', 960));
+  const sw = CROP_W / z, shh = 1080 / z;
+  const sx = clamp(cx - sw / 2, 0, 1920 - sw), sy = clamp((1080 - shh) * (sh.fyv ?? 0.5), 0, 1080 - shh);
+  const [dx, dy] = sh.shake ? shake(t, sh.shake, 26, 0.22) : [0, 0];
+  const pad = sh.shake ? 30 : 0;
+  ctx.save(); ctx.filter = sh.filter || 'none';
+  ctx.drawImage(im, sx, sy, sw, shh, WIN.x - pad + dx, WIN.y - pad * 1.25 + dy, WIN.w + 2 * pad, WIN.h + 2.5 * pad);
+  ctx.restore();
+  // 转播计分牌被 4:5 裁掉两头：压暗那一条，整条计分牌缩放后贴回原位
+  const bv = sh.bug === false ? 0 : trk(sh, t, 'bug', 0);
+  if (bv > 0.01) {
+    const sc = WIN.h / shh, [bx1, by1, bx2, by2] = BUGBOX;
+    const y1 = WIN.y + (by1 - 12 - sy) * sc, y2 = WIN.y + (by2 + 12 - sy) * sc;
+    ctx.save(); ctx.globalAlpha = 0.86 * bv; ctx.fillStyle = 'rgb(18,16,17)'; ctx.fillRect(WIN.x, y1, WIN.w, y2 - y1); ctx.restore();
+    const bw = WIN.w - 40, bh = bw * (by2 - by1) / (bx2 - bx1);
+    ctx.save(); ctx.globalAlpha = bv; ctx.filter = sh.filter || 'none';
+    ctx.drawImage(im, bx1, by1, bx2 - bx1, by2 - by1, WIN.x + 20, (y1 + y2) / 2 - bh / 2, bw, bh);
+    ctx.restore();
+  }
+  if (sh.vig !== 0) winVignette(sh.vig ?? 0.3);
+  if (sh.flash) winVeil(decay(t, sh.flash, 0.1) * 0.85, '#fff8e8');
+  if (sh.fin) winVeil(1 - clamp((t - sh.a) / sh.fin));
+  if (sh.fout) winVeil(prog(t, sh.b - sh.fout, sh.b));
+}
+async function shv_quote(t, sh) {
+  await shv_crop(t, { ...sh, vig: 0.45, bug: false, filter: 'saturate(0.92)' });
+  winVeil(1 - clamp((t - sh.a) / 0.2));
+  const e = easeOut(prog(t, sh.a + 0.25, sh.a + 0.6)) * (1 - easeInOut(prog(t, sh.a + 4.2, sh.a + 4.6)));
+  if (e <= 0) return;
+  const x = 60, y = Y0 + 850;
+  ctx.save(); ctx.beginPath(); ctx.rect(x - 30, y - 80, 1000 * e, 230); ctx.clip();
+  slab(x, y, measure(sh.who, { size: 56, font: F.hd, weight: 900 }) + 70, 82, COL.blue);
+  ctx.fillStyle = COL.red; ctx.fillRect(x - 8, y, 8, 82);
+  ctx.restore();
+  txt(sh.who, x + 35, y + 43, { size: 56, font: F.hd, weight: 900, align: 'left', alpha: e });
+  txt(sh.role, x + 4, y + 118, { size: 32, font: F.hd, weight: 700, align: 'left', alpha: e, shadow: 8 });
+  txt(sh.kicker || '赛后发布会 · POSTGAME', x + 4, y - 30, { size: 28, font: F.ko, weight: 'normal', align: 'left', alpha: e * 0.9, spacing: 3, shadow: 6 });
+}
+// 竖版图卡左上标题
+function cardHeadV(t, t0, kicker, title, { x = 60, y = Y0 + 64, alpha = 1 } = {}) {
+  const e = easeOut(prog(t, t0, t0 + 0.45)) * alpha;
+  if (e <= 0) return;
+  const dx = (1 - e) * -30;
+  ctx.save(); ctx.globalAlpha = e; ctx.fillStyle = COL.red; ctx.fillRect(x, y, 10, 66); ctx.restore();
+  txt(kicker, x + 30 + dx, y + 12, { size: 28, font: F.ko, weight: 'normal', align: 'left', alpha: e, color: COL.grey, spacing: 3 });
+  txt(title, x + 30 + dx, y + 52, { size: 54, font: F.hd, weight: 900, align: 'left', alpha: e });
+}
+const noteV = (s, t, t0, y, x = 90) =>
+  txt(s, x, y, { size: 26, font: F.hd, weight: 500, align: 'left', color: COL.grey, alpha: easeOut(prog(t, t0, t0 + 0.4)) * 0.85 });
+
+// 战术拆解：16:9 整幅，底下铺同一帧的虚化；sh.py 面板上沿
+async function shv_panel(t, sh) {
+  const im = await clip(sh.clip, t - sh.a);
+  blurCover(im, { bright: 0.32 });
+  winVignette(0.5);
+  const y = sh.py ?? Y0 + (WIN.h - 608) / 2, h = WIN.w * 9 / 16;
+  if (im) {
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 30;
+    ctx.drawImage(im, WIN.x, y, WIN.w, h); ctx.restore();
+  }
+  ctx.fillStyle = COL.red; ctx.fillRect(WIN.x, y - 6, 180, 6);
+  ctx.fillStyle = COL.blue; ctx.fillRect(WIN.x + WIN.w - 180, y + h, 180, 6);
+  if (sh.head) cardHeadV(t, sh.a + 0.2, sh.kicker || 'BREAKDOWN', sh.head, { y: y - 120 });
+  if (sh.fin) winVeil(1 - clamp((t - sh.a) / sh.fin));
+}
+
+// 计分牌卡：sh.flip 时刻 sas/nyk → sas2/nyk2，表头 head → head2；sh.peak 亮"最大领先"；sh.record 换成历史逆转对比
+async function shv_board(t, sh) {
+  const u = t - sh.a;
+  blurCover(await clip(sh.bg, sh.bgT || 0), { z: 1.1 + 0.04 * u / 10, bright: 0.45, sat: 0.6 });
+  winVignette(0.7);
+  winVeil(1 - clamp(u / 0.3));
+  const e = easeOut(clamp((u - (sh.delay || 0)) / 0.5)), oy = (1 - e) * 60;
+  const flipped = sh.flip && t >= sh.flip;
+  const fade = sh.record ? 1 - prog(t, sh.record - 0.25, sh.record) : 1;
+  const ba = e * fade;
+  if (ba > 0) {
+    const head = flipped ? sh.head2 : sh.head;
+    const hw = measure(head, { size: 40, font: F.hd, weight: 900, spacing: 4 }) + 100;
+    ctx.save(); ctx.globalAlpha = ba; slab(VW / 2 - hw / 2, Y0 + 250 + oy, hw, 68, flipped ? COL.red : COL.blue); ctx.restore();
+    txt(head, VW / 2, Y0 + 286 + oy, { size: 40, font: F.hd, weight: 900, alpha: ba, spacing: 4 });
+    withWH(VW, VH, () => {
+      teamRow(Y0 + 450 + oy, '马刺', COL.sas, sh.flip ? sh.sas2 : sh.sas, sh.sas, sh.flip || 0, t, { alpha: ba, w: 960 });
+      teamRow(Y0 + 610 + oy, '尼克斯', COL.nyk, sh.flip ? sh.nyk2 : sh.nyk, sh.nyk, sh.flip || 0, t, { alpha: ba, w: 960, win: !!sh.flip });
+    });
+    if (sh.flip) winVeil(decay(t, sh.flip, 0.12) * 0.35, '#ffffff');
+  }
+  if (sh.peak) {
+    const pa = clamp((t - sh.peak) / 0.25) * (sh.flip ? 1 - prog(t, sh.flip - 0.2, sh.flip) : 1) * fade;
+    if (pa > 0) {
+      txt('最大领先', VW / 2 - 40, Y0 + 790, { size: 52, font: F.hd, weight: 900, align: 'right', alpha: pa });
+      txt('29', VW / 2 - 10, Y0 + 796, { size: 116, font: F.numW, align: 'left', alpha: pa, color: COL.red });
+      txt('分', VW / 2 + 126, Y0 + 790, { size: 52, font: F.hd, weight: 900, align: 'left', alpha: pa });
+    }
+  }
+  if (sh.lead) huazi(t, sh.leadT, sh.lead, VW / 2, Y0 + 820, { size: 80, bg: COL.red, kicker: sh.leadK || '' });
+  if (sh.record) {
+    huazi(t, sh.record, '总决赛史上最大逆转', VW / 2, Y0 + 330, { size: 90, bg: COL.red, kicker: 'Largest Finals comeback' });
+    const ra = clamp((t - sh.record24) / 0.3);
+    if (ra > 0) {
+      [['2008 凯尔特人', 24, COL.mid], ['2026 尼克斯', 29, COL.nyk]].forEach(([lab, v, c], i) => {
+        const y = Y0 + 600 + i * 210, grow = easeOut(clamp((t - sh.record24 - i * 0.35) / 0.6));
+        txt(lab, 70, y - 70, { size: 46, font: F.hd, weight: 900, align: 'left', alpha: ra });
+        ctx.save(); ctx.globalAlpha = ra; slab(80, y - 38, 26 * v * grow, 76, c, -0.15); ctx.restore();
+        txt(String(Math.round(v * grow)), 112 + 26 * v * grow, y + 8, { size: 100, font: F.numW, align: 'left', alpha: ra, color: i ? COL.white : COL.light });
+      });
+      txt('逆转分差（分）', 80, Y0 + 940, { size: 30, font: F.hd, weight: 500, align: 'left', alpha: ra * 0.8, color: COL.grey });
+    }
+  }
+}
+
+// 应得 / 实得：柱子竖排，差值标在实得柱右侧
+function xbarGroupV(t, g) {
+  const { cx, bw, k, base, label, slabColor, xp, pts, tExp, tReal, tDiff, realColor, diffNote } = g;
+  const Yv = (v) => base - v * k;
+  const gap = 24, xe = cx - gap / 2 - bw, xr = cx + gap / 2;
+  const ge = easeOut(prog(t, tExp, tExp + 0.6)), gr2 = easeOut(prog(t, tReal, tReal + 0.8));
+  const la = clamp((t - tExp) / 0.3);
+  if (la <= 0) return;
+  txt('应得', xe + bw / 2, base + 30, { size: 30, font: F.hd, weight: 700, color: COL.grey, alpha: la });
+  txt('实得', xr + bw / 2, base + 30, { size: 30, font: F.hd, weight: 700, alpha: clamp((t - tReal) / 0.3) });
+  ctx.save(); ctx.globalAlpha = la; slab(cx - 120, base + 62, 240, 60, slabColor); ctx.restore();
+  txt(label, cx, base + 93, { size: 38, font: F.hd, weight: 900, alpha: la });
+  const bar = (x, v, gg, c) => { if (gg <= 0) return; ctx.fillStyle = c; ctx.fillRect(x, Yv(v * gg), bw, v * gg * k); };
+  bar(xe, xp, ge, COL.mid);
+  bar(xr, pts, gr2, realColor);
+  if (ge > 0) txt(String(Math.round(Math.round(xp) * ge)), xe + bw / 2, Yv(xp * ge) - 40, { size: 76, font: F.numW, color: COL.light });
+  if (gr2 > 0) txt(String(Math.round(pts * gr2)), xr + bw / 2, Yv(pts * gr2) - 40, { size: 76, font: F.numW, color: realColor === COL.red ? COL.red : COL.white });
+  const da = easeOut(prog(t, tDiff, tDiff + 0.4));
+  if (da <= 0) return;
+  const d = Math.round(pts - xp), hiV = Math.max(xp, pts), loV = Math.min(xp, pts);
+  ctx.save(); ctx.globalAlpha = da;
+  ctx.setLineDash([10, 8]); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+  ctx.beginPath(); ctx.moveTo(xe, Yv(xp)); ctx.lineTo(xr + bw + 14, Yv(xp)); ctx.stroke();
+  if (pts < xp) { ctx.strokeStyle = COL.red; ctx.strokeRect(xr + 1.5, Yv(xp), bw - 3, (xp - pts) * k); }
+  ctx.setLineDash([]);
+  const bx = xr + bw + 22, c = d > 0 ? COL.white : COL.red;
+  ctx.strokeStyle = c; ctx.lineWidth = 4;
+  const y0 = Yv(hiV), y1 = lerp(Yv(hiV), Yv(loV), da);
+  ctx.beginPath(); ctx.moveTo(bx - 10, y0); ctx.lineTo(bx, y0); ctx.lineTo(bx, y1); ctx.lineTo(bx - 10, y1); ctx.stroke();
+  ctx.restore();
+  const my = (Yv(hiV) + Yv(loV)) / 2;
+  txt(signed(d), bx + 16, my - 14 + (1 - da) * 16, { size: 80, font: F.numW, align: 'left', color: c, alpha: da });
+  txt(diffNote, bx + 18, my + 44, { size: 28, font: F.hd, weight: 700, align: 'left', color: COL.grey, alpha: da });
+}
+async function shv_xbars(t, sh) {
+  const u = t - sh.a;
+  winBg(u);
+  winVeil(1 - clamp(u / 0.25));
+  cardHeadV(t, sh.a + 0.1, 'EXPECTED vs ACTUAL POINTS', '马刺投篮得分：应得 vs 实得');
+  noteV('应得 = 每次出手的预估命中率 × 分值，再求和（不含罚球）', t, sh.a + 0.3, Y0 + 176);
+  const base = Y0 + 900, k = 8;
+  const x1 = GD.xpts['1H'], x2 = GD.xpts['2H'];
+  ctx.save(); ctx.globalAlpha = easeOut(prog(t, sh.a, sh.a + 0.5)); ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fillRect(60, base, 960, 3); ctx.restore();
+  const one = sh.n === 1;
+  xbarGroupV(t, { cx: one ? 440 : 270, bw: one ? 200 : 140, k, base, label: '上半场', slabColor: COL.blue, xp: x1.xpts, pts: x1.pts,
+    tExp: sh.e1, tReal: sh.r1, tDiff: sh.d1, realColor: COL.sas, diffNote: '手感多给' });
+  if (!one) xbarGroupV(t, { cx: 740, bw: 140, k, base, label: '下半场', slabColor: COL.red, xp: x2.xpts, pts: x2.pts,
+    tExp: sh.e2, tReal: sh.r2, tDiff: sh.d2, realColor: COL.red, diffNote: '少进' });
+}
+
+// 出手构成：标签在条上方，条宽 960
+function mixRowV(t, t0, y, q, label, { dim = 1, hl = null, tHl = 99, hls = null } = {}) {
+  const Q = GD.quarters[q];
+  const e = easeOut(prog(t, t0, t0 + 0.7));
+  if (e <= 0) return;
+  if (hls) { hl = null; tHl = 99; for (const [k, ts] of hls) if (t >= ts) { hl = k; tHl = ts; } if (!hl) [hl, tHl] = hls[0]; }
+  const x0 = 60, bw = 960, bh = 124, la = clamp((t - t0) / 0.3) * dim;
+  runs([[label, { size: 44, font: F.hd, weight: 900 }], [`${Q.fga} 次出手`, { size: 28, font: F.hd, weight: 500, color: COL.grey }]], x0, y - 44, { align: 'left', alpha: la, gap: 18 });
+  let x = x0;
+  for (const k of ['three', 'mid', 'rim']) {
+    const n = Q[k], w = bw * n / Q.fga * e;
+    const [name, c] = KIND[k];
+    const glow = hl === k ? easeOut(prog(t, tHl, tHl + 0.3)) : 0;
+    ctx.save(); ctx.globalAlpha = dim * (hl && hl !== k ? lerp(1, 0.45, easeOut(prog(t, tHl, tHl + 0.3))) : 1);
+    ctx.fillStyle = c; ctx.fillRect(x, y, Math.max(0, w - 4), bh);
+    if (glow > 0) { ctx.strokeStyle = COL.white; ctx.lineWidth = 5; ctx.globalAlpha = glow * dim; ctx.strokeRect(x + 2, y - 4, w - 8, bh + 8); }
+    ctx.restore();
+    const ta = clamp((t - t0 - 0.5) / 0.3) * dim;
+    if (w > 120) {
+      txt(`${name} ${n}`, x + 16, y + 34, { size: 30, font: F.hd, weight: 900, align: 'left', alpha: ta });
+      txt(`${Math.round(n / Q.fga * 100)}%`, x + w - 16, y + bh - 34, { size: 46, font: F.numW, align: 'right', alpha: ta });
+    }
+    x += w;
+  }
+}
+async function shv_shotmix(t, sh) {
+  const u = t - sh.a;
+  winBg(u, { orb: false });
+  winVeil(1 - clamp(u / 0.25));
+  const q = sh.q, Q = GD.quarters[q];
+  cardHeadV(t, sh.a + 0.1, 'SAN ANTONIO · SHOT MIX', q === 'Q3' ? '马刺第三节出手构成' : '马刺第四节出手构成');
+  noteV('篮下 = 出手距离 4 英尺以内；数据：NBA 追踪数据', t, sh.a + 0.3, Y0 + 176);
+  if (q === 'Q3') {
+    mixRowV(t, sh.bar, Y0 + 420, 'Q3', '第三节', { hl: 'three', tHl: sh.three });
+    const ra = easeOut(prog(t, sh.result, sh.result + 0.35));
+    runs([['三分', { size: 44, font: F.hd, weight: 900, color: COL.grey }], [`${Q.three_m}`, { size: 170, font: F.numW, color: COL.red }],
+      [`/${Q.three}`, { size: 100, font: F.numW, color: COL.mid }]], VW / 2, Y0 + 760 + (1 - ra) * 24, { alpha: ra, gap: 14 });
+    runs([['全节', { size: 40, font: F.hd, weight: 900, color: COL.grey }], [`${Q.fgm}/${Q.fga}`, { size: 90, font: F.numW, color: COL.white }]],
+      VW / 2, Y0 + 930 + (1 - ra) * 24, { alpha: ra, gap: 14 });
+  } else {
+    mixRowV(t, sh.a + 0.2, Y0 + 360, 'Q3', '第三节', { dim: 0.55 });
+    mixRowV(t, sh.bar, Y0 + 610, 'Q4', '第四节', { hl: sh.hl, tHl: sh.hlT, hls: sh.hls });
+    huazi(t, sh.result, `${Q.fga} 投 ${Q.fgm} 中`, VW / 2, Y0 + 930, { size: 100, bg: COL.red, anim: 'slam', kicker: `Q4 FG ${Q.fgm}/${Q.fga}` });
+  }
+}
+
+// 防守人的手离球多远
+async function shv_defdist(t, sh) {
+  const u = t - sh.a;
+  winBg(u, { orb: false });
+  winVeil(1 - clamp(u / 0.25));
+  cardHeadV(t, sh.a + 0.1, 'SAN ANTONIO · CONTEST', '马刺出手时，防守人的手离球多远');
+  noteV('防守人身体离球最近的部位到球的距离，每次出手取平均', t, sh.a + 0.3, Y0 + 176);
+  const k = 125, bx = 110;
+  [['Q3', '第三节', sh.r3, COL.light], ['Q4', '第四节', sh.r4, COL.red]].forEach(([q, label, t0, c], i) => {
+    const Q = GD.quarters[q], y = Y0 + 380 + i * 250;
+    const e = easeOut(prog(t, t0, t0 + 0.8));
+    if (e <= 0) return;
+    const a = clamp((t - t0) / 0.3);
+    txt(label, 60, y - 92, { size: 42, font: F.hd, weight: 900, align: 'left', alpha: a });
+    ctx.save(); ctx.globalAlpha = a;
+    ctx.fillStyle = COL.nykOr; ctx.beginPath(); ctx.arc(bx, y, 30, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(bx - 30, y); ctx.lineTo(bx + 30, y); ctx.moveTo(bx, y - 30); ctx.lineTo(bx, y + 30); ctx.stroke();
+    const d = Q.def_avg * e, hx = bx + 30 + d * k;
+    ctx.setLineDash([12, 8]); ctx.strokeStyle = c; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(bx + 36, y); ctx.lineTo(hx, y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = c; ctx.fillRect(hx - 4, y - 46, 8, 92);
+    ctx.restore();
+    txt('球', bx, y + 62, { size: 24, font: F.hd, weight: 700, color: COL.grey, alpha: a });
+    txt('手', hx, y + 66, { size: 24, font: F.hd, weight: 700, color: COL.grey, alpha: a });
+    runs([[d.toFixed(1), { size: 110, font: F.numW, color: i ? COL.red : COL.white }], ['英尺', { size: 36, font: F.hd, weight: 900, color: COL.grey }]],
+      bx + 30 + 4.2 * k + 40, y + 6, { align: 'left', alpha: a, gap: 12 });
+    if (i === 1) txt('≈ 0.8 米', bx + 30 + 4.2 * k + 40, y + 96, { size: 44, font: F.hd, weight: 900, align: 'left', alpha: easeOut(prog(t, sh.m80, sh.m80 + 0.3)) });
+  });
+  const oa = easeOut(prog(t, sh.open, sh.open + 0.4));
+  if (oa > 0) {
+    txt('手离球 6 英尺（约 1.8 米）以上的出手', 60, Y0 + 850, { size: 30, font: F.hd, weight: 700, align: 'left', color: COL.grey, alpha: oa });
+    [['Q3', '第三节'], ['Q4', '第四节']].forEach(([q, label], i) => {
+      const Q = GD.quarters[q], y = Y0 + 920 + i * 74;
+      txt(label, 60, y, { size: 30, font: F.hd, weight: 900, align: 'left', alpha: oa });
+      Q.def_seq.forEach((d, j) => {
+        ctx.save(); ctx.globalAlpha = oa * clamp((t - sh.open - j * 0.03) / 0.2);
+        slab(170 + j * 31, y - 24, 20, 48, d >= 6 ? COL.white : 'rgba(255,255,255,0.14)', -0.3); ctx.restore();
+      });
+      runs([[`${Q.open6}`, { size: 56, font: F.numW, color: i ? COL.red : COL.white }], [`/${Q.def_n}`, { size: 36, font: F.numW, color: COL.mid }]],
+        170 + 20 * 31 + 30, y + 4, { align: 'left', alpha: oa });
+    });
+  }
+}
+
+// 全场分差曲线：sh.segs 驱动；sh.mark 标注
+async function shv_mfull(t, sh) {
+  const u = t - sh.a;
+  winBg(u, { orb: false });
+  winVeil(1 - clamp(u / 0.25));
+  const clk = gameClock(sh.segs);
+  const g = clk.g(t);
+  const box = { x: 130, y: Y0 + 420, w: 880, h: 560 };
+  cardHeadV(t, sh.a + 0.1, 'SAN ANTONIO · GAME FLOW', '马刺领先分差走势');
+  noteV('负值 = 尼克斯领先；比分按 马刺:尼克斯', t, sh.a + 0.3, Y0 + 176);
+  const res = marginChart(t, g, box, { m: 1, peakSub: false, reveal: (gm) => (g >= gm ? clamp((t - clk.tOf(gm)) / 0.3) : 0) });
+  txt('SPURS LEAD', 1020, Y0 + 236, { size: 26, font: F.ko, weight: 'normal', align: 'right', color: COL.grey, spacing: 3 });
+  txt(signed(res.cur), 1020, Y0 + 316, { size: 120, font: F.numW, align: 'right', color: res.cur < 0 ? COL.nykOr : COL.white });
+  if (sh.mark) {
+    const ma = easeOut(prog(t, sh.mark.t, sh.mark.t + 0.35));
+    if (ma > 0) {
+      const x = res.X(sh.mark.g), y = res.Y(sh.mark.v);
+      ctx.save(); ctx.globalAlpha = ma; ctx.strokeStyle = COL.white; ctx.setLineDash([8, 6]); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, box.y); ctx.lineTo(x, box.y + box.h); ctx.stroke(); ctx.restore();
+      const w = tag(sh.mark.text, x - 16, y - 70, { size: 34, bg: COL.red, align: 'right', alpha: ma });
+      txt(sh.mark.sub, x - 16 - w / 2, y - 22, { size: 28, font: F.hd, weight: 500, color: COL.grey, alpha: ma });
+    }
+  }
+  if (sh.huazi) huazi(t, sh.huazi.t, sh.huazi.text, VW / 2, Y0 + 312, { size: 72, bg: COL.red, anim: 'slam', kicker: sh.huazi.kicker || '' });
+}
+
+// 福克斯拿球 → 起跳：两行，每行一帧原画 + 放大的计分牌时钟
+async function shv_tl13(t, sh) {
+  const u = t - sh.a;
+  winBg(u, { orb: false });
+  winVeil(1 - clamp(u / 0.25));
+  cardHeadV(t, sh.a + 0.1, 'THE LAST 13 SECONDS', '福克斯拿住球 → 起跳');
+  const cells = [[sh.st1, sh.bug1, sh.a + 0.3, '拿住球', '13.0'], [sh.st2, sh.bug2, sh.t2, '起跳', '12.5']];
+  for (const [i, [st, bug, t0, label, clk]] of cells.entries()) {
+    const e = easeOut(prog(t, t0, t0 + 0.4));
+    if (e <= 0) continue;
+    const y = Y0 + 300 + i * 420, x = 60, w = 560, h = 315;
+    ctx.save(); ctx.globalAlpha = e; ctx.translate(0, (1 - e) * 30);
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 24;
+    const im = await clip(st, 0);
+    if (im) ctx.drawImage(im, 0, 0, im.width, im.height, x, y, w, h);
+    ctx.shadowBlur = 0;
+    const bi = await clip(bug, 0);
+    if (bi) { ctx.drawImage(bi, 640, y + 82, 380, 152); ctx.strokeStyle = '#f5c542'; ctx.lineWidth = 4; ctx.strokeRect(640, y + 82, 380, 152); }
+    ctx.restore();
+    tag(label, x + 20, y - 40, { size: 36, bg: i ? COL.red : COL.blue, align: 'left', alpha: e });
+    txt(clk, 1020, y - 36, { size: 84, font: F.numW, align: 'right', alpha: e });
+  }
+  const la = easeOut(prog(t, sh.t3, sh.t3 + 0.4));
+  if (la > 0) huazi(t, sh.t3 + 0.15, '不到 1 秒', VW / 2, Y0 + 1000, { size: 72, bg: COL.red, anim: 'slam' });
+}
+
+// 收尾三行
+async function shv_summary(t, sh) {
+  const u = t - sh.a;
+  winBg(u);
+  winVeil(1 - clamp(u / 0.3));
+  cardHeadV(t, sh.a + 0.1, 'HOW THE SPURS LET IT SLIP', '马刺是怎么输掉的');
+  sh.rows.forEach(([head, body], i) => {
+    const t0 = sh.t[i], e = easeOut(prog(t, t0, t0 + 0.35));
+    if (e <= 0) return;
+    const y = Y0 + 330 + i * 250, x = 60, last = i === sh.rows.length - 1;
+    ctx.save(); ctx.beginPath(); ctx.rect(x - 40, y - 100, 1100 * e, 200); ctx.clip();
+    ctx.fillStyle = 'rgba(35,31,32,0.88)'; ctx.fillRect(x, y - 90, 960, 180);
+    slab(x + 30, y - 45, 84, 90, last ? COL.red : COL.blue);
+    ctx.restore();
+    txt(String(i + 1), x + 72, y + 2, { size: 64, font: F.numW, alpha: e });
+    txt(head, x + 160, y - 34, { size: 46, font: F.hd, weight: 900, align: 'left', alpha: e, color: last ? COL.white : COL.light });
+    txt(body, x + 160, y + 36, { size: 38, font: F.hd, weight: 500, align: 'left', alpha: e });
+  });
+}
+
+// 标题卡
+async function shv_title(t, sh) {
+  const u = t - sh.a, lit = t >= sh.hit;
+  const [dx, dy] = shake(t, sh.hit, 24, 0.2);
+  drawCover(await clip(sh.clip, u), { z: 1.08, fx: sh.fx ?? 0.5, dx, dy, filter: lit ? 'blur(6px) brightness(0.42) saturate(0.7)' : 'brightness(0.75) saturate(0.85)' });
+  winVignette(0.8);
+  winVeil(1 - clamp(u / 0.3));
+  winVeil(decay(t, sh.hit, 0.12) * 0.9, '#fff6e0');
+  if (!lit) return;
+  const k = easeOut(clamp((t - sh.hit) / 0.25)), cy = Y0 + 520;
+  ctx.save(); ctx.translate(VW / 2, cy); ctx.scale(lerp(1.4, 1, k), lerp(1.4, 1, k)); ctx.translate(-VW / 2, -cy);
+  txt('领先', 400, cy + 20, { size: 100, font: F.hd, weight: 900, align: 'right', alpha: k, shadow: 20 });
+  txt('29', 580, cy + 12, { size: 300, font: F.numW, alpha: k, shadow: 30 });
+  ctx.save(); ctx.globalAlpha = k; slab(430, cy + 128, 300 * easeOut(clamp((t - sh.hit - 0.1) / 0.3)), 16, COL.red, -1); ctx.restore();
+  txt('分', 760, cy + 20, { size: 100, font: F.hd, weight: 900, align: 'left', alpha: k, shadow: 20 });
+  ctx.restore();
+  huazi(t, sh.hit + 0.3, '马刺是怎么输掉的？', VW / 2, Y0 + 800, { size: 84, bg: COL.blue, kicker: 'How the Spurs let it slip' });
+}
+
+async function shv_end(t, sh) {
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, VW, VH);
+  const a = clamp((t - sh.a) / 0.6) * (1 - prog(t, sh.b - 0.8, sh.b));
+  const rows = sh.lines.reduce((n, [h]) => n + (h ? 2 : 1), 0);
+  let y = VH / 2 - rows * 34;
+  for (const [head, body] of sh.lines) {
+    if (head) { y += 24; txt(head, VW / 2, y, { size: 34, font: F.hd, weight: 700, color: COL.grey, alpha: a }); y += 58; }
+    txt(body, VW / 2, y, { size: 36, font: F.hd, weight: 500, alpha: a }); y += 60;
+  }
+}
+async function shv_black() { ctx.fillStyle = '#000'; ctx.fillRect(WIN.x, WIN.y, WIN.w, WIN.h); }
+
+// 拆③ 时停：面板下方两个时钟 + 面板里计分牌闪框；面板上方一句结论
+function ov_dualV(t, ov) {
+  const out = 1 - easeInOut(prog(t, ov.b - 0.35, ov.b));
+  const py = ov.py, ph = WIN.w * 9 / 16;
+  const card = (t0, x, label, kicker, val, color) => {
+    const e = easeOut(prog(t, t0, t0 + 0.4)) * out;
+    if (e <= 0) return;
+    const y = py + ph + 40, w = 470, h = 230;
+    ctx.save(); ctx.globalAlpha = e; ctx.translate(0, (1 - e) * 30);
+    ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 26;
+    ctx.fillStyle = 'rgba(35,31,32,0.94)'; ctx.fillRect(x, y, w, h); ctx.shadowBlur = 0;
+    ctx.fillStyle = color; ctx.fillRect(x, y, w, 58);
+    ctx.restore();
+    txt(label, x + 26, y + 30, { size: 34, font: F.hd, weight: 900, align: 'left', alpha: e });
+    txt(kicker, x + w - 20, y + 32, { size: 22, font: F.ko, weight: 'normal', align: 'right', alpha: e * 0.85, spacing: 2 });
+    runs([[val, { size: 140, font: F.numW }], ['秒', { size: 44, font: F.hd, weight: 900, color: COL.grey }]], x + w / 2, y + 150, { alpha: e, gap: 10 });
+  };
+  card(ov.tl, 50, '比赛剩余', 'GAME CLOCK', '13.0', COL.blue);
+  card(ov.tr, 560, '进攻时钟', 'SHOT CLOCK', '24', COL.red);
+  const ga = easeOut(prog(t, ov.tgt, ov.tgt + 0.3)) * out;
+  if (ga > 0) {
+    txt('<', 540, py + ph + 40 + 150, { size: 110, font: F.numW, color: COL.red, alpha: ga });
+    tag('进攻时间比比赛剩余时间还多', VW / 2, py - 64, { size: 40, bg: COL.red, alpha: ga });
+  }
+  const ba = easeOut(prog(t, ov.tl, ov.tl + 0.3)) * out;
+  if (ba > 0) {
+    const s = WIN.w / 1920;
+    ctx.save(); ctx.globalAlpha = ba * (0.7 + 0.3 * Math.sin(t * 6)); ctx.strokeStyle = '#f5c542'; ctx.lineWidth = 4;
+    ctx.strokeRect(WIN.x + 1238 * s, py + 940 * s, 196 * s, 60 * s); ctx.restore();
+  }
+}
+// 拆③ 持球流程：盖在面板上，四个节点竖排
+function ov_flowV(t, ov) {
+  const out = 1 - easeInOut(prog(t, ov.b - 0.35, ov.b));
+  winVeil(easeOut(prog(t, ov.a, ov.a + 0.4)) * 0.62 * out);
+  const e0 = easeOut(prog(t, ov.a, ov.a + 0.4)) * out;
+  tag('这球怎么打', 60, Y0 + 120, { size: 44, bg: COL.blue, align: 'left', alpha: e0 });
+  const w = 860, h = 150, gap = 64, x = (VW - w) / 2, y0 = Y0 + 210;
+  ov.nodes.forEach(([head, sub], i) => {
+    const e = easeOut(prog(t, ov.keys[i], ov.keys[i] + 0.35)) * out;
+    if (e <= 0) return;
+    const y = y0 + i * (h + gap), last = i === ov.nodes.length - 1;
+    ctx.save(); ctx.globalAlpha = e; ctx.translate((1 - e) * -24, 0);
+    ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 22;
+    ctx.fillStyle = 'rgba(35,31,32,0.95)'; ctx.fillRect(x, y, w, h); ctx.shadowBlur = 0;
+    ctx.fillStyle = last ? COL.red : COL.blue; ctx.fillRect(x, y, 12, h);
+    if (i > 0) {
+      ctx.fillStyle = COL.white; const ax = VW / 2, ay = y - gap + 10;
+      ctx.fillRect(ax - 3, ay, 6, gap - 34); ctx.beginPath(); ctx.moveTo(ax, y - 8); ctx.lineTo(ax - 14, y - 26); ctx.lineTo(ax + 14, y - 26); ctx.fill();
+    }
+    ctx.restore();
+    txt(head, x + 44, y + 54, { size: 46, font: F.hd, weight: 900, align: 'left', alpha: e });
+    txt(sub, x + 44, y + 110, { size: 30, font: F.hd, weight: 500, align: 'left', color: COL.grey, alpha: e });
+  });
+}
+
+// 横版叠加层整体缩放后搬到窗口右上 / 左侧
+const placed = (fn, x0, y0, s, tx, ty) => (t, ov) => { ctx.save(); ctx.translate(tx - x0 * s, ty - y0 * s); ctx.scale(s, s); fn(t, ov); ctx.restore(); };
+const OVV = {
+  score: placed(ov_score, 1500, 56, 0.95, VW - 40 - 370 * 0.95, Y0 + 36),
+  run: placed(ov_run, 1520, 70, 0.95, VW - 40 - 350 * 0.95, Y0 + 36),
+  fpts: placed(ov_fpts, 1340, 70, 0.95, VW - 40 - 530 * 0.95, Y0 + 36),
+  shotcard: placed(ov_shotcard, 1450, 60, 0.95, VW - 40 - 420 * 0.95, Y0 + 36),
+  chapter: placed(ov_chapter, 130, 250, 0.82, 60, Y0 + 230),
+  huazi: ov_huazi, dual: ov_dualV, flow: ov_flowV,
+};
+const SHV = { board: shv_board, xbars: shv_xbars, shotmix: shv_shotmix, defdist: shv_defdist, mfull: shv_mfull, tl13: shv_tl13,
+  summary: shv_summary, title: shv_title, end: shv_end, black: shv_black };
+
+function bandsV() {
+  ctx.fillStyle = COL.ink; ctx.fillRect(0, 0, VW, VH);
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, VW, Y0); ctx.clip();
+  ctx.fillStyle = COL.blue; ctx.beginPath(); ctx.arc(VW + 160, -560, 820, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 8;
+  ctx.beginPath(); ctx.arc(VW + 160, -560, 842, Math.PI * 0.55, Math.PI * 0.92); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 8;
+  ctx.beginPath(); ctx.arc(160, 420, 330, Math.PI * 1.05, Math.PI * 1.9); ctx.stroke();
+  ctx.fillStyle = 'rgba(35,31,32,0.45)'; ctx.fillRect(0, 0, VW, Y0);
+  ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(0, WB, VW, VH - WB); ctx.clip();
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.arc(VW / 2, VH + 150, 480, Math.PI, 2 * Math.PI); ctx.stroke();
+  ctx.strokeRect(VW / 2 - 150, VH - 175, 300, 260);
+  ctx.beginPath(); ctx.arc(VW / 2, VH - 175, 112, Math.PI, 2 * Math.PI); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = COL.red; ctx.fillRect(0, Y0 - 6, 200, 6);
+}
+function topBandV(t) {
+  if (LOGO) {
+    const lh = 76, lw = lh * LOGO.width / LOGO.height;
+    ctx.save(); ctx.globalAlpha = 0.95; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(LOGO, 44, 38, lw, lh); ctx.restore();
+  }
+  txt('NBA FINALS · GAME 4', VW - 44, 80, { size: 30, font: F.ko, weight: 'normal', align: 'right', color: COL.grey, spacing: 3 });
+  runs([['领先', { size: 62, font: F.hd, weight: 900 }], ['29', { size: 96, font: F.numW, color: COL.red }], ['分，马刺是怎么输掉的？', { size: 62, font: F.hd, weight: 900 }]],
+    VW / 2, 176, { gap: 8 });
+  const c = (TL.chap || []).filter((x) => t >= x[0]).pop();
+  if (c) {
+    const e = easeOut(prog(t, c[0], c[0] + 0.45));
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 220, 60 + 1000 * e, 60); ctx.clip();
+    slab(50, 227, 86, 46, COL.red);
+    const tw = measure(c[2], { size: 32, font: F.hd, weight: 900 });
+    slab(146, 227, tw + 50, 46, 'rgba(255,255,255,0.12)');
+    ctx.restore();
+    txt(c[1], 93, 252, { size: 40, font: F.numW, alpha: e });
+    txt(c[2], 171, 250, { size: 32, font: F.hd, weight: 900, align: 'left', alpha: e });
+  }
+  txt('AI 合成配音 · 内部测试版', VW / 2, VH - 44, { size: 22, font: F.hd, weight: 500, color: COL.grey, alpha: 0.55 });
+}
+function wrapLines(s, maxW, o) {
+  const words = s.split(' '), lines = [];
+  let cur = '';
+  for (const w of words) {
+    const nx = cur ? `${cur} ${w}` : w;
+    if (cur && measure(nx, o) > maxW) { lines.push(cur); cur = w; } else cur = nx;
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+function subtitlesV(t) {
+  for (const v of TL.vo) {
+    for (const c of v.chunks) {
+      const a = v.t + c.a, b = v.t + c.b + (c === v.chunks[v.chunks.length - 1] ? 0.2 : 0);
+      if (t < a || t >= b) continue;
+      txt(c.text.replace(/[：:]/g, ' '), VW / 2, SUB_Y, { size: 58, font: F.ui, stroke: 10, strokeColor: 'rgba(0,0,0,0.85)', shadow: 6 });
+    }
+  }
+  for (const q of TL.quotes || []) {
+    for (const c of q.chunks) {
+      const a = q.t + c.a, b = q.t + c.b + 0.15;
+      if (t < a || t >= b) continue;
+      txt(c.zh.replace(/[，。；]$/, ''), VW / 2, SUB_Y - 20, { size: 50, font: F.ui, stroke: 9, strokeColor: 'rgba(0,0,0,0.85)', shadow: 6 });
+      const o = { size: 28, font: F.ui, weight: 500 };
+      wrapLines(c.en, 980, o).forEach((ln, i) =>
+        txt(ln, VW / 2, SUB_Y + 40 + i * 36, { ...o, color: COL.light, stroke: 6, strokeColor: 'rgba(0,0,0,0.8)', shadow: 4 }));
+    }
+  }
+}
+async function renderShotV(sh, t) {
+  ctx.save();
+  if (sh.sc !== 'end') { winRect(); ctx.clip(); }
+  if (sh.lay === 'crop') await shv_crop(t, sh);
+  else if (sh.lay === 'quote') await shv_quote(t, sh);
+  else if (sh.lay === 'panel') await shv_panel(t, sh);
+  else await SHV[sh.sc](t, sh);
+  ctx.restore();
+}
+const offV = VT ? mk(VW, VH) : null, offVCtx = offV && offV.getContext('2d');
+async function renderFrameV(t) {
+  const f = Math.round(t * FPS);
+  ctx.globalAlpha = 1; ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
+  bandsV();
+  ctx.fillStyle = '#000'; ctx.fillRect(WIN.x, WIN.y, WIN.w, WIN.h);
+  const shots = TL.shots;
+  const k = shots.findIndex((s) => t >= s.a && t < s.b);
+  const cur = shots[k];
+  if (cur) {
+    const prev = shots[k - 1];
+    if (cur.xin && prev && t < cur.a + cur.xin) {
+      const main = ctx;
+      ctx = offVCtx; ctx.clearRect(0, 0, VW, VH);
+      await renderShotV(prev, t);
+      ctx = main;
+      await renderShotV(cur, t);
+      ctx.save(); ctx.globalAlpha = 1 - easeInOut((t - cur.a) / cur.xin); ctx.drawImage(offV, 0, 0); ctx.restore();
+    } else {
+      await renderShotV(cur, t);
+    }
+  }
+  if (!cur || cur.sc !== 'end') {
+    for (const ov of TL.ov || []) {
+      if (t >= ov.a && t < ov.b) { ctx.save(); OVV[ov.type](t, ov); ctx.restore(); }
+    }
+    subtitlesV(t);
+    topBandV(t);
+  }
+  const g = grain[f % 4], ox = -Math.floor(hash(f, 21) * 512), oy = -Math.floor(hash(f, 22) * 512);
+  for (let x = ox; x < VW; x += 512) for (let y = oy; y < VH; y += 512) ctx.drawImage(g, x, y);
+}
+
 const off = mk(W, H), offCtx = off.getContext('2d');
 async function renderShot(sh, t) { ctx.save(); await SH[sh.sc](t, sh); ctx.restore(); }
 
-window.renderFrame = async (t) => {
+window.renderFrame = VT ? renderFrameV : async (t) => {
   const f = Math.round(t * FPS);
   ctx.globalAlpha = 1; ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
@@ -1023,8 +1643,9 @@ window.renderFrame = async (t) => {
 
 window.ready = (async () => {
   TL = await (await fetch(`film_${MODE}.json`)).json();
-  T = TL.T; S = TL.scenes;
+  T = TL.T || {}; S = TL.scenes || {};
   MAN = await (await fetch('clips/manifest.json')).json();
+  if (VT) TRK = await (await fetch('track_vt.json')).json().catch(() => ({}));
   GD = await (await fetch('gfx_data.json')).json();
   window.DURATION = TL.duration;
   window.FPS = FPS;
