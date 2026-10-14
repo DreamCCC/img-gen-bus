@@ -136,7 +136,7 @@ LIVE = {"contrast": 1.08, "sat": 1.0, "bloom": 0.1}
 def add_clip(name, src, t0, dur, rate=1.0, **spec):
     t0 = max(0.0, t0)
     s = {"name": name, "src": src, "t0": round(t0, 3), "t1": round(t0 + dur * rate, 3), "size": [1920, 1080], "dur": round(dur, 3),
-         "grade": LIVE, "sharpen": 0.3, **spec}
+         "grade": LIVE, "sharpen": 0.5 if src.startswith("../raw/") else 0.3, **spec}
     if rate != 1.0:
         s["map"] = [[0, 0], [round(dur, 3), round(dur * rate, 3)]]
         s["rife"] = 4 if rate <= 0.6 else 0

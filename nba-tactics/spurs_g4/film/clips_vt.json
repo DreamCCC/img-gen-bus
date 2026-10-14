@@ -14,7 +14,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_crowd",
@@ -48,7 +48,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_inside",
@@ -99,7 +99,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s1_c70",
@@ -116,7 +116,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s1_w88",
@@ -133,7 +133,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s1_h325",
@@ -150,7 +150,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s1_h373",
@@ -167,7 +167,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s1_f111",
@@ -184,7 +184,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s1_h373s",
@@ -202,7 +202,7 @@
    "bloom": 0.1,
    "mono": 0.5
   },
-  "sharpen": 0.3,
+  "sharpen": 0.5,
   "map": [
    [
     0,
@@ -345,7 +345,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s2_o448",
@@ -362,7 +362,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s2_h470",
@@ -379,7 +379,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s2_q3end",
@@ -396,7 +396,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_q_barkley",
@@ -453,7 +453,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s3_drive",
@@ -470,7 +470,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s3_contest",
@@ -487,7 +487,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_q_q3_1",
@@ -527,7 +527,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s3_b606",
@@ -544,7 +544,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s3_t622",
@@ -561,7 +561,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s3_o632",
@@ -578,7 +578,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s3_o658",
@@ -595,7 +595,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s4_wem",
@@ -629,7 +629,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_s4_ft1",
@@ -733,7 +733,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_st_fox125",
@@ -750,7 +750,7 @@
    "sat": 1.0,
    "bloom": 0.1
   },
-  "sharpen": 0.3
+  "sharpen": 0.5
  },
  {
   "name": "v_bug_fox130",
@@ -814,7 +814,7 @@
    "bloom": 0.1,
    "mono": 0.8
   },
-  "sharpen": 0.3,
+  "sharpen": 0.5,
   "map": [
    [
     0,

@@ -1074,7 +1074,7 @@ async function shv_crop(t, sh) {
   const sx = clamp(cx - sw / 2, 0, 1920 - sw), sy = clamp((1080 - shh) * (sh.fyv ?? 0.5), 0, 1080 - shh);
   const [dx, dy] = sh.shake ? shake(t, sh.shake, 26, 0.22) : [0, 0];
   const pad = sh.shake ? 30 : 0;
-  ctx.save(); ctx.filter = sh.filter || 'none';
+  ctx.save(); ctx.filter = sh.filter || 'none'; ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(im, sx, sy, sw, shh, WIN.x - pad + dx, WIN.y - pad * 1.25 + dy, WIN.w + 2 * pad, WIN.h + 2.5 * pad);
   ctx.restore();
   // 转播计分牌被 4:5 裁掉两头：压暗那一条，整条计分牌缩放后贴回原位
@@ -1599,8 +1599,12 @@ async function renderFrameV(t) {
     subtitlesV(t);
     topBandV(t);
   }
+  // 比赛画面窗口里不叠颗粒：颗粒吃码率，平台二压后会变成一层雾
   const g = grain[f % 4], ox = -Math.floor(hash(f, 21) * 512), oy = -Math.floor(hash(f, 22) * 512);
+  ctx.save();
+  if (cur && cur.lay === 'crop') { ctx.beginPath(); ctx.rect(0, 0, VW, VH); ctx.rect(WIN.x, WIN.y, WIN.w, WIN.h); ctx.clip('evenodd'); }
   for (let x = ox; x < VW; x += 512) for (let y = oy; y < VH; y += 512) ctx.drawImage(g, x, y);
+  ctx.restore();
 }
 
 const off = mk(W, H), offCtx = off.getContext('2d');
