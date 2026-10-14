@@ -907,7 +907,7 @@ function ov_fpts(t, ov) {
   txt('再 1 分 → 自动停赛一场', x + 80, y + 162, { size: 30, font: F.hd, weight: 900, align: 'left', alpha: na, color: COL.white });
 }
 function ov_huazi(t, ov) {
-  huazi(t, ov.a, ov.text, ov.x ?? W / 2, ov.y ?? 300, { size: ov.size ?? 96, bg: COL[ov.bg || 'red'], kicker: ov.kicker || '', anim: ov.anim || 'wipe', align: ov.align || 'center', hold: ov.b - ov.a - 0.22 });
+  huazi(t, ov.a, ov.text, ov.x ?? W / 2, ov.y ?? 300, { size: ov.size ?? 96, bg: COL[ov.bg || 'red'], fg: COL[ov.fg || (ov.bg === 'white' ? 'ink' : 'white')], kicker: ov.kicker || '', anim: ov.anim || 'wipe', align: ov.align || 'center', hold: ov.b - ov.a - 0.22 });
 }
 // 章节卡：左侧大号序号 + 标题
 function ov_chapter(t, ov) {
