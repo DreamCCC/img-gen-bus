@@ -279,7 +279,8 @@ Y_TOP = 285 + 300  # 窗口上部花字的中心线
 # 开场：补篮 → 结果 → 历史最大逆转 → "没那么简单" → 标题
 # =====================================================================
 TIPIN = 4.85  # 补篮碰框进网落在成片这一刻（素材 6.45 秒）
-shot("tip", TIP, 0, TIPIN + 1.2, ev=6.45, at=TIPIN, gain=-1, flash=TIPIN, shake=TIPIN, kb=[1.0, 1.06])
+shot("tip", TIP, 0, TIPIN + 1.2, ev=6.45, at=TIPIN, gain=-1, flash=TIPIN, shake=TIPIN, kb=[1.0, 1.06],
+     cxk=[[0, 740], [1.5, 670], [3.0, 720], [4.3, 1290], [6.05, 1300]])
 sfx.append(["impact", round(TIPIN - 0.05, 3)])
 e = say("o1", TIPIN - 0.05)
 c0 = TIPIN + 1.2
