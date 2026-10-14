@@ -1228,35 +1228,41 @@
    "b": 71.505,
    "sc": "clip",
    "lay": "crop",
-   "clip": "v_s2_elbow"
+   "clip": "v_s2_elbow",
+   "bug": false
   },
   {
    "a": 71.505,
    "b": 73.03,
    "sc": "clip",
    "lay": "crop",
-   "clip": "v_s2_ref"
+   "clip": "v_s2_ref",
+   "bug": false
   },
   {
    "a": 73.03,
    "b": 76.345,
    "sc": "clip",
    "lay": "crop",
-   "clip": "v_s2_down"
+   "clip": "v_s2_down",
+   "bug": false
   },
   {
    "a": 76.345,
    "b": 80.7,
    "sc": "clip",
    "lay": "crop",
-   "clip": "v_s2_rep"
+   "clip": "v_s2_rep",
+   "bug": false
   },
   {
    "a": 80.7,
    "b": 84.6,
    "sc": "clip",
    "lay": "crop",
-   "clip": "v_s2_kat"
+   "clip": "v_s2_kat",
+   "cx": 820,
+   "bug": false
   },
   {
    "a": 84.6,
@@ -1323,7 +1329,9 @@
    "b": 133.05,
    "sc": "clip",
    "lay": "crop",
-   "clip": "v_s2_inside2"
+   "clip": "v_s2_inside2",
+   "cx": 680,
+   "bug": false
   },
   {
    "a": 133.05,
@@ -1546,7 +1554,9 @@
    "b": 298.3,
    "sc": "clip",
    "lay": "crop",
-   "clip": "v_s4_msg"
+   "clip": "v_s4_msg",
+   "cx": 960,
+   "bug": false
   },
   {
    "a": 298.3,

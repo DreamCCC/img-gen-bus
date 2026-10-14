@@ -324,16 +324,16 @@ add_clip("v_bg_jgnc", JGNC, 8.0, 1 / 30)
 kwb = K("b2", "文班亚马")
 card("board", seg2, kwb, delay=2.3, bg="v_bg_jgnc", head="第三节 9:27", sas=81, nyk=52, lead="马刺领先 29", leadT=K("b2", "马刺还领先"),
      leadK="SPURS +29")
-shot("s2_elbow", JGNC, kwb, K("b2", "一级"), ev=13.2, at=K("b2", "唐斯") + 0.4, gain=-2)
-shot("s2_ref", JGNC, K("b2", "一级"), e2 + 0.3, t0=60.5, gain=-8)
+shot("s2_elbow", JGNC, kwb, K("b2", "一级"), ev=13.2, at=K("b2", "唐斯") + 0.4, gain=-2, bug=False)
+shot("s2_ref", JGNC, K("b2", "一级"), e2 + 0.3, t0=60.5, gain=-8, bug=False)
 a = e2 + 0.3
 e = say("b3", a + 0.1)
-shot("s2_down", JGNC, a, K("b3", "再来"), t0=23.5, gain=-8)
-shot("s2_rep", JGNC, K("b3", "再来"), e + 0.4, t0=40.0, gain=-8)
+shot("s2_down", JGNC, a, K("b3", "再来"), t0=23.5, gain=-8, bug=False)
+shot("s2_rep", JGNC, K("b3", "再来"), e + 0.4, t0=40.0, gain=-8, bug=False)
 ov("fpts", a + 0.3, e + 0.4, keys=[[K("b3", "3 个"), 3]], tnote=K("b3", "再来"))
 a = e + 0.4
 e = say("b4", a + 0.2)
-shot("s2_kat", JGNC, a, e + 0.4, t0=50.5, gain=-8)
+shot("s2_kat", JGNC, a, e + 0.4, t0=50.5, gain=-8, cx=820, bug=False)
 ov("run", a + 0.3, e + 0.4, label="尼克斯一波", steps=[[a, 0], [K("b4", "两个罚球") + 0.3, 2]])
 bd1 = e + 0.4
 e = breakdown("e428", bd1, head="中路没人", kicker="BREAKDOWN · 8:49 Q3")
@@ -358,7 +358,7 @@ e = put_quote("v_q_barkley", "assets/footage/inside_barkley_ext.mp4", 51.6, 59.8
 a = e
 e = say("b8", a + 0.6)
 kz = K("b8", "你领先")
-shot("s2_inside2", "assets/footage/inside_barkley.mp4", a, kz, t0=44.0, gain=-14)
+shot("s2_inside2", "assets/footage/inside_barkley.mp4", a, kz, t0=44.0, gain=-14, cx=680, bug=False)
 shot("s2_run", Q3R, kz, e + 0.6, ev=185.6, tail=0.6, gain=-6)
 seg3 = e + 0.6
 m2 = bgm("Impact_Prelude.mp3", 100.0 - (mont0 - seg2), seg2, -16)
@@ -466,7 +466,7 @@ sfx.append(["impact", round(AT["d17"] - 0.05, 3)])
 a = e
 e = say("d18", a + 0.2)
 seg5 = e + 2.2
-shot("s4_msg", "../online/lL4TMc1sYmQ.mp4", a, seg5, t0=256.4, gain=-4)
+shot("s4_msg", "../online/lL4TMc1sYmQ.mp4", a, seg5, t0=256.4, gain=-4, cx=960, bug=False)
 ov("huazi", K("d18", "53.8"), seg5 - 0.2, text="尼克斯全场只领先 53.8 秒", x=540, y=Y_TOP, size=60, bg="blue", kicker="Knicks led for 53.8 seconds")
 m4 = bgm("Impact_Lento.mp3", 122.0 - (BD["e715"]["A"][1] - seg4), seg4, -15)
 fa0 = bd4 - 3.0
