@@ -727,7 +727,7 @@ async function sc_ticket(t, f) {
   }
   if (t >= real0) {
     const k = t - real0;
-    const im = await clip('mac2004', k);
+    const im = await clip('mac2004_en', k);
     const w = 640, h = 658;
     const x = lerp(1240, 1000, easeOut(prog(k, 0, 0.5))), y = 211;
     blurBack(im, { alpha: prog(k, 0, 0.4), dark: 0.25 });
