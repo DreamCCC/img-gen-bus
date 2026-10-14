@@ -383,8 +383,8 @@ q3end = e + 0.5
 shot("s2_q3end", Q3R, k_end, q3end, t0=225.8 - (q3end - k_end), gain=-4,
      cxk=[[0, 1330], [0.4, 1150], [0.8, 1000], [1.2, 850], [1.7, 620], [2.2, 540]])
 ov("score", k_end - 0.2, q3end, keys=[[0, 90, 75, "第三节结束"]])
-BARK = [{"zh": "我就批评这一点，老兄，你们根本投不进啊", "en": "That's my criticism. Like, damn, dude, you ain't making them.", "a": 0.2, "b": 3.4},
-        {"zh": "领先 20 分，根本没理由连着投八九个三分", "en": "There's never a reason to shoot eight or nine in a row when you got a 20-point lead.", "a": 4.3, "b": 7.9}]
+BARK = [{"zh": "我就批评这一点，老兄，你们根本投不进啊", "en": "That's my criticism. Like, damn, dude, you ain't making them.", "a": 51.8, "b": 55.0},
+        {"zh": "领先 20 分，根本没理由连着投八九个三分", "en": "There's never a reason to shoot eight or nine in a row when you got a 20-point lead.", "a": 55.9, "b": 59.5}]
 e = put_quote("v_q_barkley", "assets/footage/inside_barkley_ext.mp4", 51.6, 59.8, BARK, q3end + 0.1, "巴克利", "TNT 评论员 · 名人堂球员",
               [1264, 60, 512, 640], kicker="INSIDE THE NBA · 赛后节目")
 a = e
