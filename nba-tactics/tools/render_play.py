@@ -1542,7 +1542,9 @@ def mix(r: Renderer, out_wav: Path):
         for vid, (a, b) in tl.vo.items():
             m[max(0, int((a - pre) * sr)):int((b + uv.get("post", {}).get(vid, post)) * sr)] = 1.0
         k = int(0.25 * sr)
-        m = np.convolve(m, np.ones(k) / k, "same")
+        c = np.concatenate([[0.0], np.cumsum(m)])
+        j = np.arange(len(m)) + (k - 1) // 2
+        m = (c[np.minimum(j + 1, len(m))] - c[np.clip(j + 1 - k, 0, len(m))]) / k
         live = live * (1 - m) + under * m
     buf += live
     for sg in tl.segs:
