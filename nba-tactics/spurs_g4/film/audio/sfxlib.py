@@ -118,6 +118,14 @@ def section_gain(n, sections, ramp=1.5):
     return 10 ** (g / 20)
 
 
+def box(x, k):
+    """k 点滑动平均，等同 np.convolve(x, np.ones(k) / k, "same")；直接卷积在整片长度上要跑几小时。"""
+    n = len(x)
+    c = np.concatenate([[0.0], np.cumsum(x)])
+    j = np.arange(n) + (k - 1) // 2
+    return (c[np.minimum(j + 1, n)] - c[np.clip(j + 1 - k, 0, n)]) / k
+
+
 def shape_music(y, mu):
     """一条配乐：淡入淡出 + 固定人声挖槽 + 剧情节点推子（mu["push"] = [[t0, t1, dB], ...]，成片时间）
     + dips 段压低并低通（mu["dips"] = [[t0, t1, dB, 低通Hz], ...]）。不跟旁白起落。"""
@@ -132,7 +140,7 @@ def shape_music(y, mu):
         i0, i1 = int((a - mu["t"]) * SR), int((b - mu["t"]) * SR)
         w = np.zeros(n)
         w[max(0, i0):min(n, i1)] = 1.0
-        w = np.convolve(w, np.ones(int(0.5 * SR)) / int(0.5 * SR), "same")
+        w = box(w, int(0.5 * SR))
         low = np.stack([lp(y[c], cut, 2) for c in range(2)]) * 10 ** (db / 20)
         y = y * (1 - w) + low * w
     return y

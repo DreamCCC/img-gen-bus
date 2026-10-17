@@ -14,7 +14,7 @@ import soundfile as sf
 from scipy.signal import butter, sosfiltfilt
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from sfxlib import SFX, SR, Bus, ROOT, load_vo, ramp, shape_music
+from sfxlib import SFX, SR, Bus, ROOT, box, load_vo, ramp, shape_music
 
 EN = "--en" in sys.argv
 VOD = "audio/vo_vt_en" if EN else "audio/vo_vt"
@@ -76,10 +76,7 @@ under = (game.x - CARVE * speech) * 10 ** (UNDER_DB / 20)
 m = np.zeros(N)
 for a, b in speech_spans:
     m[max(0, int((a - PAD[0]) * SR)):int((b + PAD[1]) * SR)] = 1.0
-kk = int(0.25 * SR)
-c = np.concatenate([[0.0], np.cumsum(m)])
-j = np.arange(N) + (kk - 1) // 2
-m = (c[np.minimum(j + 1, N)] - c[np.clip(j + 1 - kk, 0, N)]) / kk
+m = box(m, int(0.25 * SR))
 game.x = game.x * (1 - m) + under * m
 
 # ---------------- 战术拆解底轨 ----------------
