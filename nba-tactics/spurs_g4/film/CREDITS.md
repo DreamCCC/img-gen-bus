@@ -46,6 +46,10 @@ v3（内部试听版）：MiniMax `speech-2.8-hd`，克隆音色 `xjy_internal_t
 竖版（`out/vt_*.mp4`，文稿 `../文稿_竖屏5min_v2.md`）：同一个 MiniMax 克隆音色重新配音（`audio/vo_vt`），同样**只限内部测试**；
 画面底部常驻"AI 合成配音 · 内部测试版"，片尾同横版标注。素材、配乐都是横版 v3 的子集，没有新增来源。
 
+竖版英文版（`out/领先29分马刺是怎么输掉的_竖屏_英文版.mp4`，文稿 `audio/vo_vt_en.json`）：阿里云百炼 `qwen-audio-3.1-tts-flash`
+设计音色"9 号 现场解说"（`…-vd-pbp-…`），由文字描述生成，**没有克隆任何真人声音**，可以公开发布。画面底部常驻"AI-generated narration"，
+片尾标"Narration · AI-generated voice"。发布会引语用英文原声 + 英文逐字字幕（`research/quotes_verified.md`）。素材、配乐与中文竖版相同，没有新增来源。
+
 ## AI 生成画面
 
 无。全片画面都是真实比赛 / 节目 / 发布会画面，图表和战术拆解为代码绘制。
