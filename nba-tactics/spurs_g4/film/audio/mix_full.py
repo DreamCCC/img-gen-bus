@@ -93,7 +93,9 @@ m = np.zeros(N)
 for a, b in speech_spans:
     m[max(0, int((a - PAD[0]) * SR)):int((b + PAD[1]) * SR)] = 1.0
 kk = int(0.25 * SR)
-m = np.convolve(m, np.ones(kk) / kk, "same")
+c = np.concatenate([[0.0], np.cumsum(m)])
+j = np.arange(N) + (kk - 1) // 2
+m = (c[np.minimum(j + 1, N)] - c[np.clip(j + 1 - kk, 0, N)]) / kk
 game.x = game.x * (1 - m) + under * m
 
 # ---------------- 战术拆解底轨 ----------------
