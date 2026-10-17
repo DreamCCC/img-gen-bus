@@ -6,23 +6,34 @@
 - 字幕每行不超过 MAXC 个字。
 - 战术拆解用竖版重渲的 work/bd/eXXX_vt（旁白换成 audio/vo_vt，见 ../eXXX_vt_edl.json）。
 - 抽帧名字统一加 v_ 前缀，不碰横版的 scenes/clips。
-用法：python tools/timeline_vt.py
+英文版（--en）：台词 audio/vo_vt_en.json（keys 把下面 K() 用的中文关键词映射成英文原文），旁白 audio/vo_vt_en，字幕按 words.json 词级时间分行，
+拆解用 work/bd/eXXX_vt_en.*，画面文字走 tr(中文, 英文)；抽帧名再加 en_ 前缀。旁白长短变了以后镜头入点会挪，手写的 cxk 关键帧按
+中文版 clips_vt.json 的入点平移，保持对准素材里同一时刻。输出 scenes/film_vt_en.json、clips_vt_en.json。
+用法：python tools/timeline_vt.py [--en]
 """
 import json
 import re
+import sys
 from pathlib import Path
 
 import librosa
 
+import en_vo
+
 ROOT = Path(__file__).resolve().parent.parent
 BASE = ROOT.parent
-VOD = ROOT / "audio/vo_vt"
-LINES = {l["id"]: l for l in json.loads((ROOT / "audio/vo_vt.json").read_text())}
+EN = "--en" in sys.argv
+tr = lambda zh, en: en if EN else zh  # noqa: E731
+VOD = ROOT / ("audio/vo_vt_en" if EN else "audio/vo_vt")
+LINES = {l["id"]: l for l in json.loads((ROOT / ("audio/vo_vt_en.json" if EN else "audio/vo_vt.json")).read_text())}
 DUR = json.loads((VOD / "durations.json").read_text())
+WORDS = json.loads((VOD / "words.json").read_text()) if EN else {}
+REF = {c["name"]: c for c in json.loads((ROOT / "clips_vt.json").read_text())} if EN else {}
 QUOTES = {q["id"]: q for q in json.loads((ROOT / "audio/quotes.json").read_text())}
 SBEV = json.loads((BASE / "research/sb_db/_events.json").read_text())
 GAP = 0.3
 MAXC = 15
+MAXC_EN = 30
 
 
 # ---------------- 字幕分段 ----------------
@@ -71,6 +82,9 @@ def chunks(lid):
     if lid in _chunks:
         return _chunks[lid]
     text = LINES[lid]["text"]
+    if EN:
+        _chunks[lid] = en_vo.chunks(text, WORDS[lid], DUR[lid], MAXC_EN)
+        return _chunks[lid]
     parts = [p for p in re.split(r"(?<=[，。？！；])", text) if p.strip()]
     merged = []
     for p in parts:
@@ -102,6 +116,8 @@ def chunks(lid):
 
 def kw(lid, key):
     """台词里某个词出现的时刻（相对句首）：词在某段字幕开头就取该段起点，否则按字数插值。"""
+    if EN:
+        return en_vo.key_time(LINES[lid]["text"], WORDS[lid], DUR[lid], LINES[lid]["keys"][key])
     for c in chunks(lid):
         if c["text"].startswith(key):
             return c["a"]
@@ -135,7 +151,7 @@ LIVE = {"contrast": 1.08, "sat": 1.0, "bloom": 0.1}
 
 def add_clip(name, src, t0, dur, rate=1.0, **spec):
     t0 = max(0.0, t0)
-    s = {"name": name, "src": src, "t0": round(t0, 3), "t1": round(t0 + dur * rate, 3), "size": [1920, 1080], "dur": round(dur, 3),
+    s = {"name": tr(name, "en_" + name), "src": src, "t0": round(t0, 3), "t1": round(t0 + dur * rate, 3), "size": [1920, 1080], "dur": round(dur, 3),
          "grade": LIVE, "sharpen": 0.5 if src.startswith("../raw/") else 0.3, **spec}
     if rate != 1.0:
         s["map"] = [[0, 0], [round(dur, 3), round(dur * rate, 3)]]
@@ -144,13 +160,17 @@ def add_clip(name, src, t0, dur, rate=1.0, **spec):
     return s
 
 
-def shot(name, src, a, b, *, ev=None, at=None, tail=0.8, t0=None, rate=1.0, gain=0.0, mute=False, clipkw=None, lay="crop", **opts):
-    """比赛镜头。ev = 事件在素材里的秒数，at = 事件落在成片的时刻（默认镜头结尾前 tail 秒）；或直接给 t0。rate < 1 为慢放。"""
+def shot(name, src, a, b, *, ev=None, at=None, tail=0.8, t0=None, rate=1.0, gain=0.0, mute=False, clipkw=None, lay="crop", keep_k=False, **opts):
+    """比赛镜头。ev = 事件在素材里的秒数，at = 事件落在成片的时刻（默认镜头结尾前 tail 秒）；或直接给 t0。rate < 1 为慢放。
+    keep_k：cxk 已经按旁白时刻算好，英文版不再平移。"""
     name = "v_" + name
     if t0 is None:
         at = b - tail if at is None else at
         t0 = ev - (at - a) * rate
     s = add_clip(name, src, t0, b - a, rate, **(clipkw or {}))
+    if EN and "cxk" in opts and name in REF and not keep_k:
+        shift = (REF[name]["t0"] - s["t0"]) / rate
+        opts["cxk"] = [[round(k + shift, 3), x] for k, x in opts["cxk"]]
     shots.append({"a": round(a, 3), "b": round(b, 3), "sc": "clip", "lay": lay, "clip": name, **opts})
     if not mute and rate == 1.0:
         orig.append({"src": src, "s0": s["t0"], "t": round(a, 3), "dur": round(b - a, 3), "db": gain, "clip": name})
@@ -184,15 +204,16 @@ def chapter(t, num, title, kicker, hold=2.6):
 
 
 def breakdown(eid, t, **opts):
-    m = json.loads((ROOT / f"work/bd/{eid}_vt.json").read_text())
+    bid = tr(f"{eid}_vt", f"{eid}_vt_en")
+    m = json.loads((ROOT / f"work/bd/{bid}.json").read_text())
     BD[eid] = {sg["id"]: (t + sg["start"], t + sg["end"]) for sg in m["segments"]}
     FRZ.extend((t + sg["start"], t + sg["end"]) for sg in m["segments"] if sg["kind"] == "freeze")
     name = f"v_bd_{eid}"
-    add_clip(name, f"work/bd/{eid}_vt.mp4", 0, m["duration"], grade=False, sharpen=0)
+    add_clip(name, f"work/bd/{bid}.mp4", 0, m["duration"], grade=False, sharpen=0)
     shots.append({"a": round(t, 3), "b": round(t + m["duration"], 3), "sc": "clip", "lay": "panel", "clip": name, **opts})
     for v in m["vo"]:
         say(v["id"], t + v["t"])
-    beds.append({"src": f"work/bd/{eid}_vt.wav", "t": round(t, 3), "dur": round(m["duration"], 3)})
+    beds.append({"src": f"work/bd/{bid}.wav", "t": round(t, 3), "dur": round(m["duration"], 3)})
     return t + m["duration"]
 
 
@@ -209,7 +230,8 @@ def put_quote(name, src, s0, s1, cs, t, who, role, crop, **opts):
 # 原声按句裁剪 [首句, 末句]（含）；发布会画面去掉底部比分条后按人物裁 4:5
 QCUT = {"q3_1": (0, 0), "q4_2": (2, 3), "q5_1": (1, 5)}
 QCROP = {"q3_1": [632, 0, 656, 820], "q4_2": [632, 0, 656, 820], "q5_1": [682, 0, 656, 820]}
-ROLE = {"文班": ("文班亚马", "马刺 · 中锋"), "迈克·布朗": ("迈克·布朗", "尼克斯 · 主教练")}
+ROLE = {"文班": tr(("文班亚马", "马刺 · 中锋"), ("Victor Wembanyama", "Spurs · Center")),
+        "迈克·布朗": tr(("迈克·布朗", "尼克斯 · 主教练"), ("Mike Brown", "Knicks · Head Coach"))}
 # 布朗那路麦克风丢包，声音改用 SNY 录的同一场发布会（同 timeline_full.py）
 ALT_AUDIO = {"q3_1": 501.625, "q4_2": 738.970}
 SNY = "assets/footage/quotes/sny_93iEr0LWF8U.webm"
@@ -285,23 +307,23 @@ sfx.append(["impact", round(TIPIN - 0.05, 3)])
 e = say("o1", TIPIN - 0.05)
 c0 = TIPIN + 1.2
 shot("crowd", MSGV, c0, c0 + 2.5, t0=15.25, gain=0, shake=c0 + 0.1, kb=[1.04, 1.1])
-ov("huazi", c0 + 0.1, c0 + 2.4, text="绝杀", x=540, y=285 + 520, size=200, anim="slam", kicker="Knicks 107  Spurs 106")
+ov("huazi", c0 + 0.1, c0 + 2.4, text=tr("绝杀", "GAME-WINNER"), x=540, y=285 + 520, size=tr(200, 130), anim="slam", kicker="Knicks 107  Spurs 106")
 b0 = c0 + 2.5
 e2 = say("o2", b0 + 0.3)
 e3 = say("o3", e2 + 0.4)
 add_clip("v_bg_tip", TIP, 1.6, 1 / 30)
-card("board", b0, e3 + 0.4, bg="v_bg_tip", head="第二节 3:06 · 马刺最大领先", head2="终场 FINAL", sas=71, nyk=42, sas2=106, nyk2=107,
+card("board", b0, e3 + 0.4, bg="v_bg_tip", head=tr("第二节 3:06 · 马刺最大领先", "Q2 3:06 · LARGEST LEAD"), head2=tr("终场 FINAL", "FINAL"), sas=71, nyk=42, sas2=106, nyk2=107,
      flip=K("o2", "输了"), peak=K("o2", "29"), record=AT["o3"] - 0.1, record24=K("o3", "把这么大"))
 sfx += [["flip", round(K("o2", "输了"), 3)], ["stamp", round(AT["o3"] - 0.1, 3)]]
 a = e3 + 0.4
 e4 = say("o4", a + 0.15)
 kb_ = K("o4", "但是啊")
 shot("inside", INSIDE, a, kb_, t0=340.4, gain=-18, cx=980)
-ov("huazi", K("o4", "乱投"), kb_, text="乱投？", x=1020, y=285 + 330, size=104, bg="white", align="right", kicker="Shot selection")
-ov("huazi", K("o4", "心态"), kb_, text="心态崩了？", x=1020, y=285 + 560, size=104, bg="red", align="right", kicker="Mental collapse")
+ov("huazi", K("o4", "乱投"), kb_, text=tr("乱投？", "BAD SHOTS?"), x=1020, y=285 + 330, size=104, bg="white", align="right", kicker="Shot selection")
+ov("huazi", K("o4", "心态"), kb_, text=tr("心态崩了？", "MELTDOWN?"), x=1020, y=285 + 560, size=104, bg="red", align="right", kicker="Mental collapse")
 ti = e4 + 0.5
 card("mfull", kb_, ti, segs=[[kb_ + 0.2, e4 - 0.2, 0, 2880]],
-     huazi={"t": K("o4", "没那么简单"), "text": "没那么简单", "kicker": "It's not that simple"})
+     huazi={"t": K("o4", "没那么简单"), "text": tr("没那么简单", "NOT THAT SIMPLE"), "kicker": tr("It's not that simple", "Look closer")})
 sfx.append(["stamp", round(K("o4", "没那么简单"), 3)])
 add_clip("v_top_slow", MSGV, 30.3, 4.2)
 card("title", ti, ti + 4.2, whoosh=False, clip="v_top_slow", hit=ti + 0.7)
@@ -314,7 +336,7 @@ m0["dur"] = round(seg1 + 0.4 - m0["t"], 3)
 # =====================================================================
 # 一 · 借来的领先
 # =====================================================================
-chapter(seg1 + 0.3, "01", "借来的领先", "CHAPTER 1 · FIRST HALF")
+chapter(seg1 + 0.3, "01", tr("借来的领先", "A BORROWED LEAD"), "CHAPTER 1 · FIRST HALF")
 e = say("a1", seg1 + 0.5)
 e = say("a2", e + 0.25)
 mb = [seg1, seg1 + 2.3] + [seg1 + 2.3 + (e + 0.7 - seg1 - 2.3) * i / 4 for i in (1, 2, 3, 4)]
@@ -323,13 +345,13 @@ montage([("s1_v13", "2606110853187102", {"t0": 4.65, "cxk": [[0, 1000], [0.5, 10
          ("s1_w88", "2606110908252902", {"t0": 6.84, "cxk": follow(0.1, 170, 1.2, 1290)}),
          ("s1_h325", "2606110959171102", {"t0": 5.26, "cxk": follow(0.1, 590, 1.35, 1249)}),
          ("s1_h373", "2606111004560502", {"t0": 7.80, "cxk": follow(0.15, 1610, 1.2, 1310)})], mb)
-ov("score", AT["a2"] - 0.2, K("a2", "半场"), keys=[[0, 41, 22, "第一节结束"]])
-ov("huazi", K("a2", "14"), e + 0.6, text="半场 14 记三分", x=540, y=Y_TOP, size=80, kicker="14 3PM · Most in a Finals half")
+ov("score", AT["a2"] - 0.2, K("a2", "半场"), keys=[[0, 41, 22, tr("第一节结束", "END Q1")]])
+ov("huazi", K("a2", "14"), e + 0.6, text=tr("半场 14 记三分", "14 THREES IN THE HALF"), x=540, y=Y_TOP, size=tr(80, 72), kicker=tr("14 3PM · Most in a Finals half", "Most in a Finals half"))
 a = e + 0.7
 e = say("a3", a + 0.25)
 shot("s1_f111", DB("2606110913193002"), a, e + 0.5, ev=EV("2606110913193002"), tail=0.7,
      cxk=[[0, 960], [1.0, 1000], [1.8, 1200], [2.6, 1260]])
-ov("shotcard", a + 0.3, e + 0.45, who="福克斯", what="三分 · 被扑", hand=2.2, xfg=33, hot=True)
+ov("shotcard", a + 0.3, e + 0.45, who=tr("福克斯", "Fox"), what=tr("三分 · 被扑", "3PT · CONTESTED"), hand=2.2, xfg=33, hot=True)
 a = e + 0.5
 e4 = say("a4", a + 0.3)
 e5 = say("a5", e4 + 1.2)
@@ -344,12 +366,12 @@ m1["dur"] = round(seg2 - m1["t"], 3)
 # =====================================================================
 # 二 · 第三节
 # =====================================================================
-chapter(seg2 + 0.2, "02", "第三节：13 比 0", "CHAPTER 2 · THIRD QUARTER")
+chapter(seg2 + 0.2, "02", tr("第三节：13 比 0", "Q3: THE 13-0 RUN"), "CHAPTER 2 · THIRD QUARTER")
 e = say("b1", seg2 + 0.5)
 e2 = say("b2", e + 0.2)
 add_clip("v_bg_jgnc", JGNC, 8.0, 1 / 30)
 kwb = K("b2", "文班亚马")
-card("board", seg2, kwb, delay=2.3, bg="v_bg_jgnc", head="第三节 9:27", sas=81, nyk=52, lead="马刺领先 29", leadT=K("b2", "马刺还领先"),
+card("board", seg2, kwb, delay=2.3, bg="v_bg_jgnc", head=tr("第三节 9:27", "Q3 9:27"), sas=81, nyk=52, lead=tr("马刺领先 29", "SPURS LEAD BY 29"), leadT=K("b2", "马刺还领先"),
      leadK="SPURS +29")
 shot("s2_elbow", JGNC, kwb, K("b2", "一级"), ev=13.2, at=K("b2", "唐斯") + 0.4, gain=-2, bug=False,
      cxk=[[0, 820], [1.9, 820], [1.95, 1000]])
@@ -363,18 +385,18 @@ a = e + 0.4
 e = say("b4", a + 0.2)
 shot("s2_kat", JGNC, a, e + 0.4, t0=50.5, gain=-8, bug=False,
      cxk=[[0, 1010], [1.5, 1000], [2.4, 900], [3.1, 1020], [3.9, 1060]])
-ov("run", a + 0.3, e + 0.4, label="尼克斯一波", steps=[[a, 0], [K("b4", "两个罚球") + 0.3, 2]])
+ov("run", a + 0.3, e + 0.4, label=tr("尼克斯一波", "KNICKS RUN"), steps=[[a, 0], [K("b4", "两个罚球") + 0.3, 2]])
 bd1 = e + 0.4
-e = breakdown("e428", bd1, head="中路没人", kicker="BREAKDOWN · 8:49 Q3")
+e = breakdown("e428", bd1, head=tr("中路没人", "WIDE-OPEN LANE"), kicker="BREAKDOWN · 8:49 Q3")
 dunk = BD["e428"]["dunk"][0] + 1.83
-ov("run", bd1, e, label="尼克斯一波", steps=[[bd1, 2], [dunk, 4]])
+ov("run", bd1, e, label=tr("尼克斯一波", "KNICKS RUN"), steps=[[bd1, 2], [dunk, 4]])
 mont0 = e
 mb = [mont0, mont0 + 2.5, mont0 + 5.0, mont0 + 7.5]
 montage([("s2_b432", "2606111033176002", {"t0": 9.75, "cxk": follow(0.6, 720, 1.5, 1310, before=[[0, 900]])}),
          ("s2_o448", "2606111038291302", {"t0": 3.70, "cxk": follow(0.65, 1520, 1.65, 1320)}),
          ("s2_h470", "2606111043178802", {"t0": 1.60, "cxk": follow(0.95, 260, 2.0, 1310)})], mb)
-ov("run", mont0, mb[-1], label="尼克斯一波", steps=[[mont0, 4], [mb[0] + 1.5, 7], [mb[1] + 1.65, 10], [mb[2] + 2.0, 13]])
-ov("huazi", mb[2] + 2.05, mb[3], text="13 : 0", x=540, y=Y_TOP, size=110, anim="slam", kicker="Knicks 13-0 run")
+ov("run", mont0, mb[-1], label=tr("尼克斯一波", "KNICKS RUN"), steps=[[mont0, 4], [mb[0] + 1.5, 7], [mb[1] + 1.65, 10], [mb[2] + 2.0, 13]])
+ov("huazi", mb[2] + 2.05, mb[3], text="13 : 0", x=540, y=Y_TOP, size=110, anim="slam", kicker=tr("Knicks 13-0 run", "Knicks run"))
 a = mb[3]
 e = say("b7", a + 0.3)
 k_end = K("b7", "一节打完")
@@ -382,11 +404,12 @@ card("shotmix", a, k_end, q="Q3", bar=a + 0.3, three=K("b7", "12"), result=K("b7
 q3end = e + 0.5
 shot("s2_q3end", Q3R, k_end, q3end, t0=225.8 - (q3end - k_end), gain=-4,
      cxk=[[0, 1330], [0.4, 1150], [0.8, 1000], [1.2, 850], [1.7, 620], [2.2, 540]])
-ov("score", k_end - 0.2, q3end, keys=[[0, 90, 75, "第三节结束"]])
+ov("score", k_end - 0.2, q3end, keys=[[0, 90, 75, tr("第三节结束", "END Q3")]])
 BARK = [{"zh": "我就批评这一点，老兄，你们根本投不进啊", "en": "That's my criticism. Like, damn, dude, you ain't making them.", "a": 51.8, "b": 55.0},
         {"zh": "领先 20 分，根本没理由连着投八九个三分", "en": "There's never a reason to shoot eight or nine in a row when you got a 20-point lead.", "a": 55.9, "b": 59.5}]
-e = put_quote("v_q_barkley", "assets/footage/inside_barkley_ext.mp4", 51.6, 59.8, BARK, q3end + 0.1, "巴克利", "TNT 评论员 · 名人堂球员",
-              [1264, 60, 512, 640], kicker="INSIDE THE NBA · 赛后节目")
+e = put_quote("v_q_barkley", "assets/footage/inside_barkley_ext.mp4", 51.6, 59.8, BARK, q3end + 0.1, tr("巴克利", "Charles Barkley"),
+              tr("TNT 评论员 · 名人堂球员", "TNT Analyst · Hall of Famer"), [1264, 60, 512, 640],
+              kicker=tr("INSIDE THE NBA · 赛后节目", "INSIDE THE NBA · POSTGAME"))
 a = e
 e = say("b8", a + 0.6)
 kz = K("b8", "你领先")
@@ -401,7 +424,7 @@ m2["push"].append([mont0 - 0.5, mb[-1], 2])
 # =====================================================================
 # 三 · 第四节
 # =====================================================================
-chapter(seg3 + 0.2, "03", "第四节：往里打，还是不进", "CHAPTER 3 · FOURTH QUARTER")
+chapter(seg3 + 0.2, "03", tr("第四节：往里打，还是不进", "Q4: ATTACKING, STILL MISSING"), "CHAPTER 3 · FOURTH QUARTER")
 e1 = say("c1", seg3 + 0.4)
 kr = K("c1", "结果呢")
 shot("s3_drive", Q4R, seg3, kr, t0=35.6, gain=-4, cxk=[[0, 720], [0.8, 620], [2.0, 560]])
@@ -419,9 +442,9 @@ montage([("s3_a598", "2606111112208502", {"cx": 1160}),
          ("s3_t622", "2606111117300602", {"cxk": follow(0.3, 430, 1.5, 1400)}),
          ("s3_o632", "2606111117394102", {"cxk": follow(1.05, 830, 1.7, 1300, before=[[0, 1000]])}),
          ("s3_o658", "2606111127259502", {"cxk": follow(0.85, 490, 1.75, 1440, before=[[0, 620]])})], bb, tail=0.55)
-ov("score", a + 0.2, bb[-1], keys=[[0, 95, 75, "第四节 9:33"], [bb[1] - 0.55, 95, 78, "9:16"], [bb[2] - 0.55, 95, 80, "8:44"],
+ov("score", a + 0.2, bb[-1], keys=[[0, 95, 75, tr("第四节 9:33", "Q4 9:33")], [bb[1] - 0.55, 95, 78, "9:16"], [bb[2] - 0.55, 95, 80, "8:44"],
                                    [bb[3] - 0.55, 95, 83, "7:28"], [bb[4] - 0.55, 97, 86, "7:03"], [bb[5] - 0.55, 99, 95, "4:34"]])
-ov("huazi", bb[5] - 0.5, bb[5], text="5 分钟 20 : 4", x=540, y=Y_TOP, size=84, anim="slam", kicker="Knicks 20-4 run")
+ov("huazi", bb[5] - 0.5, bb[5], text=tr("5 分钟 20 : 4", "20-4 IN 5 MINUTES"), x=540, y=Y_TOP, size=84, anim="slam", kicker=tr("Knicks 20-4 run", "Knicks run"))
 a = bb[-1]
 e = say("c4", a + 0.3)
 card("xbars", a, e + 1.5, n=2, e1=a + 0.2, r1=a + 0.4, d1=a + 0.9, e2=K("c4", "下半场") - 0.5, r2=K("c4", "下半场"), d2=K("c4", "原样"))
@@ -429,8 +452,8 @@ a = e + 1.5
 e = say("c5", a + 0.2)
 seg4 = e + 1.0
 card("mfull", a, seg4, segs=[[a + 0.3, AT["c5"] + 1.2, 0, 2669]],
-     mark={"t": K("c5", "马刺手里"), "g": 2669, "v": 7, "text": "还剩 3:31 · 马刺 +7", "sub": "104 : 97"},
-     huazi={"t": K("c5", "这都能输"), "text": "这都能输？", "kicker": "How?"})
+     mark={"t": K("c5", "马刺手里"), "g": 2669, "v": 7, "text": tr("还剩 3:31 · 马刺 +7", "3:31 LEFT · SPURS +7"), "sub": "104 : 97"},
+     huazi={"t": K("c5", "这都能输"), "text": tr("这都能输？", "HOW?"), "kicker": tr("How?", "Up 7 with 3:31 left")})
 sfx.append(["stamp", round(K("c5", "这都能输"), 3)])
 m3 = bgm("The_Escalation.mp3", 321.9 - (seg4 - seg3), seg3, -15, fout=0.4)
 m3["dur"] = round(seg4 - m3["t"] + 0.3, 3)
@@ -439,7 +462,7 @@ m3["push"] += [[bb[0], bb[-1], 2], [AT["c5"], seg4, 3]]
 # =====================================================================
 # 四 · 最后 3 分半
 # =====================================================================
-chapter(seg4 + 0.2, "04", "最后 3 分 31 秒", "CHAPTER 4 · CLUTCH")
+chapter(seg4 + 0.2, "04", tr("最后 3 分 31 秒", "THE FINAL 3:31"), "CHAPTER 4 · CLUTCH")
 e = say("d1", seg4 + 0.5)
 kwm = K("d1", "文班亚马") + 0.9
 e2 = say("d2", e + 0.3)
@@ -447,8 +470,8 @@ shot("s4_wem", DCF8, seg4, e2 + 1.0, ev=259.79, at=kwm, gain=-2,
      cxk=follow(1.2, 1360, 2.3, 500, before=[[0, 1220]],
                 after=[[2.7, 600], [3.2, 800], [3.78, 1050], [3.8, 1060], [4.7, 980], [5.2, 1120], [5.7, 1400], [6.2, 1250],
                        [6.48, 1250], [6.5, 560], [8.5, 450]]))
-ov("score", AT["d1"] - 0.3, e2 + 1.0, keys=[[0, 102, 97, "第四节 3:31"], [kwm, 104, 97, "3:31"]])
-ov("huazi", K("d2", "这是"), e2 + 0.9, text="最后一个运动战进球", x=540, y=Y_TOP, size=66, kicker="Spurs' last field goal")
+ov("score", AT["d1"] - 0.3, e2 + 1.0, keys=[[0, 102, 97, tr("第四节 3:31", "Q4 3:31")], [kwm, 104, 97, "3:31"]])
+ov("huazi", K("d2", "这是"), e2 + 0.9, text=tr("最后一个运动战进球", "LAST SPURS FIELD GOAL"), x=540, y=Y_TOP, size=66, kicker=tr("Spurs' last field goal", "3:31 Q4"))
 a = e2 + 1.0
 e3 = say("d3", a + 0.3)
 e4 = say("d4", e3 + 0.3)
@@ -456,20 +479,20 @@ rel = e4 + 0.05
 mk27 = rel + (17.33 - 15.87)
 e5 = say("d5", mk27 + 0.5)
 shot("s4_br27", "../raw/d676.mp4", a, e5 + 1.2, ev=15.87, at=rel, gain=0,
-     cxk=follow(rel - a, 840, mk27 - a, 1270, before=[[0, 520], [2.0, 850], [4.0, 1000], [6.0, 780]],
-                after=[[mk27 - a + 0.1, 980], [e5 + 1.2 - a, 820]]))
+     cxk=follow(rel - a, 840, mk27 - a, 1270, before=[[rel - a + d, x] for d, x in ((-7.3, 520), (-5.3, 850), (-3.3, 1000), (-1.3, 780))],
+                after=[[mk27 - a + 0.1, 980], [e5 + 1.2 - a, 820]]), keep_k=True)
 ov("score", a + 0.2, e5 + 1.2, keys=[[0, 104, 100, "2:31"], [mk27, 104, 103, "2:21"]])
-ov("huazi", K("d4", "27"), rel + 0.3, text="27 英尺 · 8 米多", x=540, y=Y_TOP, size=66, kicker="27-ft three")
+ov("huazi", K("d4", "27"), rel + 0.3, text=tr("27 英尺 · 8 米多", "27 FEET"), x=540, y=Y_TOP, size=tr(66, 84), kicker=tr("27-ft three", "Brunson from deep"))
 a = e5 + 1.2
 e = say("d6", a + 1.76)
 shot("s4_ft1", DCF8, a, a + 4.8, t0=386.0, gain=-2, cxk=[[0, 850], [1.98, 850], [2.0, 900]])
-ov("huazi", a + 3.0, a + 4.7, text="两罚全丢", x=540, y=Y_TOP, size=80, kicker="1:47 · Spurs lead by 1")
+ov("huazi", a + 3.0, a + 4.7, text=tr("两罚全丢", "0 FOR 2 AT THE LINE"), x=540, y=Y_TOP, size=tr(80, 72), kicker="1:47 · Spurs lead by 1")
 a = a + 4.8
 e = say("d7", a + 0.3)
 kf = K("d7", "抛投") + 0.7
 shot("s4_float", DCF8, a, e + 1.6, ev=425.1, at=kf, gain=-2, cxk=[[0, 1150], [1.5, 1200], [2.4, 1100], [4.0, 900]])
 ov("score", a + 0.3, e + 1.6, keys=[[0, 104, 103, "1:22"], [kf, 104, 105, "1:22"]])
-ov("huazi", kf + 0.3, e + 1.5, text="尼克斯全场第一次领先", x=540, y=Y_TOP, size=60, bg="blue", kicker="Knicks lead 105-104")
+ov("huazi", kf + 0.3, e + 1.5, text=tr("尼克斯全场第一次领先", "KNICKS' FIRST LEAD"), x=540, y=Y_TOP, size=tr(60, 72), bg="blue", kicker="Knicks lead 105-104")
 a = e + 1.6
 e = say("d8", a + 0.2)
 shot("s4_castleft", DCF8, a, e + 1.2, ev=515.0, at=K("d8", "两罚") + 0.6, gain=-2, cx=950)
@@ -479,7 +502,8 @@ PY715 = 285 + 150
 e = breakdown("e715", bd3, py=PY715)
 ov("dual", K("d10", "还剩") - 0.2, AT["d11"] - 0.1, py=PY715, tl=K("d10", "还剩"), tr=K("d10", "进攻时间"), tgt=K("d10", "比比赛"))
 ov("flow", AT["d11"], BD["e715"]["A"][1] - 0.05,
-   nodes=[["什么都不用做", "把球攥在手里"], ["等尼克斯犯规", "送你上罚球线"], ["两罚都进", "领先 3 分"], ["对面最多投三分", "也只能追平"]],
+   nodes=tr([["什么都不用做", "把球攥在手里"], ["等尼克斯犯规", "送你上罚球线"], ["两罚都进", "领先 3 分"], ["对面最多投三分", "也只能追平"]],
+            [["DO NOTHING", "Just hold the ball"], ["KNICKS MUST FOUL", "You go to the line"], ["MAKE BOTH", "Up 3"], ["BEST CASE FOR NYK", "A three only ties it"]]),
    keys=[K("d11", "什么都不用"), K("d11", "等对面"), end("d11") - 0.2, end("d11") + 0.5])
 for k in ("还剩", "进攻时间"):
     sfx.append(["tick", round(K("d10", k), 3)])
@@ -503,14 +527,14 @@ shot("s4_blkslow", BLK, a, e + 0.4, ev=6.67, at=e - 0.4, rate=0.35, mute=True, c
      cxk=[[0, 980], [1.8, 920], [3.0, 800], [4.2, 690], [5.4, 610], [6.6, 570]])
 sfx.append(["boom", round(e - 0.4, 3)])
 bd4 = e + 0.4
-e = breakdown("e727", bd4, head="最后 5.7 秒", kicker="BREAKDOWN · 0:05.7")
+e = breakdown("e727", bd4, head=tr("最后 5.7 秒", "THE LAST 5.7 SECONDS"), kicker="BREAKDOWN · 0:05.7")
 sfx.append(["impact", round(AT["d17"] - 0.05, 3)])
 a = e
 e = say("d18", a + 0.2)
 seg5 = e + 2.2
 shot("s4_msg", "../online/lL4TMc1sYmQ.mp4", a, seg5, t0=256.4, gain=-4, bug=False,
      cxk=[[0, 960], [1.2, 1000], [1.7, 1270], [2.5, 1070], [3.3, 1110], [4.4, 960], [5.6, 760], [6.2, 760]])
-ov("huazi", K("d18", "53.8"), seg5 - 0.2, text="尼克斯全场只领先 53.8 秒", x=540, y=Y_TOP, size=60, bg="blue", kicker="Knicks led for 53.8 seconds")
+ov("huazi", K("d18", "53.8"), seg5 - 0.2, text=tr("尼克斯全场只领先 53.8 秒", "KNICKS LED FOR 53.8 SECONDS"), x=540, y=Y_TOP, size=60, bg="blue", kicker=tr("Knicks led for 53.8 seconds", "The whole game"))
 m4 = bgm("Impact_Lento.mp3", 122.0 - (BD["e715"]["A"][1] - seg4), seg4, -15)
 fa0 = bd4 - 3.0
 fa_end = end("d18") + 0.3
@@ -526,7 +550,9 @@ m4["fout"] = 3.0
 e1 = say("e1", seg5 + 0.6)
 e2 = say("e2", e1 + GAP)
 card("summary", seg5, e2 + 0.5, t=[K("e1", "那 29 分"), K("e1", "下半场"), AT["e2"] + 0.3],
-     rows=[["上半场", "手感多给了 21 分"], ["下半场", "同样的出手，少进 20 分"], ["最后 3 分半", "自己丢掉的回合，把比赛送了出去"]])
+     rows=tr([["上半场", "手感多给了 21 分"], ["下半场", "同样的出手，少进 20 分"], ["最后 3 分半", "自己丢掉的回合，把比赛送了出去"]],
+             [["FIRST HALF", "21 points above expectation"], ["SECOND HALF", "Same looks, 20 points below"],
+              ["FINAL 3:30", "Possessions they gave away"]]))
 for k in (K("e1", "那 29 分"), K("e1", "下半场"), AT["e2"] + 0.3):
     sfx.append(["tick", round(k, 3)])
 a = e2 + 0.5
@@ -544,6 +570,17 @@ endcard = [
     ["", "Long Road Ahead"],
     ["解说配音", "AI 合成语音 · 内部效果测试版"],
 ]
+if EN:
+    endcard = [
+        ["Game footage", "Tencent Sports NBA archive · NBA · NBA on ESPN"],
+        ["Press conferences", "NBA Postgame Media Availability · SNY"],
+        ["Data", "NBA play-by-play · NBA tracking data"],
+        ["Music", "Kevin MacLeod (incompetech.com) · CC BY 4.0"],
+        ["", "Lightless Dawn · Hitman · Impact Prelude"],
+        ["", "The Escalation · Impact Lento · Five Armies"],
+        ["", "Long Road Ahead"],
+        ["Narration", "AI-generated voice"],
+    ]
 card("end", e + 0.3, e + 7.3, whoosh=False, lines=endcard)
 duration = e + 7.3
 m5 = bgm("Long_Road_Ahead.mp3", 100.0 - (K("e3", "尼克斯") - seg5), seg5, -15, fin=2.5, fout=2.5)
@@ -578,10 +615,11 @@ out = {
     "vo": sorted(vo, key=lambda v: v["t"]), "shots": shots, "ov": ovs, "quotes": quotes, "sfx": sorted(sfx, key=lambda x: x[1]),
     "orig": orig, "beds": beds, "qaudio": qaudio, "music": music, "segs": {k: round(v, 3) for k, v in segs.items()},
 }
-(ROOT / "scenes/film_vt.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
-(ROOT / "clips_vt.json").write_text(json.dumps(list(clips.values()), ensure_ascii=False, indent=1))
+(ROOT / tr("scenes/film_vt.json", "scenes/film_vt_en.json")).write_text(json.dumps(out, ensure_ascii=False, indent=1))
+(ROOT / tr("clips_vt.json", "clips_vt_en.json")).write_text(json.dumps(list(clips.values()), ensure_ascii=False, indent=1))
 track = sorted(s["clip"] for s in shots if s.get("lay") == "crop" and "cx" not in s and "cxk" not in s)
-(ROOT / "work/vt_track_list.json").write_text(json.dumps(track))
+if not EN:
+    (ROOT / "work/vt_track_list.json").write_text(json.dumps(track))
 print(f"duration {duration:.2f}s = {int(duration // 60)}:{duration % 60:04.1f}")
 for k, v in segs.items():
     print(f"  {k} {v:7.2f}  ({int(v // 60)}:{v % 60:04.1f})")
@@ -591,5 +629,5 @@ print("镜头空档：", gaps or "无")
 for c in clips.values():
     if c["t0"] <= 0.0 and not c["src"].startswith(("work/", "assets/")):
         print("入点被夹到 0：", c["name"])
-long = [(v["id"], c["text"]) for v in vo for c in v["chunks"] if size(c["text"]) > MAXC]
+long = [(v["id"], c["text"]) for v in vo for c in v["chunks"] if (len(c["text"]) > MAXC_EN if EN else size(c["text"]) > MAXC)]
 print("超长字幕：", long or "无")

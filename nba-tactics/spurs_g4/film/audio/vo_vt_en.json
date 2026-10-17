@@ -1,0 +1,464 @@
+[
+ {
+  "id": "o1",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "mood": "hype",
+  "text": "Tipped in! Anunoby tips it in!",
+  "keys": {}
+ },
+ {
+  "id": "o2",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Game 4 of the Finals. The Spurs led by as many as 29 at Madison Square Garden, and lost by one.",
+  "say": "Game four of the Finals. The Spurs led by as many as twenty-nine at Madison Square Garden... and lost by one.",
+  "keys": {
+   "输了": "and lost by one",
+   "29": "as many as 29"
+  }
+ },
+ {
+  "id": "o3",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "In all the years of the Finals, no team had ever blown a lead that big. The Spurs now own that record.",
+  "keys": {
+   "把这么大": "blown a lead that big"
+  }
+ },
+ {
+  "id": "o4",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Afterward, everyone said bad shots, mental collapse. Not wrong. But I went through the tracking data, and it's not that simple.",
+  "keys": {
+   "乱投": "bad shots",
+   "心态": "mental collapse",
+   "但是啊": "But I went",
+   "没那么简单": "it's not that simple"
+  }
+ },
+ {
+  "id": "a1",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Start with the first half. Just how hot were the Spurs?",
+  "keys": {}
+ },
+ {
+  "id": "a2",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "41 to 22 after one. 14 threes in the half, the most in Finals history. Everything was falling.",
+  "say": "Forty-one to twenty-two after one. Fourteen threes in the half, the most in Finals history. Everything was falling.",
+  "keys": {
+   "半场": "14 threes",
+   "14": "14 threes"
+  }
+ },
+ {
+  "id": "a3",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "But look closely, and a lot of these shots weren't easy.",
+  "keys": {}
+ },
+ {
+  "id": "a4",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Tracking data puts a make probability on every shot. At normal rates, the Spurs should have scored about 49 in the first half. Instead? They scored 70.",
+  "say": "Tracking data puts a make probability on every shot. At normal rates, the Spurs should have scored about forty-nine in the first half. Instead? They scored seventy.",
+  "keys": {
+   "按正常": "At normal rates",
+   "实际": "They scored 70"
+  }
+ },
+ {
+  "id": "a5",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "That extra 21 points was a hot hand. And a hot hand comes and goes. You can't ride it for a whole game.",
+  "say": "That extra twenty-one points was a hot hand. And a hot hand comes and goes. You can't ride it for a whole game.",
+  "keys": {
+   "手感这玩意儿": "And a hot hand"
+  }
+ },
+ {
+  "id": "b1",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "So where did the lead start to slip?",
+  "keys": {}
+ },
+ {
+  "id": "b2",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "9:27 left in the third, Spurs up 29. Wembanyama swings an elbow into Towns' jaw. Flagrant 1.",
+  "say": "Nine twenty-seven left in the third, Spurs up twenty-nine. Wembanyama swings an elbow into Towns's jaw. Flagrant one.",
+  "keys": {
+   "马刺还领先": "Spurs up 29",
+   "文班亚马": "Wembanyama swings",
+   "唐斯": "into Towns",
+   "一级": "Flagrant 1"
+  }
+ },
+ {
+  "id": "b3",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "And here's the thing: he already had 3 flagrant points this postseason. One more, and he's suspended. In the Finals. So how freely can he play now?",
+  "say": "And here's the thing: he already had three flagrant points this postseason. One more, and he's suspended. In the Finals. So how freely can he play now?",
+  "keys": {
+   "3 个": "already had 3",
+   "再来": "One more"
+  }
+ },
+ {
+  "id": "b4",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "From those two free throws, the Knicks ripped off a 13-0 run.",
+  "say": "From those two free throws, the Knicks ripped off a thirteen-oh run.",
+  "keys": {
+   "两个罚球": "two free throws"
+  }
+ },
+ {
+  "id": "b5",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Look at this trip. The Spurs get four guys back, each on a man, and the whole lane, from the free-throw line to the rim, is empty.",
+  "keys": {
+   "四个人": "four guys back",
+   "各盯各的": "each on a man",
+   "中路": "the whole lane"
+  }
+ },
+ {
+  "id": "b6",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "mood": "hype",
+  "text": "By the time Wembanyama gets there, Anunoby's already thrown it down!",
+  "keys": {}
+ },
+ {
+  "id": "b7",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "The Spurs shot 12 threes that quarter and made two. Every miss turned into a Knicks run-out. By the end of the quarter, the lead was down to 15.",
+  "say": "The Spurs shot twelve threes that quarter and made two. Every miss turned into a Knicks run-out. By the end of the quarter, the lead was down to fifteen.",
+  "keys": {
+   "12": "shot 12 threes",
+   "就进俩": "and made two",
+   "一节打完": "By the end of the quarter"
+  }
+ },
+ {
+  "id": "b8",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Barkley wasn't wrong. With a lead that big, why keep jacking threes? Where's the logic in that?",
+  "keys": {
+   "你领先": "With a lead that big"
+  }
+ },
+ {
+  "id": "c1",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "So in the fourth, skip the threes and attack the rim. The Spurs did exactly that. The result? 4 for 19.",
+  "say": "So in the fourth, skip the threes and attack the rim. The Spurs did exactly that. The result? Four for nineteen.",
+  "keys": {
+   "结果呢": "The result",
+   "19 投": "4 for 19"
+  }
+ },
+ {
+  "id": "c2",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Why? Because the Knicks were right in their faces. On Spurs shots, the nearest defender's hand averaged just 2.7 feet from the ball. Less than an arm's length. How do you shoot over that?",
+  "say": "Why? Because the Knicks were right in their faces. On Spurs shots, the nearest defender's hand averaged just two point seven feet from the ball. Less than an arm's length. How do you shoot over that?",
+  "keys": {
+   "因为": "Because",
+   "防守人": "On Spurs shots",
+   "平均": "averaged just",
+   "八十": "Less than an arm's length",
+   "你说": "How do you shoot"
+  }
+ },
+ {
+  "id": "c3",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "9:30 left, Spurs up 20. Five minutes later, it was down to 4.",
+  "say": "Nine thirty left, Spurs up twenty. Five minutes later, it was down to four.",
+  "keys": {}
+ },
+ {
+  "id": "c4",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "So run the numbers. The 21 bonus points from the first half? In the second half, they gave almost all of it back.",
+  "say": "So run the numbers. The twenty-one bonus points from the first half? In the second half, they gave almost all of it back.",
+  "keys": {
+   "下半场": "In the second half",
+   "原样": "gave almost all"
+  }
+ },
+ {
+  "id": "c5",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Still, with three and a half minutes left, the Spurs were up 7. How do you lose that?",
+  "say": "Still, with three and a half minutes left, the Spurs were up seven... How do you lose that?",
+  "keys": {
+   "马刺手里": "the Spurs were up 7",
+   "这都能输": "How do you lose that"
+  }
+ },
+ {
+  "id": "d1",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "3:31 left. Wembanyama hits a jumper. 104-97.",
+  "say": "Three thirty-one left. Wembanyama hits a jumper. One-oh-four, ninety-seven.",
+  "keys": {
+   "文班亚马": "Wembanyama hits"
+  }
+ },
+ {
+  "id": "d2",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Believe it or not, that's the Spurs' last field goal of the game.",
+  "keys": {
+   "这是": "that's the Spurs' last"
+  }
+ },
+ {
+  "id": "d3",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Two and a half minutes left. The Knicks get Wembanyama switched onto Brunson.",
+  "keys": {}
+ },
+ {
+  "id": "d4",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "mood": "hype",
+  "text": "Brunson doesn't care. 27 feet. Up it goes!",
+  "say": "Brunson doesn't care. Twenty-seven feet. Up it goes!",
+  "keys": {
+   "27": "27 feet"
+  }
+ },
+ {
+  "id": "d5",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "104-103.",
+  "say": "One-oh-four, one-oh-three.",
+  "keys": {}
+ },
+ {
+  "id": "d6",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Then Wemby misses both free throws.",
+  "keys": {}
+ },
+ {
+  "id": "d7",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Brunson floater. Knicks in front.",
+  "keys": {
+   "抛投": "floater"
+  }
+ },
+ {
+  "id": "d8",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Castle hits both free throws. Spurs back on top, 106-105.",
+  "say": "Castle hits both free throws. Spurs back on top, one-oh-six, one-oh-five.",
+  "keys": {
+   "两罚": "hits both",
+   "马刺 106": "Spurs back on top"
+  }
+ },
+ {
+  "id": "d9",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "And then, this play. Let's freeze it right here.",
+  "keys": {}
+ },
+ {
+  "id": "d10",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Up one, 13 seconds left, Spurs ball. And the shot clock reads more than the time left in the game.",
+  "say": "Up one, thirteen seconds left, Spurs ball. And the shot clock reads more than the time left in the game.",
+  "keys": {
+   "还剩": "13 seconds left",
+   "进攻时间": "the shot clock reads",
+   "比比赛": "more than the time left"
+  }
+ },
+ {
+  "id": "d11",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "So how do you play it? Simple. Do nothing. Hold the ball, and wait for them to foul you and send you to the line.",
+  "keys": {
+   "什么都不用": "Do nothing",
+   "等对面": "wait for them"
+  }
+ },
+ {
+  "id": "d12",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "And Fox? He gets the ball, never breaks stride, and goes straight at the rim.",
+  "keys": {}
+ },
+ {
+  "id": "d13",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "mood": "hype",
+  "text": "Pinned on the glass!",
+  "keys": {}
+ },
+ {
+  "id": "d14",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Now look at the clock. From the catch to takeoff, less than a second. Does that look like running out the clock?",
+  "keys": {
+   "到起跳": "to takeoff",
+   "前后不到": "less than a second"
+  }
+ },
+ {
+  "id": "d15",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "That one play handed the Knicks a free possession. A whole night's work, gone.",
+  "keys": {}
+ },
+ {
+  "id": "d16",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "5.7 seconds left. Brunson fires from 31 feet. Off the iron.",
+  "say": "Five point seven seconds left. Brunson fires from thirty-one feet. Off the iron.",
+  "keys": {}
+ },
+ {
+  "id": "d16b",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Everyone's watching him. Nobody picks up Anunoby crashing in.",
+  "keys": {
+   "没人去管": "Nobody picks up"
+  }
+ },
+ {
+  "id": "d17",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "mood": "hype",
+  "text": "Tipped in!",
+  "keys": {}
+ },
+ {
+  "id": "d18",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "All game long, the Knicks led for just 53.8 seconds.",
+  "say": "All game long, the Knicks led for just fifty-three point eight seconds.",
+  "keys": {
+   "53.8": "53.8 seconds"
+  }
+ },
+ {
+  "id": "e1",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "So here's the deal. The Spurs didn't just lose to bad shots. A big chunk of that 29-point lead was borrowed, and they paid it back in the second half.",
+  "say": "So here's the deal. The Spurs didn't just lose to bad shots. A big chunk of that twenty-nine point lead was borrowed, and they paid it back in the second half.",
+  "keys": {
+   "那 29 分": "A big chunk",
+   "下半场": "in the second half"
+  }
+ },
+ {
+  "id": "e2",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "What really gave it away were the possessions they threw away in the final three and a half minutes.",
+  "keys": {}
+ },
+ {
+  "id": "e3",
+  "voice": "qwen-audio-3.1-tts-flash-vd-pbp-5c735632078c4e039050f3aee80b37f3",
+  "lang": "en",
+  "rate": 1.05,
+  "text": "Three days later, the Spurs lost Game 5, and the Knicks won their first title since 1973.",
+  "say": "Three days later, the Spurs lost Game five, and the Knicks won their first title since nineteen seventy-three.",
+  "keys": {
+   "尼克斯": "and the Knicks won"
+  }
+ }
+]

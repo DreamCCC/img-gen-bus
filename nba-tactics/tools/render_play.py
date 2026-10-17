@@ -29,6 +29,8 @@ from court import RIM, Cam, device  # noqa: E402
 import fx  # noqa: E402
 
 FONTS = Path(__file__).resolve().parent.parent / "assets/fonts"
+# 服务器上没有 ~/Library/Fonts，同名字体装在这里
+SERVER_FONTS = Path("/usr/share/fonts/img-gen-bus")
 COL = {"gold": (255, 196, 40), "orange": (255, 104, 52), "white": (240, 240, 240), "blue": (78, 168, 255),
        "pass": (255, 236, 150), "red": (226, 44, 52), "navy": (14, 22, 40)}
 TEAM = {"HOU": (214, 36, 48), "DAL": (34, 102, 214)}
@@ -42,16 +44,49 @@ def ease(x: float) -> float:
 
 FONT_SPEC = {"zh": (FONTS / "NotoSansSC-Bold.otf", None), "zhr": (FONTS / "NotoSansSC-Regular.otf", None),
              "num": (FONTS / "BarlowCondensed-SemiBold.ttf", None)}
+FONT_FALLBACK = {"numw": "num", "ko": "num", "sub": "zh"}
 
 
 def font(size: int, kind: str = "zh") -> ImageFont.FreeTypeFont:
+    """EDL 的 fonts 里第二项是字符串时当可变字体的实例名，是整数时当 ttc 里的字体序号。"""
     if (size, kind) not in _font_cache:
-        path, var = FONT_SPEC[kind]
-        f = ImageFont.truetype(str(path), size)
-        if var:
+        k = kind
+        while k not in FONT_SPEC or not Path(FONT_SPEC[k][0]).exists():
+            k = FONT_FALLBACK.get(k, "zh")
+        path, var = FONT_SPEC[k]
+        f = ImageFont.truetype(str(path), size, index=var if isinstance(var, int) else 0)
+        if isinstance(var, str):
             f.set_variation_by_name(var)
         _font_cache[(size, kind)] = f
     return _font_cache[(size, kind)]
+
+
+NUM_RUN = re.compile(r"[#+]?\d+(?:[.:]\d+)*")
+
+
+def mixed_runs(text: str, size: int, zh: str = "zh", num: str = "num", scale: float = 1.28):
+    """中文和数字分开排：数字段用 Action NBA，其余用中文字体。返回 [(文字, 字体)] 和总宽。"""
+    runs, i = [], 0
+    for m in NUM_RUN.finditer(text):
+        if m.start() > i:
+            runs.append((text[i:m.start()], font(size, zh)))
+        runs.append((m.group(), font(int(size * scale), num)))
+        i = m.end()
+    if i < len(text):
+        runs.append((text[i:], font(size, zh)))
+    return runs, sum(f.getlength(s) for s, f in runs)
+
+
+def draw_mixed(dr, xy, text, size, fill, a=1.0, anchor="lm", zh="zh", num="num", stroke=0, scale=1.28):
+    """按基线对齐画中文和数字混排；anchor 只认 lm / mm / rm。"""
+    runs, w = mixed_runs(text, size, zh, num, scale)
+    x = float(xy[0]) - {"l": 0, "m": w / 2, "r": w}[anchor[0]]
+    base = float(xy[1]) + size * 0.36
+    for s, f in runs:
+        dr.text((x, base), s, font=f, fill=tuple(fill) + (int(255 * a),), anchor="ls",
+                stroke_width=stroke, stroke_fill=(0, 0, 0, int(200 * a)))
+        x += f.getlength(s)
+    return w
 
 
 _font_cache: dict = {}
@@ -282,6 +317,9 @@ class Canvas:
         for cx, cy in ((x1 + r, y1 + r), (x2 - r, y1 + r), (x1 + r, y2 - r), (x2 - r, y2 - r)):
             self.disc((cx, cy), r, col, alpha)
 
+    def rect(self, x1, y1, x2, y2, col, alpha):
+        self.fill([(x1, y1), (x2, y1), (x2, y2), (x1, y2)], col, alpha)
+
     def slab(self, x1, y1, x2, y2, col, alpha, skew=NBA_SKEW):
         """NBA 图文的斜切色块（平行四边形），和 film.html 的 slab 同一斜率。"""
         k = (y2 - y1) * skew / 2
@@ -413,15 +451,27 @@ class Renderer:
         self.base = edl_path.parent
         self.edl = json.load(open(edl_path))
         for k, (path, var) in self.edl.get("fonts", {}).items():
-            FONT_SPEC[k] = (Path(path).expanduser() if Path(path).expanduser().is_absolute() else self.base / path, var)
+            p = Path(path).expanduser() if Path(path).expanduser().is_absolute() else self.base / path
+            if not p.exists() and (SERVER_FONTS / p.name).exists():
+                p = SERVER_FONTS / p.name
+            FONT_SPEC[k] = (p, var)
         _font_cache.clear()
         COL.update({k: tuple(v) for k, v in self.edl.get("colors", {}).items()})
         TEAM.update({k: tuple(v) for k, v in self.edl.get("teams", {}).items()})
         self.nba = self.edl.get("chrome") == "nba"
+        self.en = self.edl.get("lang") == "en"
+        self._panels, self._ui_text = [], []
+        self.logo = None
+        if self.edl.get("logo"):
+            lg = Image.open(self.base / self.edl["logo"]).convert("RGBA")
+            lh = self.edl.get("logo_h", 96)
+            self.logo = lg.resize((round(lg.width * lh / lg.height), lh), Image.LANCZOS)
         self.tl = Timeline(self.edl, self.base)
         self.work = self.base / self.edl["work"]
         self.cam = Cam(self.work / "cam.json")
         self.P = Players(self.work / "players.json")
+        for k, nm in self.edl.get("names", {}).items():
+            self.P.d[k]["name"] = nm
         self.M = Masks(self.work, self.P)
         self.W, self.H = self.edl["size"]
         self.layers = []
@@ -455,6 +505,24 @@ class Renderer:
         out = []
         for vid, (a, b) in self.tl.vo.items():
             text = self.tl.vo_text[vid]
+            if self.en:
+                chunks = []
+                for sent in [x for x in re.split(r"(?<=[.!?])\s+", text) if x.strip()]:
+                    cur = ""
+                    for p in [x for x in re.split(r"(?<=,)\s+", sent) if x]:
+                        if cur and len(cur) + len(p) + 1 > self.edl.get("sub_chars", 44):
+                            chunks.append(cur)
+                            cur = p
+                        else:
+                            cur = f"{cur} {p}".strip()
+                    chunks.append(cur)
+                n = sum(len(c) for c in chunks)
+                t = a
+                for k, c in enumerate(chunks):
+                    d = (b - a) * len(c) / n
+                    out.append((t, t + d + (0.25 if k == len(chunks) - 1 else 0), c.rstrip(",")))
+                    t += d
+                continue
             chunks = []
             for sent in [x for x in re.split(r"(?<=[。！？])", text) if x.strip()]:
                 cur = ""
@@ -680,7 +748,8 @@ class Renderer:
             A, B = self.P.uv(ly["a"], s), self.P.uv(ly["b"], s)
             if A is not None and B is not None:
                 m = self.cam.to_img(s, [(A + B) / 2])[0]
-                out.append((m, f"{np.linalg.norm(A - B) * 0.3048:.1f} 米", "white"))
+                dist = np.linalg.norm(A - B)
+                out.append((m, f"{dist:.1f} FT" if self.en else f"{dist * 0.3048:.1f} 米", "white"))
         elif t == "hull":
             us = [self.P.uv(k, s) for k in ly["keys"] if self.P.uv(k, s) is not None]
             if us:
@@ -692,7 +761,7 @@ class Renderer:
             ds = [(np.linalg.norm(self.P.uv(d, s) - c), d) for d in ly["defs"] if self.P.uv(d, s) is not None]
             r, near = min(ds)
             m = self.cam.to_img(s, [(c + self.P.uv(near, s)) / 2])[0]
-            out.append((m + [0, 0], f"最近防守人 {r * 0.3048:.1f} 米", "gold"))
+            out.append((m + [0, 0], f"CLOSEST DEFENDER {r:.1f} FT" if self.en else f"最近防守人 {r * 0.3048:.1f} 米", "gold"))
         elif t == "shotline":
             c = self.P.uv(ly["key"], ly.get("at", s))
             if c is not None:
@@ -778,11 +847,17 @@ class Renderer:
         pills = []
         bodies = {}
         self._panels = []
+        self._ui_text = []
+        if self.logo is not None:
+            lx, ly0 = self.edl.get("logo_xy", (56, 46))
+            self._panels.append(dict(name="logoman", a=1.0, rect=[lx, ly0, lx + self.logo.width, ly0 + self.logo.height]))
         self._layout = {"pills": [], "subs": [], "panels": self._panels, "bodies": bodies}
 
         def want(anchor, text, col, a, f=None, dark=False, prio=5, lift=34, owner=None):
             f = f or font(30)
             x1, y1, x2, y2 = dr.textbbox((0, 0), text, font=f, anchor="mm")
+            if self.nba:
+                x1, x2 = 0, mixed_runs(text, f.size)[1] + 8
             pills.append(dict(anchor=np.asarray(anchor, float), cx=float(anchor[0]), cy=float(anchor[1] - lift),
                               w=x2 - x1 + 30, h=max(46, y2 - y1 + 18), text=text, f=f, col=col, a=a, dark=dark, prio=prio,
                               owner=owner))
@@ -815,7 +890,8 @@ class Renderer:
                 rim = zt(self.world_to_img(s, self.rim_w))
                 age = T - self._src_time(ly["src_on"], ly["_on"])
                 if ly.get("fx"):
-                    fx.score_pop(pil, rim + [0, -130], ly["text"], age, al, font)
+                    fx.score_pop(pil, rim + [0, -130], ly["text"], age, al,
+                                 (lambda sz, kind: font(sz, "numw")) if self.nba else font)
                     continue
                 sc = 0.6 + 0.6 * ease(age / 0.25) - 0.15 * ease((age - 0.25) / 0.3)
                 txt(rim + [0, -120], ly["text"], font(int(150 * sc), "num"), COL["gold"], stroke=8, a=al)
@@ -870,25 +946,46 @@ class Renderer:
             if self.nba:
                 cv.slab(cx - w / 2 + 3, cy - h / 2 + 4, cx + w / 2 + 3, cy + h / 2 + 4, (0, 0, 0), p["a"] * 0.35)
                 cv.slab(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2, p["col"], p["a"] * 0.95)
-                acc = COL["blue"] if p["col"] == COL["red"] else COL["red"]
+                reddish = p["col"][0] > 150 and p["col"][1] < 80 and p["col"][2] < 100
+                acc = COL.get("nbablue", COL["blue"]) if reddish else COL["red"]
                 cv.slab(cx + w / 2 - 9, cy - h / 2, cx + w / 2, cy + h / 2, acc, p["a"])
             else:
                 cv.rrect(cx - w / 2 + 2, cy - h / 2 + 3, cx + w / 2 + 2, cy + h / 2 + 3, 12, (0, 0, 0), p["a"] * 0.35)
                 cv.rrect(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2, 12, p["col"], p["a"] * 0.92)
-            texts.append((cx, cy - 1, p["text"], p["f"], (20, 20, 20) if p["dark"] else (255, 255, 255), p["a"]))
+            texts.append((cx, cy - 1, p["text"], p["f"], (20, 20, 20) if p["dark"] else (255, 255, 255), p["a"],
+                          self.nba))
         # 段角标
         if sg.get("badge"):
             self._badge(cv, txt, sg, j)
+        for ly in self.layers:
+            if ly["type"] == "huazi" and self.vis(ly, T, s) > 0:
+                self._huazi(cv, texts, ly, T)
         # 字幕（subs=false 时字幕交给成片时间线，这里只保留上面的避让位）
+        sf = font(self.edl.get("sub_size", 54), "sub" if self.nba else "zh")
         for a, b, c in self.subs if self.edl.get("subs", True) else []:
             if a <= T < b:
                 al = min(1.0, (T - a) / 0.12, (b - T) / 0.12)
-                txt((W / 2, H - 172), c, font(54), stroke=6, a=al)
+                if self.nba:
+                    dr.text((W / 2 + 3, sub_y + 4), c, font=sf, fill=(0, 0, 0, int(140 * al)), anchor="mm",
+                            stroke_width=7, stroke_fill=(0, 0, 0, int(140 * al)))
+                txt((W / 2, sub_y), c, sf, stroke=6, a=al)
                 self._layout["subs"].append(dict(text=c, a=float(al), rect=list(
-                    dr.textbbox((W / 2, H - 172), c, font=font(54), anchor="mm", stroke_width=6))))
+                    dr.textbbox((W / 2, sub_y), c, font=sf, anchor="mm", stroke_width=6))))
         img = cv.composite(img)
-        for cx, cy, text, f, fill, a in texts:
-            dr.text((cx, cy), text, font=f, fill=fill + (int(255 * a),), anchor="mm")
+        for cx, cy, text, f, fill, a, *mx in texts:
+            if mx and mx[0]:
+                draw_mixed(dr, (cx, cy), text, f.size, fill, a, anchor="mm", zh=mx[1] if len(mx) > 1 else "zh",
+                           num=mx[2] if len(mx) > 2 else "num")
+            else:
+                dr.text((cx, cy), text, font=f, fill=fill + (int(255 * a),), anchor="mm")
+        for kind, xy, text, size, fill, a, *anc in self._ui_text:
+            anchor = anc[0] if anc else "lm"
+            if kind == "mix":
+                draw_mixed(dr, xy, text, size, fill, a, anchor=anchor)
+            else:
+                dr.text(tuple(map(float, xy)), text, font=font(size, kind), fill=tuple(fill) + (int(255 * a),), anchor=anchor)
+        if self.logo is not None:
+            pil.alpha_composite(self.logo, tuple(self.edl.get("logo_xy", (56, 46))))
         pa = np.asarray(pil).astype(np.float32)
         al = pa[..., 3:4] / 255.0
         return img * (1 - al) + pa[..., :3] * al
@@ -901,6 +998,8 @@ class Renderer:
         return -1e9
 
     def _title(self, cv, txt, ly, al):
+        if self.nba:
+            return self._title_nba(cv, ly, al)
         x, y = 48, 44
         lines = ly["lines"]
         w = 70 + max(font(26, "zhr").getlength(lines[0]), font(38).getlength(lines[1]), font(34).getlength(lines[2]))
@@ -911,11 +1010,62 @@ class Renderer:
         txt((x + 34, y + 84), lines[1], font(38), anchor="lm", stroke=0, a=al)
         txt((x + 34, y + 138), lines[2], font(34), COL["gold"], anchor="lm", stroke=0, a=al)
 
+    def _title_nba(self, cv, ly, al):
+        """信息卡：蓝色眉条写英文赛事名（Knockout），墨黑底两行，数字用 Action NBA，左侧红条。"""
+        x, y = self.edl.get("badge_xy", (130, 46))
+        lines, kick = ly["lines"], ly.get("kicker", "")
+        bar = font(26, "ko").getlength(kick) + 28 + font(22, "zhr").getlength(lines[0])
+        w = 64 + max(bar, mixed_runs(lines[1], 38)[1], mixed_runs(lines[2], 32)[1])
+        h = 48 + 116
+        self._panels.append(dict(name="信息卡", a=float(al), rect=[x, y, x + w, y + h]))
+        cv.rect(x, y, x + w, y + 48, COL.get("nbablue", COL["blue"]), al)
+        cv.rect(x, y + 48, x + w, y + h, COL["navy"], al * 0.86)
+        cv.rect(x, y, x + 10, y + h, COL["red"], al)
+        self._ui_text.append(("ko", (x + 32, y + 25), kick, 26, (255, 255, 255), al))
+        self._ui_text.append(("zhr", (x + w - 22, y + 25), lines[0], 22, (195, 206, 211), al, "rm"))
+        self._ui_text.append(("mix", (x + 32, y + 48 + 36), lines[1], 38, (255, 255, 255), al))
+        self._ui_text.append(("mix", (x + 32, y + 48 + 86), lines[2], 32, COL["gold"], al))
+
+    def _huazi(self, cv, texts, ly, T):
+        """花字：斜切色块从左擦入（slam 时从大砸到原大），白色黑体，右侧异色细条，上方英文小标加红色短线。"""
+        age = T - ly["_on"]
+        a = min(1.0, (ly["_off"] - T) / 0.2)
+        if a <= 0 or age < 0:
+            return
+        size = ly.get("size", 96)
+        sc = 1 + 0.5 * (1 - ease(age / 0.16)) if ly.get("style") == "slam" else 1.0
+        sz = int(size * sc)
+        hf = font(sz, "ko" if self.en else "zh")
+        tw = hf.getlength(ly["text"])
+        bw, bh = tw + sz * 0.9, sz * 1.36
+        cx, cy = ly["pos"]
+        x1, y1 = cx - bw / 2, cy - bh / 2
+        wipe = ease(age / 0.22) if ly.get("style") != "slam" else 1.0
+        a *= min(1.0, age / 0.08) if ly.get("style") == "slam" else 1.0
+        bg = COL[ly.get("bg", "red")]
+        acc = COL.get("nbablue", COL["blue"]) if bg == COL["red"] else COL["red"]
+        self._panels.append(dict(name="花字", a=float(a), rect=[x1, y1 - 40, x1 + bw, y1 + bh]))
+        cv.slab(x1 + 6, y1 + 8, x1 + 6 + bw * wipe, y1 + bh + 8, (0, 0, 0), a * 0.35)
+        cv.slab(x1, y1, x1 + bw * wipe, y1 + bh, bg, a)
+        if wipe > 0.98:
+            cv.slab(x1 + bw - 4, y1, x1 + bw + 14, y1 + bh, acc, a)
+        ta = a * ease((age - 0.08) / 0.15) if ly.get("style") != "slam" else a
+        texts.append((cx, cy, ly["text"], hf, (255, 255, 255), ta))
+        if ly.get("kicker"):
+            ks = max(24, int(sz * 0.3))
+            kf = font(ks, "ko")
+            kw = kf.getlength(ly["kicker"].upper())
+            self._ui_text.append(("ko", (x1 + 8, y1 - ks * 0.9), ly["kicker"].upper(), ks, (255, 255, 255), ta))
+            cv.rect(x1 + kw + 24, y1 - ks * 0.9 - 2, x1 + kw + 24 + sz * 1.2, y1 - ks * 0.9 + 3, COL["red"], ta)
+
+    def _box(self, cv, x1, y1, x2, y2, r, col, al):
+        (cv.rect(x1, y1, x2, y2, col, al) if self.nba else cv.rrect(x1, y1, x2, y2, r, col, al))
+
     def _badge(self, cv, txt, sg, j):
         x, y = self.edl.get("badge_xy", (48, 44))
         label = sg["badge"]
         f = font(34)
-        w = 70 + int(f.getlength(label))
+        w = 70 + int(f.getlength(label) if not self.nba else mixed_runs(label, 34)[1])
         a = min(1.0, j / 0.2)
         self._panels.append(dict(name="角标", a=float(a), rect=[x, y, x + w, y + 58]))
         if self.nba:
@@ -932,7 +1082,10 @@ class Renderer:
                 cv.fill([(cx + dx + 10, cy - 11), (cx + dx + 10, cy + 11), (cx + dx - 2, cy)], COL["gold"], a)
         else:
             cv.disc((cx, cy), 10, COL["red"], a)
-        txt((x + 52, y + 29), label, f, (255, 255, 255), anchor="lm", stroke=0, a=a)
+        if self.nba:
+            self._ui_text.append(("mix", (x + 52, y + 29), label, 34, (255, 255, 255), a))
+        else:
+            txt((x + 52, y + 29), label, f, (255, 255, 255), anchor="lm", stroke=0, a=a)
 
     def _board(self, cv, texts, ly, s, T, al):
         if ly.get("pos") == "card":
@@ -944,12 +1097,20 @@ class Renderer:
         pr = BoardProj(x0, y0, k)
         bw, bh = pr.size
         self._panels.append(dict(name="战术板", a=float(al), rect=[x0 - 14, y0 - 54, x0 + bw + 14, y0 + bh + 52]))
-        cv.rrect(x0 - 14, y0 - 54, x0 + bw + 14, y0 + bh + 14, 16, COL["navy"], al * 0.86)
-        texts.append((x0 + 2 + 48, y0 - 28, "战术板", font(28 if k < 8 else 36), (255, 255, 255), al))
-        for i, (tn, c) in enumerate((("火箭", TEAM["HOU"]), ("独行侠", TEAM["DAL"]))):
+        self._box(cv, x0 - 14, y0 - 54, x0 + bw + 14, y0 + bh + 14, 16, COL["navy"], al * 0.86)
+        title = "PLAY DIAGRAM" if self.en else "战术板"
+        if self.nba:
+            cv.rect(x0 - 14, y0 - 54, x0 - 6, y0 - 4, COL["red"], al)
+            tf = font(28 if k < 8 else 36, "ko" if self.en else "zh")
+            texts.append((x0 + 6 + tf.getlength(title) / 2, y0 - 28, title, tf, (255, 255, 255), al))
+        else:
+            texts.append((x0 + 2 + 48, y0 - 28, title, font(28 if k < 8 else 36), (255, 255, 255), al))
+        teams = (("HOU", TEAM["HOU"]), ("DAL", TEAM["DAL"])) if self.en else (("火箭", TEAM["HOU"]), ("独行侠", TEAM["DAL"]))
+        for i, (tn, c) in enumerate(teams):
             lx = x0 + bw - 150 + i * 72
             cv.disc((lx, y0 - 28), 7, c, al)
-            texts.append((lx + 28 + 6 * i, y0 - 28, tn, font(20, "zhr"), (220, 225, 235), al))
+            tf = font(22, "ko") if self.en else font(20, "zhr")
+            texts.append((lx + 12 + tf.getlength(tn) / 2 if self.en else lx + 28 + 6 * i, y0 - 28, tn, tf, (220, 225, 235), al))
         cv.fill(pr([(0, -25), (41.5, -25), (41.5, 25), (0, 25)]), (64, 52, 40), al * 0.9)
         cv.fill(pr([(0, -8), (19, -8), (19, 8), (0, 8)]), (40, 62, 130), al * 0.9)
         for ln in court_lines():
@@ -994,9 +1155,10 @@ class Renderer:
                 texts.append((p[0], p[1], d["name"], f26, COL[sty], al))
         # 线型图例
         ly0 = y0 + bh + 30
-        cv.rrect(x0 - 14, y0 + bh + 8, x0 + bw + 14, y0 + bh + 52, 12, COL["navy"], al * 0.86)
-        items = (("跑位", COL["orange"], False), ("传球", COL["pass"], True), ("防守", COL["blue"], False))
-        fz = font(20 if k < 8 else 26, "zhr")
+        self._box(cv, x0 - 14, y0 + bh + 8, x0 + bw + 14, y0 + bh + 52, 12, COL["navy"], al * 0.86)
+        names = ("CUT", "PASS", "DEF") if self.en else ("跑位", "传球", "防守")
+        items = tuple(zip(names, (COL["orange"], COL["pass"], COL["blue"]), (False, True, False)))
+        fz = font(22 if k < 8 else 30, "ko") if self.en else font(20 if k < 8 else 26, "zhr")
         step = bw / len(items)
         for n, (name, c, dash) in enumerate(items):
             lx = x0 + n * step + 4
@@ -1014,6 +1176,8 @@ class Renderer:
         cv = Canvas(H, W)
         pil = Image.new("RGBA", (W, H), (0, 0, 0, 0))
         dr = ImageDraw.Draw(pil)
+        if self.nba:
+            return self._card_nba(img, cv, pil, dr, sg, j, a)
         home, hs, vs, away = sg["score"]
         y = 300
         cv.rrect(120, y - 90, 1130, y + 90, 22, COL["navy"], a * 0.85)
@@ -1031,6 +1195,51 @@ class Renderer:
             dr.text((420, yy), what, font=font(42, "zhr"), fill=(255, 255, 255, int(255 * ra)), anchor="lm")
         dr.text((W / 2, H - 40), sg["credit"], font=font(24, "zhr"), fill=(170, 175, 190, int(255 * a)), anchor="mm")
         img = cv.composite(img)
+        pa = np.asarray(pil).astype(np.float32)
+        al = pa[..., 3:4] / 255.0
+        return img * (1 - al) + pa[..., :3] * al
+
+    def _card_nba(self, img, cv, pil, dr, sg, j, a):
+        H, W = self.H, self.W
+        home, hs, vs, away = sg["score"]
+        A = lambda al: int(255 * al)  # noqa: E731
+        texts = []
+        if sg.get("head"):
+            zh, en = sg["head"]
+            self._ui_text = []
+            self._huazi(cv, texts, dict(text=zh, kicker=en, pos=(120 + (font(60, "ko" if self.en else "zh").getlength(zh) + 54) / 2, 168), size=60,
+                                        _on=sg["start"] + 0.15, _off=1e9), sg["start"] + j)
+            heads = self._ui_text
+        else:
+            heads = []
+        y = 345
+        cv.slab(120, y - 84, 1130, y + 84, COL["navy"], a * 0.88)
+        cv.slab(120, y - 84, 420, y + 84, TEAM["HOU"], a)
+        cv.slab(830, y - 84, 1130, y + 84, TEAM["DAL"], a)
+        cv.slab(1122, y - 84, 1138, y + 84, COL["red"], a)
+        rows = sg["rows"]
+        for i in range(len(rows)):
+            ra = ease((j - 0.5 - 0.35 * i) / 0.35)
+            yy = 555 + i * 108
+            cv.rect(120, yy - 42, 1130, yy + 42, COL["navy"], ra * 0.86)
+            cv.rect(120, yy - 42, 130, yy + 42, COL["red"], ra)
+        img = cv.composite(img)
+        tf = font(64, "ko") if self.en else font(60)
+        dr.text((270, y), home, font=tf, fill=(255, 255, 255, A(a)), anchor="mm")
+        dr.text((980, y), away, font=tf, fill=(255, 255, 255, A(a)), anchor="mm")
+        dr.text((540, y + 8), hs, font=font(150, "numw"), fill=(255, 255, 255, A(a)), anchor="mm")
+        dr.text((625, y + 4), ":", font=font(110, "numw"), fill=(195, 206, 211, A(a)), anchor="mm")
+        dr.text((710, y + 8), vs, font=font(150, "numw"), fill=(195, 206, 211, A(a)), anchor="mm")
+        for i, (who, what) in enumerate(rows):
+            ra = ease((j - 0.5 - 0.35 * i) / 0.35)
+            yy = 555 + i * 108
+            dr.text((160, yy), who, font=font(44, "ko") if self.en else font(44), fill=(255, 255, 255, A(ra)), anchor="lm")
+            draw_mixed(dr, (400, yy), what, 40, (213, 217, 221), ra, zh="zhr")
+        for cx, cy, text, f, fill, al in texts:
+            dr.text((cx, cy), text, font=f, fill=fill + (A(al),), anchor="mm")
+        for kind, xy, text, size, fill, al, *anc in heads:
+            dr.text(tuple(map(float, xy)), text, font=font(size, kind), fill=tuple(fill) + (A(al),), anchor="lm")
+        dr.text((W / 2, H - 40), sg["credit"], font=font(24, "zhr"), fill=(170, 175, 190, A(a)), anchor="mm")
         pa = np.asarray(pil).astype(np.float32)
         al = pa[..., 3:4] / 255.0
         return img * (1 - al) + pa[..., :3] * al

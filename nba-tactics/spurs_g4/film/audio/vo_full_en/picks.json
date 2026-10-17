@@ -1,0 +1,1217 @@
+{
+ "s1_01": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 2.92,
+    "f0": 398.8,
+    "dyn": 8.1,
+    "bright": -11.3,
+    "seed": 1,
+    "heard": "Back to the first half. Just how hot were the Spurs?",
+    "ok": true
+   }
+  ]
+ },
+ "s1_02": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 13.95,
+    "f0": 152.0,
+    "dyn": 4.7,
+    "bright": -11.6,
+    "seed": 1,
+    "heard": "After one, it was forty one to twenty two, a road team up nineteen after the first quarter of a finals game, that had never happened. With three minutes left in the second, it was seventy one to forty two.",
+    "ok": true
+   }
+  ]
+ },
+ "s1_03": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 13.12,
+    "f0": 138.6,
+    "dyn": 5.3,
+    "bright": -11.0,
+    "seed": 1,
+    "heard": "Vassil went five for five in the half. Harper, off the bench, six of seven as a team, fourteen threes in one half—the most in any Finals half since play-by-play began in nineteen ninety-seven.",
+    "ok": false
+   }
+  ]
+ },
+ "s1_04": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 2.4,
+    "f0": 165.8,
+    "dyn": 3.1,
+    "bright": -10.2,
+    "seed": 1,
+    "heard": "Playing like that, who wouldn't think this one was over?",
+    "ok": true
+   }
+  ]
+ },
+ "s1_05": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 5.23,
+    "f0": 126.4,
+    "dyn": 4.2,
+    "bright": -12.5,
+    "seed": 1,
+    "heard": "But go back and watch those shots one by one, and plenty of them weren't easy looks.",
+    "ok": true
+   }
+  ]
+ },
+ "s1_06": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 13.78,
+    "f0": 141.8,
+    "dyn": 5.3,
+    "bright": -11.7,
+    "seed": 1,
+    "heard": "Every NBA arena has a tracking system that puts a make probability on every shot, based on things like shot distance and how hard it's contested. Take two threes, one wide open, one with a defender in your face. The odds aren't even close.",
+    "ok": true
+   }
+  ]
+ },
+ "s1_07": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 10.83,
+    "f0": 154.7,
+    "dyn": 6.2,
+    "bright": -11.6,
+    "seed": 1,
+    "heard": "Run the Spurs' first half shots through that model, and a normal night gets you about forty nine points. They actually scored seventy. Those extra twenty one that's the hot hand.",
+    "ok": true
+   }
+  ]
+ },
+ "s1_08": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 10.27,
+    "f0": 140.2,
+    "dyn": 6.5,
+    "bright": -9.6,
+    "seed": 1,
+    "heard": "In other words, a big chunk of that twenty-nine point lead came from a hot hand, and a hot hand comes fast and leaves just as fast. Hold that thought.",
+    "ok": true
+   }
+  ]
+ },
+ "s2_01": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 1.92,
+    "f0": 180.8,
+    "dyn": 5.7,
+    "bright": -9.5,
+    "seed": 1,
+    "heard": "So where did the lead start to slip?",
+    "ok": true
+   }
+  ]
+ },
+ "s2_02": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 5.16,
+    "f0": 140.2,
+    "dyn": 5.8,
+    "bright": -10.7,
+    "seed": 1,
+    "heard": "If you ask me, one possession with nine twenty-seven left in the third.",
+    "ok": true
+   }
+  ]
+ },
+ "s2_03": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 9.83,
+    "f0": 127.8,
+    "dyn": 4.2,
+    "bright": -11.4,
+    "seed": 1,
+    "heard": "Spurs up eighty one to fifty two, still a twenty nine point lead when Wembenyama's elbow catches Carl Anthony Towns on the chin. After a review, it's a flagrant one.",
+    "ok": false
+   }
+  ]
+ },
+ "s2_04": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 12.0,
+    "f0": 162.9,
+    "dyn": 5.5,
+    "bright": -12.4,
+    "seed": 1,
+    "heard": "And the problem wasn't just the two free throws. Wemby already had three flagrant points in these playoffs. One more and it's an automatic one-game suspension in the finals. Who is going to risk that?",
+    "ok": false
+   }
+  ]
+ },
+ "s2_05": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 1.65,
+    "f0": 133.9,
+    "dyn": 4.5,
+    "bright": -9.5,
+    "seed": 1,
+    "heard": "He was asked about it after the game.",
+    "ok": true
+   }
+  ]
+ },
+ "s2_06": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 3.95,
+    "f0": 137.0,
+    "dyn": 4.9,
+    "bright": -12.4,
+    "seed": 1,
+    "heard": "And starting with those two free throws, the Knicks went on a 13-0 run.",
+    "ok": false
+   }
+  ]
+ },
+ "s2_07": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 6.35,
+    "f0": 136.2,
+    "dyn": 5.6,
+    "bright": -11.0,
+    "seed": 1,
+    "heard": "On the next trip, Kel'el Johnson misses three straight putbacks, and Anobi grabs the board and takes off.",
+    "ok": false
+   }
+  ]
+ },
+ "s2_08": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 16.33,
+    "f0": 136.6,
+    "dyn": 5.8,
+    "bright": -10.8,
+    "seed": 1,
+    "heard": "Look, the Spurs get four guys back. Three of them each pick up a man, and Wemby sinks to the weak side to protect the rim. But the last man back, Johnson, is a good six feet behind Ananobi, and the whole lane from the free throw line to the rim is empty.",
+    "ok": false
+   }
+  ]
+ },
+ "s2_09": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 7.57,
+    "f0": 161.0,
+    "dyn": 5.2,
+    "bright": -10.7,
+    "seed": 1,
+    "heard": "Ananobi cuts right down the middle. Hart hits him in stride, and the closest defender, Wembanyama, is still more than six feet away.",
+    "ok": false
+   }
+  ]
+ },
+ "s2_09b": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 3.34,
+    "f0": 152.0,
+    "dyn": 4.7,
+    "bright": -10.7,
+    "seed": 1,
+    "heard": "By the time he gets there, Onenobe's already thrown it down.",
+    "ok": false
+   }
+  ]
+ },
+ "s2_10": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 4.69,
+    "f0": 152.0,
+    "dyn": 3.6,
+    "bright": -12.6,
+    "seed": 1,
+    "heard": "Then came the threes: Brunson one, Anunobi one, Hart another.",
+    "ok": false
+   }
+  ]
+ },
+ "s2_11": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 6.32,
+    "f0": 158.3,
+    "dyn": 4.9,
+    "bright": -10.7,
+    "seed": 1,
+    "heard": "And the Spurs, after Fox's jumper at 9:40, they went six full minutes without a field goal.",
+    "ok": false
+   }
+  ]
+ },
+ "s2_12": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 4.93,
+    "f0": 121.0,
+    "dyn": 4.2,
+    "bright": -10.4,
+    "seed": 1,
+    "heard": "After the game, Charles Barkley let them have it on Inside the NBA.",
+    "ok": true
+   }
+  ]
+ },
+ "s2_13": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 1.84,
+    "f0": 103.5,
+    "dyn": 8.9,
+    "bright": -10.2,
+    "seed": 1,
+    "heard": "So was Chuck right?",
+    "ok": true
+   }
+  ]
+ },
+ "s2_14": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 5.9,
+    "f0": 148.5,
+    "dyn": 8.7,
+    "bright": -11.6,
+    "seed": 1,
+    "heard": "In the third, the Spurs took twenty shots; twelve were threes. They made two.",
+    "ok": true
+   }
+  ]
+ },
+ "s2_15": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 10.58,
+    "f0": 123.1,
+    "dyn": 5.8,
+    "bright": -12.0,
+    "seed": 1,
+    "heard": "This time Chuck had a point. Miss after miss off the rim, the Knicks grabbing the rebounds and running. The Spurs lost the quarter twenty six fourteen, and the lead was down to fifteen.",
+    "ok": false
+   }
+  ]
+ },
+ "s3_01": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 7.68,
+    "f0": 143.5,
+    "dyn": 6.1,
+    "bright": -11.2,
+    "seed": 1,
+    "heard": "Now you'd say if the threes won't fall, take it inside. And in the fourth, that's exactly what the Spurs did.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_02": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 9.67,
+    "f0": 141.0,
+    "dyn": 5.4,
+    "bright": -12.3,
+    "seed": 1,
+    "heard": "Nineteen shots in the fourth, only five threes and seven at the rim, and the result four for nineteen, just as bad as the third.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_03": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 2.04,
+    "f0": 137.8,
+    "dyn": 4.1,
+    "bright": -13.8,
+    "seed": 1,
+    "heard": "The problem was on the other end.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_04": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 4.96,
+    "f0": 137.8,
+    "dyn": 4.7,
+    "bright": -11.9,
+    "seed": 1,
+    "heard": "Look at how close the defender's hand was to the ball on every Spurs shot.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_05": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 13.29,
+    "f0": 136.2,
+    "dyn": 5.1,
+    "bright": -11.0,
+    "seed": 1,
+    "heard": "In the fourth, it averaged just two point seven feet. Almost every shot had a hand right in front of it. The tightest the Spurs were guarded all night. Of their nineteen shots, only one came with the nearest hand more than six feet away.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_06": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 3.21,
+    "f0": 136.2,
+    "dyn": 6.6,
+    "bright": -10.1,
+    "seed": 1,
+    "heard": "Nick's coach Mike Brown said they didn't change the game plan.",
+    "ok": false
+   }
+  ]
+ },
+ "s3_07": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 2.71,
+    "f0": 170.6,
+    "dyn": 9.6,
+    "bright": -11.1,
+    "seed": 1,
+    "heard": "Spurs coach Mitch Johnson didn't make excuses.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_08": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 9.51,
+    "f0": 127.1,
+    "dyn": 5.5,
+    "bright": -11.8,
+    "seed": 1,
+    "heard": "Pressure on the rim, rolls to the basket, running the floor in the second half. All of it disappeared, and the whole team was pushed back on its heels.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_09": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 5.99,
+    "f0": 143.5,
+    "dyn": 4.5,
+    "bright": -11.0,
+    "seed": 1,
+    "heard": "With nine and a half minutes left in the fourth, the Spurs were still up twenty. Five minutes later, it was down to four.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_10": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 6.88,
+    "f0": 162.0,
+    "dyn": 7.8,
+    "bright": -11.9,
+    "seed": 1,
+    "heard": "In those five minutes, the Knicks went twenty to four, and all four Spurs points were castle free throws. Not one field goal.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_11": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 3.08,
+    "f0": 143.5,
+    "dyn": 5.1,
+    "bright": -11.5,
+    "seed": 1,
+    "heard": "Okay, now we can go back to the thing that didn't add up.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_12": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 9.41,
+    "f0": 142.7,
+    "dyn": 6.0,
+    "bright": -10.6,
+    "seed": 1,
+    "heard": "By shot difficulty, the Spurs' second half looks were worth about thirty nine points, right in line with the first half they scored nineteen. That's twenty short.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_13": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 9.68,
+    "f0": 149.4,
+    "dyn": 4.6,
+    "bright": -11.3,
+    "seed": 1,
+    "heard": "Those twenty one bonus points from the first half, they gave almost all of them right back, and the Knicks in the fourth made about seven more than expected.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_14": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 7.4,
+    "f0": 134.6,
+    "dyn": 5.5,
+    "bright": -11.8,
+    "seed": 1,
+    "heard": "So most of that twenty-nine was borrowed to begin with. The Spurs paid it back after halftime, and the Knicks squeezed out the rest.",
+    "ok": true
+   }
+  ]
+ },
+ "s3_15": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 6.57,
+    "f0": 167.7,
+    "dyn": 4.0,
+    "bright": -11.7,
+    "seed": 1,
+    "heard": "But remember, with three and a half minutes to go, the Spurs still had a seven-point lead. How do you lose that?",
+    "ok": true
+   }
+  ]
+ },
+ "s4_01": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 4.11,
+    "f0": 137.0,
+    "dyn": 5.2,
+    "bright": -11.1,
+    "seed": 1,
+    "heard": "So let's go through those last three and a half minutes, one possession at a time.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_02": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 6.6,
+    "f0": 164.8,
+    "dyn": 4.0,
+    "bright": -11.0,
+    "seed": 1,
+    "heard": "3:31 left. Wembanyama hits a jumper. Spurs up 104-97, a seven-point lead.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_03": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 3.16,
+    "f0": 150.3,
+    "dyn": 3.6,
+    "bright": -11.0,
+    "seed": 1,
+    "heard": "Believe it or not, that was the Spurs' last field goal of the night.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_04": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 8.56,
+    "f0": 129.7,
+    "dyn": 4.8,
+    "bright": -13.2,
+    "seed": 1,
+    "heard": "Alvarado answers with a three, one hundred and four to one hundred. Fox misses a three at the other end, and the ball is back in Brunson's hands.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_05": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 4.76,
+    "f0": 148.5,
+    "dyn": 4.6,
+    "bright": -11.1,
+    "seed": 1,
+    "heard": "Two and a half minutes left. The Knicks run a pick and roll and get Wembenyama switched onto Brunson.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_06": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 5.49,
+    "f0": 182.9,
+    "dyn": 5.8,
+    "bright": -11.4,
+    "seed": 1,
+    "heard": "Alvarado drives, kicks it back out to Brunson, and the Spurs never switch back.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_06b": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 4.73,
+    "f0": 139.4,
+    "dyn": 4.2,
+    "bright": -11.3,
+    "seed": 1,
+    "heard": "This time Wemby is right on him, hand up, less than three feet from the ball.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_07": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 3.41,
+    "f0": 172.6,
+    "dyn": 6.4,
+    "bright": -9.6,
+    "seed": 1,
+    "heard": "Brunson doesn't care. Twenty-seven feet up, it goes.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_08": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 2.83,
+    "f0": 183.4,
+    "dyn": 4.0,
+    "bright": -11.9,
+    "seed": 1,
+    "heard": "And it's good, one hundred and four to one hundred and three.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_09": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 7.44,
+    "f0": 162.9,
+    "dyn": 6.2,
+    "bright": -11.4,
+    "seed": 1,
+    "heard": "Next trip, Hart picks off a Fox pass. Luckily, Hart can't finish the layup on the break, and Fox gets the rebound back.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_10": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 5.28,
+    "f0": 136.2,
+    "dyn": 4.1,
+    "bright": -11.3,
+    "seed": 1,
+    "heard": "147 left. Wembanyama is fouled and goes to the line. Misses them both.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_11": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 2.95,
+    "f0": 167.7,
+    "dyn": 7.4,
+    "bright": -11.7,
+    "seed": 1,
+    "heard": "Asked about those free throws, Wemby kept it simple.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_12": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 6.25,
+    "f0": 145.1,
+    "dyn": 4.7,
+    "bright": -13.0,
+    "seed": 1,
+    "heard": "Then Brunson goes at Castle floater good. Knicks lead one hundred and five to one hundred and four. Their first lead of the night.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_13": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 5.72,
+    "f0": 133.9,
+    "dyn": 5.1,
+    "bright": -11.4,
+    "seed": 1,
+    "heard": "Castle steps out of bounds. Another turnover. Luckily the Knicks come up empty and the shot clock runs out.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_14": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 11.01,
+    "f0": 152.0,
+    "dyn": 6.9,
+    "bright": -12.4,
+    "seed": 1,
+    "heard": "Thirty seconds left. Fox misses a jumper. Castle grabs the offensive board and gets fouled by Hart. Two free throws, both good. Spurs back in front, one hundred and six to one hundred and five.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_15": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 7.3,
+    "f0": 156.0,
+    "dyn": 5.3,
+    "bright": -11.3,
+    "seed": 1,
+    "heard": "Knicks timeout. Brunson drives floater no good. The ball bounces way out and Fox chases it down in the front court.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_16": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 1.34,
+    "f0": 139.8,
+    "dyn": 7.5,
+    "bright": -10.6,
+    "seed": 1,
+    "heard": "Let's freeze it right here.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_17": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 9.95,
+    "f0": 142.7,
+    "dyn": 5.0,
+    "bright": -10.0,
+    "seed": 1,
+    "heard": "Spurs up one, thirteen seconds left. Their ball, and the shot clock reads twenty-four. More than the time left in the game, a shot clock violation can't even happen.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_18": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 1.74,
+    "f0": 159.2,
+    "dyn": 8.0,
+    "bright": -8.5,
+    "seed": 1,
+    "heard": "So how do you play this?",
+    "ok": true
+   }
+  ]
+ },
+ "s4_19": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 13.32,
+    "f0": 144.3,
+    "dyn": 6.4,
+    "bright": -11.7,
+    "seed": 1,
+    "heard": "Simple, do nothing. Just hold the ball. The Knicks have to foul and send you to the line. Make both, and you're up three. The best they can do is a three to tie. Anyone who's ever played the game knows that.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_20": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 3.6,
+    "f0": 115.2,
+    "dyn": 7.4,
+    "bright": -12.4,
+    "seed": 1,
+    "heard": "But Fox grabs it, never stops, and goes straight at the rim.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_21": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 2.49,
+    "f0": 151.1,
+    "dyn": 4.4,
+    "bright": -11.0,
+    "seed": 1,
+    "heard": "Here comes Anunobi from behind.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_22": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 1.09,
+    "f0": 223.2,
+    "dyn": 3.6,
+    "bright": -12.5,
+    "seed": 1,
+    "heard": "Pinned on the glass.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_23": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 4.0,
+    "f0": 154.7,
+    "dyn": 3.9,
+    "bright": -9.8,
+    "seed": 1,
+    "heard": "Asked about that play afterward, Mike Brown gave Fox the benefit of the doubt.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_24": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 10.34,
+    "f0": 150.7,
+    "dyn": 6.6,
+    "bright": -11.4,
+    "seed": 1,
+    "heard": "But look at the clock. Fox has the ball with thirteen seconds left. He leaves his feet at twelve point five, less than a second. Does that look like a guy trying to kill the clock?",
+    "ok": true
+   }
+  ]
+ },
+ "s4_25": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 2.1,
+    "f0": 146.0,
+    "dyn": 2.9,
+    "bright": -12.3,
+    "seed": 1,
+    "heard": "Wembenyama was on the floor when it happened.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_26": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 5.63,
+    "f0": 119.3,
+    "dyn": 6.7,
+    "bright": -9.8,
+    "seed": 1,
+    "heard": "That one play handed the Knicks a free possession, and in the end, that's the possession that beat them.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_27": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 10.43,
+    "f0": 151.1,
+    "dyn": 5.5,
+    "bright": -12.9,
+    "seed": 1,
+    "heard": "Alvarado comes up with the loose ball and the Spurs foul with 5.7 seconds left. Only their second foul of the quarter, so no free throws. The Knicks call timeout and advance it to the front court.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_28": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 1.6,
+    "f0": 137.0,
+    "dyn": 4.5,
+    "bright": -9.4,
+    "seed": 1,
+    "heard": "An anobii takes it out.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_29": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 5.82,
+    "f0": 150.3,
+    "dyn": 4.7,
+    "bright": -11.0,
+    "seed": 1,
+    "heard": "Once Brunson has it, Ananobi just parks outside the arc like he's got nothing to do with this play.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_30": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 3.65,
+    "f0": 122.8,
+    "dyn": 4.1,
+    "bright": -13.3,
+    "seed": 1,
+    "heard": "Brunson lets it fly from 31 feet. No good.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_31": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 11.99,
+    "f0": 136.6,
+    "dyn": 4.8,
+    "bright": -12.6,
+    "seed": 1,
+    "heard": "But the moment it's up, Ananobi crashes in from beyond the arc. Wembenyama and Fox were both pulled out by Brunson, and the other three Spurs are stuck on their own men. Nobody touches him.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_32": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 0.74,
+    "f0": 225.1,
+    "dyn": 2.2,
+    "bright": -12.4,
+    "seed": 1,
+    "heard": "Tipton.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_33": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 3.26,
+    "f0": 143.9,
+    "dyn": 3.7,
+    "bright": -10.2,
+    "seed": 1,
+    "heard": "Mike Brown said he challenged Ananobi by name before the game.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_35": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 3.93,
+    "f0": 134.6,
+    "dyn": 4.3,
+    "bright": -10.9,
+    "seed": 1,
+    "heard": "Ananobi had one offensive rebound all game. That was it.",
+    "ok": false
+   }
+  ]
+ },
+ "s4_36": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 5.51,
+    "f0": 157.4,
+    "dyn": 5.6,
+    "bright": -11.7,
+    "seed": 1,
+    "heard": "The Spurs had one point two seconds left. Towns tipped away the inbound. Game over.",
+    "ok": true
+   }
+  ]
+ },
+ "s4_37": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 4.26,
+    "f0": 143.1,
+    "dyn": 6.2,
+    "bright": -10.9,
+    "seed": 1,
+    "heard": "The Knicks led this game for a grand total of fifty-three point eight seconds.",
+    "ok": true
+   }
+  ]
+ },
+ "s5_01": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 5.54,
+    "f0": 143.1,
+    "dyn": 8.6,
+    "bright": -12.6,
+    "seed": 1,
+    "heard": "So, back to the question we started with: How did the Spurs lose this game?",
+    "ok": true
+   }
+  ]
+ },
+ "s5_02": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 15.7,
+    "f0": 160.1,
+    "dyn": 5.3,
+    "bright": -10.6,
+    "seed": 1,
+    "heard": "In the first half, that twenty-nine point lead was mostly hot shooting. In the second half, the shooting went cold. In the third, the threes kept clanking. In the fourth, the Knicks defense squeezed them bit by bit. But all of that only cost them the lead.",
+    "ok": true
+   }
+  ]
+ },
+ "s5_03": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 10.2,
+    "f0": 143.5,
+    "dyn": 4.3,
+    "bright": -10.1,
+    "seed": 1,
+    "heard": "What really gave the game away were the possessions the Spurs threw away in the final three and a half minutes. Above all, that Fox layup, a shot he never needed to take.",
+    "ok": true
+   }
+  ]
+ },
+ "s5_04": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 1.89,
+    "f0": 167.7,
+    "dyn": 3.9,
+    "bright": -8.8,
+    "seed": 1,
+    "heard": "Wembenyama after the game.",
+    "ok": false
+   }
+  ]
+ },
+ "s5_05": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 8.82,
+    "f0": 147.7,
+    "dyn": 3.9,
+    "bright": -9.5,
+    "seed": 1,
+    "heard": "Three days later, back in San Antonio, the Spurs lost Game Five, ninety-four to ninety, and the Knicks won their first championship since nineteen seventy-three.",
+    "ok": true
+   }
+  ]
+ }
+}

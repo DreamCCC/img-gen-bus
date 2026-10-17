@@ -1,6 +1,7 @@
 """竖版混音：全部时间从 scenes/film_vt.json 读，规则同 mix_full.py（没有冷开场，旁白目录换成 audio/vo_vt）。
 
-用法：python audio/mix_vt.py  →  out/vt_mix.wav
+英文版（--en）：时间线 scenes/film_vt_en.json，旁白 audio/vo_vt_en。
+用法：python audio/mix_vt.py [--en]  →  out/vt_mix.wav（英文版 out/vt_en_mix.wav）
 """
 import json
 import subprocess
@@ -15,7 +16,10 @@ from scipy.signal import butter, sosfiltfilt
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from sfxlib import SFX, SR, Bus, ROOT, load_vo, ramp, shape_music
 
-TL = json.loads((ROOT / "scenes/film_vt.json").read_text())
+EN = "--en" in sys.argv
+VOD = "audio/vo_vt_en" if EN else "audio/vo_vt"
+TAG = "vt_en" if EN else "vt"
+TL = json.loads((ROOT / ("scenes/film_vt_en.json" if EN else "scenes/film_vt.json")).read_text())
 N = int((TL["duration"] + 0.5) * SR)
 ORIG_RMS = -26.0
 ORIG_BUS = -9.0
@@ -44,12 +48,12 @@ def active_rms_db(y, rel=0.08):
 
 
 # ---------------- 旁白 ----------------
-MOOD = {l["id"]: l.get("mood") for l in json.loads((ROOT / "audio/vo_vt.json").read_text())}
+MOOD = {l["id"]: l.get("mood") for l in json.loads((ROOT / f"{VOD}.json").read_text())}
 HYPE_DB = 2.0
 vo_gain = {}
 for v in TL["vo"]:
-    raw, _ = librosa.load(ROOT / f"audio/vo_vt/{v['id']}.wav", sr=SR, mono=True)
-    y = load_vo(f"audio/vo_vt/{v['id']}.wav")
+    raw, _ = librosa.load(ROOT / f"{VOD}/{v['id']}.wav", sr=SR, mono=True)
+    y = load_vo(f"{VOD}/{v['id']}.wav")
     vo_gain[v["id"]] = float(np.sqrt((y ** 2).sum() / ((raw ** 2).sum() + 1e-12)))
     vo.place(y, v["t"], 10 ** (HYPE_DB / 20) if MOOD.get(v["id"]) == "hype" else 1.0)
 
@@ -98,13 +102,13 @@ for name, t in TL["sfx"]:
     fx.place(SFX[name](), max(0.0, t), 10 ** (-12 / 20))
 
 mix = vo.x + qbus.x + game.x + bed.x + mus.x + fx.x
-tmp = ROOT / "out/vt_mix_raw.wav"
+tmp = ROOT / f"out/{TAG}_mix_raw.wav"
 sf.write(tmp, mix[:, : int((TL["duration"] + 0.2) * SR)].T, SR, subtype="FLOAT")
 meas = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(tmp), "-af", "ebur128=peak=true", "-f", "null", "-"],
                       capture_output=True, text=True).stderr
 lufs = float(meas.rsplit("I:", 1)[1].split("LUFS")[0])
 gain = -16 - lufs
-out = ROOT / "out/vt_mix.wav"
+out = ROOT / f"out/{TAG}_mix.wav"
 subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(tmp), "-af",
                 f"volume={gain:.2f}dB,alimiter=limit=0.7:attack=2:release=60:level=false",
                 "-ar", str(SR), "-c:a", "pcm_s16le", str(out)], check=True)

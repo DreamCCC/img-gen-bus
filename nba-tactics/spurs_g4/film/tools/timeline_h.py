@@ -1,19 +1,26 @@
 """时间轴：旁白排点、字幕分段、画面场景、事件（花字 / 音效）全部写进 scenes/film_h.json。
 
 字幕分段：按标点把一句拆成几段，在旁白音频里找停顿，把分段边界吸附到最近的停顿上。
-用法：python tools/timeline_h.py
+英文版（--en）：台词 audio/vo_cold_en.json，旁白 audio/vo_en，字幕分段和关键词时刻按 words.json 词级时间（tools/en_vo.py）；
+台词的 keys 把下面 find() 用的中文关键词映射成英文原文。输出 scenes/film_h_en.json 和 clips_h_en.json（片段名加 en_ 前缀）。
+用法：python tools/timeline_h.py [--en]
 """
 import json
 import re
+import sys
 from pathlib import Path
 
 import librosa
 import numpy as np
 
+import en_vo
+
 ROOT = Path(__file__).resolve().parent.parent
-VO = ROOT / "audio/vo"
-LINES = {l["id"]: l for l in json.loads((ROOT / "audio/vo_cold.json").read_text())}
+EN = "--en" in sys.argv
+VO = ROOT / ("audio/vo_en" if EN else "audio/vo")
+LINES = {l["id"]: l for l in json.loads((ROOT / ("audio/vo_cold_en.json" if EN else "audio/vo_cold.json")).read_text())}
 DUR = json.loads((VO / "durations.json").read_text())
+WORDS = json.loads((VO / "words.json").read_text()) if EN else {}
 
 
 def pauses(lid):
@@ -38,6 +45,8 @@ def pauses(lid):
 
 def chunks(lid, max_len=18):
     text = LINES[lid]["text"]
+    if EN:
+        return en_vo.chunks(text, WORDS[lid], DUR[lid])
     parts = [p for p in re.split(r"(?<=[，。？！])", text) if p.strip()]
     merged = []
     for p in parts:
@@ -61,6 +70,8 @@ def chunks(lid, max_len=18):
 
 def find(lid, key):
     """台词里某个词出现的时刻：是某个字幕分段的开头就用分段起点（来自停顿），否则按字数比例估。"""
+    if EN:
+        return en_vo.key_time(LINES[lid]["text"], WORDS[lid], DUR[lid], LINES[lid]["keys"][key])
     for c in chunks(lid):
         if c["text"].startswith(key):
             return c["a"]
@@ -90,6 +101,7 @@ T["crowd_end"] = T["crowd"] + 2.53
 T["board"] = T["crowd_end"] + 0.25
 c02 = T["board"] + 0.6
 end = put("c02", c02)
+T["peak"] = c02 + find("c02", "最多")
 T["flip"] = c02 + find("c02", "输了")
 c03 = end + 0.45
 end = put("c03", c03)
@@ -149,7 +161,18 @@ music = [{"src": "assets/music/Lightless_Dawn.mp3", "s0": 0.0, "t": T["freeze"],
 out = {"duration": round(duration, 3), "fps": 30, "T": {k: round(v, 3) for k, v in T.items()},
        "scenes": {k: [round(a, 3), round(b, 3)] for k, (a, b) in scenes.items()},
        "vo": vo, "sfx": [[n, round(t, 3)] for n, t in sfx], "orig": orig, "music": music}
-(ROOT / "scenes/film_h.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
+(ROOT / ("scenes/film_h_en.json" if EN else "scenes/film_h.json")).write_text(json.dumps(out, ensure_ascii=False, indent=1))
+if EN:
+    # 英文旁白更长，Inside the NBA 和片名两个镜头按场景时长重抽
+    span = {"inside": T["stat"] - T["inside"], "top_slow": duration - T["title_bg"]}
+    cl = []
+    for c in json.loads((ROOT / "clips_h.json").read_text()):
+        c = dict(c, name="en_" + c["name"])
+        d = span.get(c["name"][3:])
+        if d:
+            c.update(dur=round(d, 3), t1=round(c["t0"] + d, 3))
+        cl.append(c)
+    (ROOT / "clips_h_en.json").write_text(json.dumps(cl, ensure_ascii=False, indent=1))
 print(f"duration {duration:.2f}s")
 for v in vo:
     print(v["id"], v["t"], [(c["text"], c["a"], c["b"]) for c in v["chunks"]])

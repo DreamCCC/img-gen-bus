@@ -1,12 +1,12 @@
 #!/bin/bash
 # 重渲 render_par.sh 生成的某几段（每段拆成 SUBS 个进程，默认 4），写回 out/parts/<mode>_<段号>.mp4，再拼接成母版：
-#   ./rerender_part.sh <h|v|f|vt> "<段号> [段号 ...]" <段数> <输出.mp4> <混音.wav>
+#   ./rerender_part.sh <h|v|f|vt|f_en|vt_en> "<段号> [段号 ...]" <段数> <输出.mp4> <混音.wav>
 # 需要 out/parts/ 里其余各段还在；被清理过就直接重跑 render_par.sh。
 set -e
 shopt -s nullglob
 cd "$(dirname "$0")"
 mode=$1; idxs=$2; parts=$3; out=$4; audio=$5; subs=${SUBS:-4}
-query=""; [[ $mode == v ]] && query="v=1"; [[ $mode == f ]] && query="m=f"; [[ $mode == vt ]] && query="m=vt"
+query=""; [[ $mode == v ]] && query="v=1"; [[ $mode == f ]] && query="m=f"; [[ $mode == vt ]] && query="m=vt"; [[ $mode == *_en ]] && query="m=${mode%_en}&lang=en"
 total=$(node -e "const j=require('./scenes/film_${mode}.json');console.log(Math.round(j.duration*30))")
 step=$(( (total + parts - 1) / parts ))
 pids=()

@@ -1,0 +1,92 @@
+{
+ "c01": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 4.8,
+    "f0": 117.9,
+    "dyn": 4.6,
+    "bright": -10.1,
+    "seed": 1,
+    "heard": "If this one doesn't go down, the Spurs tie the finals at two games apiece.",
+    "ok": true
+   }
+  ]
+ },
+ "c02": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 10.73,
+    "f0": 147.7,
+    "dyn": 4.9,
+    "bright": -12.0,
+    "seed": 1,
+    "heard": "Game four of the twenty twenty six finals, the Spurs were up twenty seven at the half and led by as many as twenty nine. Then the Knicks came all the way back at Madison Square Garden and won by one.",
+    "ok": true
+   }
+  ]
+ },
+ "c03": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 7.36,
+    "f0": 135.4,
+    "dyn": 6.0,
+    "bright": -11.8,
+    "seed": 1,
+    "heard": "No team had ever blown a lead that big in the finals. The previous record was a twenty-four point comeback by the two thousand and eight Celtics.",
+    "ok": true
+   }
+  ]
+ },
+ "c04": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 7.82,
+    "f0": 139.4,
+    "dyn": 6.5,
+    "bright": -10.6,
+    "seed": 1,
+    "heard": "Afterward, everyone said the same two things: the Spurs took bad shots in the second half, and they lost their nerve.",
+    "ok": true
+   }
+  ]
+ },
+ "c05": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 11.74,
+    "f0": 146.8,
+    "dyn": 5.8,
+    "bright": -11.4,
+    "seed": 1,
+    "heard": "Fair enough, but I went back through the NBA tracking data and something doesn't add up. By shot difficulty, the Spurs' second half looks were about as good as the first halves; they just made far fewer of them.",
+    "ok": false
+   }
+  ]
+ },
+ "c06": {
+  "seed": 1,
+  "room": 99,
+  "takes": [
+   {
+    "dur": 4.17,
+    "f0": 174.1,
+    "dyn": 4.3,
+    "bright": -10.9,
+    "seed": 1,
+    "heard": "So how did a 29-point lead leak away? Let's start from the top.",
+    "ok": false
+   }
+  ]
+ }
+}
