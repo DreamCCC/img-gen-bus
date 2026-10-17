@@ -75,7 +75,7 @@ def key_time(text, words, dur, key):
 
 
 def split_text(text, maxc=44):
-    """按句号、问号、逗号等切成字幕行；超长的从中间附近的词间断开。"""
+    """按句号、问号、逗号等切成字幕行；超长的按 maxc 均分成几段，在词间断开。"""
     parts = [p.strip() for p in re.split(r"(?<=[.?!,;:])\s+", text) if p.strip()]
     merged = []
     for p in parts:
@@ -88,8 +88,9 @@ def split_text(text, maxc=44):
     out = []
     for p in merged:
         while len(p) > maxc:
-            sp = [m.start() for m in re.finditer(" ", p)]
-            cut = min(sp, key=lambda i: abs(i - len(p) / 2))
+            n = -(-len(p) // maxc)
+            sp = [m.start() for m in re.finditer(" ", p) if m.start() <= maxc]
+            cut = min(sp, key=lambda i: abs(i - len(p) / n))
             out.append(p[:cut])
             p = p[cut + 1:]
         out.append(p)
