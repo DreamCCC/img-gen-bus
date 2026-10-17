@@ -1,0 +1,3510 @@
+{
+ "duration": 378.157,
+ "fps": 30,
+ "chap": [
+  [
+   37.05,
+   "01",
+   "A BORROWED LEAD"
+  ],
+  [
+   72.49,
+   "02",
+   "Q3: THE 13-0 RUN"
+  ],
+  [
+   156.17,
+   "03",
+   "Q4: ATTACKING, STILL MISSING"
+  ],
+  [
+   211.21,
+   "04",
+   "THE FINAL 3:31"
+  ]
+ ],
+ "vo": [
+  {
+   "id": "o1",
+   "t": 4.8,
+   "dur": 2.33,
+   "text": "Tipped in! Anunoby tips it in!",
+   "chunks": [
+    {
+     "text": "Tipped in!",
+     "a": 0.0,
+     "b": 1.1
+    },
+    {
+     "text": "Anunoby tips it in!",
+     "a": 1.1,
+     "b": 2.33
+    }
+   ]
+  },
+  {
+   "id": "o2",
+   "t": 8.85,
+   "dur": 7.29,
+   "text": "Game 4 of the Finals. The Spurs led by as many as 29 at Madison Square Garden, and lost by one.",
+   "chunks": [
+    {
+     "text": "Game 4 of the Finals",
+     "a": 0.0,
+     "b": 2.12
+    },
+    {
+     "text": "The Spurs led by as many as",
+     "a": 2.12,
+     "b": 3.86
+    },
+    {
+     "text": "29 at Madison Square Garden",
+     "a": 3.86,
+     "b": 6.04
+    },
+    {
+     "text": "and lost by one",
+     "a": 6.04,
+     "b": 7.29
+    }
+   ]
+  },
+  {
+   "id": "o3",
+   "t": 16.54,
+   "dur": 6.82,
+   "text": "In all the years of the Finals, no team had ever blown a lead that big. The Spurs now own that record.",
+   "chunks": [
+    {
+     "text": "In all the years",
+     "a": 0.0,
+     "b": 0.78
+    },
+    {
+     "text": "of the Finals",
+     "a": 0.78,
+     "b": 1.92
+    },
+    {
+     "text": "no team had ever blown",
+     "a": 1.92,
+     "b": 3.34
+    },
+    {
+     "text": "a lead that big",
+     "a": 3.34,
+     "b": 4.86
+    },
+    {
+     "text": "The Spurs now own that record",
+     "a": 4.86,
+     "b": 6.82
+    }
+   ]
+  },
+  {
+   "id": "o4",
+   "t": 23.91,
+   "dur": 8.14,
+   "text": "Afterward, everyone said bad shots, mental collapse. Not wrong. But I went through the tracking data, and it's not that simple.",
+   "chunks": [
+    {
+     "text": "Afterward",
+     "a": 0.0,
+     "b": 1.14
+    },
+    {
+     "text": "everyone said bad shots",
+     "a": 1.14,
+     "b": 2.94
+    },
+    {
+     "text": "mental collapse. Not wrong",
+     "a": 2.94,
+     "b": 4.84
+    },
+    {
+     "text": "But I went through",
+     "a": 4.84,
+     "b": 5.54
+    },
+    {
+     "text": "the tracking data",
+     "a": 5.54,
+     "b": 6.76
+    },
+    {
+     "text": "and it's not that simple",
+     "a": 6.76,
+     "b": 8.14
+    }
+   ]
+  },
+  {
+   "id": "a1",
+   "t": 37.25,
+   "dur": 2.95,
+   "text": "Start with the first half. Just how hot were the Spurs?",
+   "chunks": [
+    {
+     "text": "Start with the first half",
+     "a": 0.0,
+     "b": 1.52
+    },
+    {
+     "text": "Just how hot were the Spurs?",
+     "a": 1.52,
+     "b": 2.95
+    }
+   ]
+  },
+  {
+   "id": "a2",
+   "t": 40.45,
+   "dur": 8.08,
+   "text": "41 to 22 after one. 14 threes in the half, the most in Finals history. Everything was falling.",
+   "chunks": [
+    {
+     "text": "41 to 22 after one",
+     "a": 0.0,
+     "b": 2.76
+    },
+    {
+     "text": "14 threes in the half",
+     "a": 2.76,
+     "b": 4.56
+    },
+    {
+     "text": "the most in Finals history",
+     "a": 4.56,
+     "b": 6.7
+    },
+    {
+     "text": "Everything was falling",
+     "a": 6.7,
+     "b": 8.08
+    }
+   ]
+  },
+  {
+   "id": "a3",
+   "t": 49.48,
+   "dur": 3.18,
+   "text": "But look closely, and a lot of these shots weren't easy.",
+   "chunks": [
+    {
+     "text": "But look closely",
+     "a": 0.0,
+     "b": 1.185
+    },
+    {
+     "text": "and a lot of these",
+     "a": 1.185,
+     "b": 3.16
+    },
+    {
+     "text": "shots weren't easy",
+     "a": 3.16,
+     "b": 3.18
+    }
+   ]
+  },
+  {
+   "id": "a4",
+   "t": 53.46,
+   "dur": 10.39,
+   "text": "Tracking data puts a make probability on every shot. At normal rates, the Spurs should have scored about 49 in the first half. Instead? They scored 70.",
+   "chunks": [
+    {
+     "text": "Tracking data puts a make",
+     "a": 0.0,
+     "b": 1.44
+    },
+    {
+     "text": "probability on every shot",
+     "a": 1.44,
+     "b": 3.58
+    },
+    {
+     "text": "At normal rates",
+     "a": 3.58,
+     "b": 5.0
+    },
+    {
+     "text": "the Spurs should have scored",
+     "a": 5.0,
+     "b": 5.98
+    },
+    {
+     "text": "about 49 in the first half",
+     "a": 5.98,
+     "b": 8.28
+    },
+    {
+     "text": "Instead?",
+     "a": 8.28,
+     "b": 9.16
+    },
+    {
+     "text": "They scored 70",
+     "a": 9.16,
+     "b": 10.39
+    }
+   ]
+  },
+  {
+   "id": "a5",
+   "t": 65.05,
+   "dur": 6.44,
+   "text": "That extra 21 points was a hot hand. And a hot hand comes and goes. You can't ride it for a whole game.",
+   "chunks": [
+    {
+     "text": "That extra 21 points",
+     "a": 0.0,
+     "b": 1.42
+    },
+    {
+     "text": "was a hot hand",
+     "a": 1.42,
+     "b": 2.92
+    },
+    {
+     "text": "And a hot hand comes and goes",
+     "a": 2.92,
+     "b": 4.78
+    },
+    {
+     "text": "You can't ride it",
+     "a": 4.78,
+     "b": 5.54
+    },
+    {
+     "text": "for a whole game",
+     "a": 5.54,
+     "b": 6.44
+    }
+   ]
+  },
+  {
+   "id": "b1",
+   "t": 72.79,
+   "dur": 2.1,
+   "text": "So where did the lead start to slip?",
+   "chunks": [
+    {
+     "text": "So where did the",
+     "a": 0.0,
+     "b": 0.96
+    },
+    {
+     "text": "lead start to slip?",
+     "a": 0.96,
+     "b": 2.1
+    }
+   ]
+  },
+  {
+   "id": "b2",
+   "t": 75.09,
+   "dur": 7.32,
+   "text": "9:27 left in the third, Spurs up 29. Wembanyama swings an elbow into Towns' jaw. Flagrant 1.",
+   "chunks": [
+    {
+     "text": "9:27 left in the third",
+     "a": 0.0,
+     "b": 2.14
+    },
+    {
+     "text": "Spurs up 29",
+     "a": 2.14,
+     "b": 3.7
+    },
+    {
+     "text": "Wembanyama swings an",
+     "a": 3.7,
+     "b": 4.72
+    },
+    {
+     "text": "elbow into Towns' jaw",
+     "a": 4.72,
+     "b": 6.66
+    },
+    {
+     "text": "Flagrant 1",
+     "a": 6.66,
+     "b": 7.32
+    }
+   ]
+  },
+  {
+   "id": "b3",
+   "t": 82.81,
+   "dur": 10.12,
+   "text": "And here's the thing: he already had 3 flagrant points this postseason. One more, and he's suspended. In the Finals. So how freely can he play now?",
+   "chunks": [
+    {
+     "text": "And here's the thing",
+     "a": 0.0,
+     "b": 1.28
+    },
+    {
+     "text": "he already had 3 flagrant",
+     "a": 1.28,
+     "b": 3.24
+    },
+    {
+     "text": "points this postseason",
+     "a": 3.24,
+     "b": 4.92
+    },
+    {
+     "text": "One more, and he's suspended",
+     "a": 4.92,
+     "b": 7.02
+    },
+    {
+     "text": "In the Finals",
+     "a": 7.02,
+     "b": 8.2
+    },
+    {
+     "text": "So how freely can he play now?",
+     "a": 8.2,
+     "b": 10.12
+    }
+   ]
+  },
+  {
+   "id": "b4",
+   "t": 93.53,
+   "dur": 3.15,
+   "text": "From those two free throws, the Knicks ripped off a 13-0 run.",
+   "chunks": [
+    {
+     "text": "From those two free throws",
+     "a": 0.0,
+     "b": 1.3
+    },
+    {
+     "text": "the Knicks ripped",
+     "a": 1.3,
+     "b": 1.72
+    },
+    {
+     "text": "off a 13-0 run",
+     "a": 1.72,
+     "b": 3.15
+    }
+   ]
+  },
+  {
+   "id": "b5",
+   "t": 102.113,
+   "dur": 8.68,
+   "text": "Look at this trip. The Spurs get four guys back, each on a man, and the whole lane, from the free-throw line to the rim, is empty.",
+   "chunks": [
+    {
+     "text": "Look at this trip",
+     "a": 0.0,
+     "b": 1.32
+    },
+    {
+     "text": "The Spurs get four guys back",
+     "a": 1.32,
+     "b": 3.44
+    },
+    {
+     "text": "each on a man",
+     "a": 3.44,
+     "b": 4.62
+    },
+    {
+     "text": "and the whole lane",
+     "a": 4.62,
+     "b": 5.92
+    },
+    {
+     "text": "from the free-throw",
+     "a": 5.92,
+     "b": 6.64
+    },
+    {
+     "text": "line to the rim",
+     "a": 6.64,
+     "b": 8.02
+    },
+    {
+     "text": "is empty",
+     "a": 8.02,
+     "b": 8.68
+    }
+   ]
+  },
+  {
+   "id": "b6",
+   "t": 114.517,
+   "dur": 3.98,
+   "text": "By the time Wembanyama gets there, Anunoby's already thrown it down!",
+   "chunks": [
+    {
+     "text": "By the time Wembanyama",
+     "a": 0.0,
+     "b": 1.18
+    },
+    {
+     "text": "gets there",
+     "a": 1.18,
+     "b": 2.1
+    },
+    {
+     "text": "Anunoby's already",
+     "a": 2.1,
+     "b": 3.12
+    },
+    {
+     "text": "thrown it down!",
+     "a": 3.12,
+     "b": 3.98
+    }
+   ]
+  },
+  {
+   "id": "b7",
+   "t": 131.38,
+   "dur": 9.26,
+   "text": "The Spurs shot 12 threes that quarter and made two. Every miss turned into a Knicks run-out. By the end of the quarter, the lead was down to 15.",
+   "chunks": [
+    {
+     "text": "The Spurs shot 12 threes",
+     "a": 0.0,
+     "b": 1.66
+    },
+    {
+     "text": "that quarter and made two",
+     "a": 1.66,
+     "b": 3.46
+    },
+    {
+     "text": "Every miss turned into",
+     "a": 3.46,
+     "b": 4.6
+    },
+    {
+     "text": "a Knicks run-out",
+     "a": 4.6,
+     "b": 5.8
+    },
+    {
+     "text": "By the end of the quarter",
+     "a": 5.8,
+     "b": 7.2
+    },
+    {
+     "text": "the lead was down to 15",
+     "a": 7.2,
+     "b": 9.26
+    }
+   ]
+  },
+  {
+   "id": "b8",
+   "t": 150.04,
+   "dur": 5.33,
+   "text": "Barkley wasn't wrong. With a lead that big, why keep jacking threes? Where's the logic in that?",
+   "chunks": [
+    {
+     "text": "Barkley wasn't wrong",
+     "a": 0.0,
+     "b": 1.18
+    },
+    {
+     "text": "With a lead that big",
+     "a": 1.18,
+     "b": 2.72
+    },
+    {
+     "text": "why keep jacking threes?",
+     "a": 2.72,
+     "b": 4.26
+    },
+    {
+     "text": "Where's the logic in that?",
+     "a": 4.26,
+     "b": 5.33
+    }
+   ]
+  },
+  {
+   "id": "c1",
+   "t": 156.37,
+   "dur": 7.87,
+   "text": "So in the fourth, skip the threes and attack the rim. The Spurs did exactly that. The result? 4 for 19.",
+   "chunks": [
+    {
+     "text": "So in the fourth",
+     "a": 0.0,
+     "b": 1.58
+    },
+    {
+     "text": "skip the threes and",
+     "a": 1.58,
+     "b": 2.72
+    },
+    {
+     "text": "attack the rim",
+     "a": 2.72,
+     "b": 3.96
+    },
+    {
+     "text": "The Spurs did exactly that",
+     "a": 3.96,
+     "b": 5.86
+    },
+    {
+     "text": "The result? 4 for 19",
+     "a": 5.86,
+     "b": 7.87
+    }
+   ]
+  },
+  {
+   "id": "c2",
+   "t": 164.74,
+   "dur": 11.68,
+   "text": "Why? Because the Knicks were right in their faces. On Spurs shots, the nearest defender's hand averaged just 2.7 feet from the ball. Less than an arm's length. How do you shoot over that?",
+   "chunks": [
+    {
+     "text": "Why?",
+     "a": 0.0,
+     "b": 0.78
+    },
+    {
+     "text": "Because the Knicks were",
+     "a": 0.78,
+     "b": 1.68
+    },
+    {
+     "text": "right in their faces",
+     "a": 1.68,
+     "b": 3.2
+    },
+    {
+     "text": "On Spurs shots",
+     "a": 3.2,
+     "b": 4.62
+    },
+    {
+     "text": "the nearest defender's",
+     "a": 4.62,
+     "b": 5.68
+    },
+    {
+     "text": "hand averaged just 2.7",
+     "a": 5.68,
+     "b": 7.84
+    },
+    {
+     "text": "feet from the ball",
+     "a": 7.84,
+     "b": 9.12
+    },
+    {
+     "text": "Less than an arm's length",
+     "a": 9.12,
+     "b": 10.52
+    },
+    {
+     "text": "How do you shoot over that?",
+     "a": 10.52,
+     "b": 11.68
+    }
+   ]
+  },
+  {
+   "id": "c3",
+   "t": 184.29,
+   "dur": 5.05,
+   "text": "9:30 left, Spurs up 20. Five minutes later, it was down to 4.",
+   "chunks": [
+    {
+     "text": "9:30 left, Spurs up 20",
+     "a": 0.0,
+     "b": 2.82
+    },
+    {
+     "text": "Five minutes later",
+     "a": 2.82,
+     "b": 4.1
+    },
+    {
+     "text": "it was down to 4",
+     "a": 4.1,
+     "b": 5.05
+    }
+   ]
+  },
+  {
+   "id": "c4",
+   "t": 195.29,
+   "dur": 7.17,
+   "text": "So run the numbers. The 21 bonus points from the first half? In the second half, they gave almost all of it back.",
+   "chunks": [
+    {
+     "text": "So run the numbers",
+     "a": 0.0,
+     "b": 1.6
+    },
+    {
+     "text": "The 21 bonus points",
+     "a": 1.6,
+     "b": 2.86
+    },
+    {
+     "text": "from the first half?",
+     "a": 2.86,
+     "b": 4.18
+    },
+    {
+     "text": "In the second half",
+     "a": 4.18,
+     "b": 5.38
+    },
+    {
+     "text": "they gave almost",
+     "a": 5.38,
+     "b": 6.16
+    },
+    {
+     "text": "all of it back",
+     "a": 6.16,
+     "b": 7.17
+    }
+   ]
+  },
+  {
+   "id": "c5",
+   "t": 204.16,
+   "dur": 5.85,
+   "text": "Still, with three and a half minutes left, the Spurs were up 7. How do you lose that?",
+   "chunks": [
+    {
+     "text": "Still",
+     "a": 0.0,
+     "b": 1.02
+    },
+    {
+     "text": "with three and a",
+     "a": 1.02,
+     "b": 1.66
+    },
+    {
+     "text": "half minutes left",
+     "a": 1.66,
+     "b": 3.0
+    },
+    {
+     "text": "the Spurs were up 7",
+     "a": 3.0,
+     "b": 4.8
+    },
+    {
+     "text": "How do you lose that?",
+     "a": 4.8,
+     "b": 5.85
+    }
+   ]
+  },
+  {
+   "id": "d1",
+   "t": 211.51,
+   "dur": 5.54,
+   "text": "3:31 left. Wembanyama hits a jumper. 104-97.",
+   "chunks": [
+    {
+     "text": "3:31 left",
+     "a": 0.0,
+     "b": 1.74
+    },
+    {
+     "text": "Wembanyama hits a jumper",
+     "a": 1.74,
+     "b": 3.62
+    },
+    {
+     "text": "104-97",
+     "a": 3.62,
+     "b": 5.54
+    }
+   ]
+  },
+  {
+   "id": "d2",
+   "t": 217.35,
+   "dur": 3.42,
+   "text": "Believe it or not, that's the Spurs' last field goal of the game.",
+   "chunks": [
+    {
+     "text": "Believe it or not",
+     "a": 0.0,
+     "b": 1.12
+    },
+    {
+     "text": "that's the Spurs' last",
+     "a": 1.12,
+     "b": 2.28
+    },
+    {
+     "text": "field goal of the game",
+     "a": 2.28,
+     "b": 3.42
+    }
+   ]
+  },
+  {
+   "id": "d3",
+   "t": 222.07,
+   "dur": 4.09,
+   "text": "Two and a half minutes left. The Knicks get Wembanyama switched onto Brunson.",
+   "chunks": [
+    {
+     "text": "Two and a half minutes left",
+     "a": 0.0,
+     "b": 1.64
+    },
+    {
+     "text": "The Knicks get Wembanyama",
+     "a": 1.64,
+     "b": 2.96
+    },
+    {
+     "text": "switched onto Brunson",
+     "a": 2.96,
+     "b": 4.09
+    }
+   ]
+  },
+  {
+   "id": "d4",
+   "t": 226.46,
+   "dur": 3.14,
+   "text": "Brunson doesn't care. 27 feet. Up it goes!",
+   "chunks": [
+    {
+     "text": "Brunson doesn't care. 27 feet",
+     "a": 0.0,
+     "b": 2.34
+    },
+    {
+     "text": "Up it goes!",
+     "a": 2.34,
+     "b": 3.14
+    }
+   ]
+  },
+  {
+   "id": "d5",
+   "t": 231.61,
+   "dur": 1.99,
+   "text": "104-103.",
+   "chunks": [
+    {
+     "text": "104-103",
+     "a": 0.0,
+     "b": 1.99
+    }
+   ]
+  },
+  {
+   "id": "d6",
+   "t": 236.56,
+   "dur": 2.3,
+   "text": "Then Wemby misses both free throws.",
+   "chunks": [
+    {
+     "text": "Then Wemby misses",
+     "a": 0.0,
+     "b": 1.14
+    },
+    {
+     "text": "both free throws",
+     "a": 1.14,
+     "b": 2.3
+    }
+   ]
+  },
+  {
+   "id": "d7",
+   "t": 239.9,
+   "dur": 1.89,
+   "text": "Brunson floater. Knicks in front.",
+   "chunks": [
+    {
+     "text": "Brunson floater",
+     "a": 0.0,
+     "b": 1.26
+    },
+    {
+     "text": "Knicks in front",
+     "a": 1.26,
+     "b": 1.89
+    }
+   ]
+  },
+  {
+   "id": "d8",
+   "t": 243.59,
+   "dur": 6.14,
+   "text": "Castle hits both free throws. Spurs back on top, 106-105.",
+   "chunks": [
+    {
+     "text": "Castle hits both free throws",
+     "a": 0.0,
+     "b": 2.3
+    },
+    {
+     "text": "Spurs back on top, 106-105",
+     "a": 2.3,
+     "b": 6.14
+    }
+   ]
+  },
+  {
+   "id": "d9",
+   "t": 253.69,
+   "dur": 2.89,
+   "text": "And then, this play. Let's freeze it right here.",
+   "chunks": [
+    {
+     "text": "And then, this play",
+     "a": 0.0,
+     "b": 1.92
+    },
+    {
+     "text": "Let's freeze it right here",
+     "a": 1.92,
+     "b": 2.89
+    }
+   ]
+  },
+  {
+   "id": "d10",
+   "t": 257.13,
+   "dur": 6.06,
+   "text": "Up one, 13 seconds left, Spurs ball. And the shot clock reads more than the time left in the game.",
+   "chunks": [
+    {
+     "text": "Up one, 13 seconds left",
+     "a": 0.0,
+     "b": 2.68
+    },
+    {
+     "text": "Spurs ball",
+     "a": 2.68,
+     "b": 3.38
+    },
+    {
+     "text": "And the shot clock",
+     "a": 3.38,
+     "b": 4.06
+    },
+    {
+     "text": "reads more than the",
+     "a": 4.06,
+     "b": 4.94
+    },
+    {
+     "text": "time left in the game",
+     "a": 4.94,
+     "b": 6.06
+    }
+   ]
+  },
+  {
+   "id": "d11",
+   "t": 263.49,
+   "dur": 7.37,
+   "text": "So how do you play it? Simple. Do nothing. Hold the ball, and wait for them to foul you and send you to the line.",
+   "chunks": [
+    {
+     "text": "So how do you play it? Simple",
+     "a": 0.0,
+     "b": 2.38
+    },
+    {
+     "text": "Do nothing",
+     "a": 2.38,
+     "b": 3.48
+    },
+    {
+     "text": "Hold the ball",
+     "a": 3.48,
+     "b": 4.6
+    },
+    {
+     "text": "and wait for them to foul you",
+     "a": 4.6,
+     "b": 5.9
+    },
+    {
+     "text": "and send you to the line",
+     "a": 5.9,
+     "b": 7.37
+    }
+   ]
+  },
+  {
+   "id": "d12",
+   "t": 272.513,
+   "dur": 4.67,
+   "text": "And Fox? He gets the ball, never breaks stride, and goes straight at the rim.",
+   "chunks": [
+    {
+     "text": "And Fox?",
+     "a": 0.0,
+     "b": 1.12
+    },
+    {
+     "text": "He gets the ball",
+     "a": 1.12,
+     "b": 2.18
+    },
+    {
+     "text": "never breaks stride",
+     "a": 2.18,
+     "b": 3.34
+    },
+    {
+     "text": "and goes straight at the rim",
+     "a": 3.34,
+     "b": 4.67
+    }
+   ]
+  },
+  {
+   "id": "d13",
+   "t": 280.197,
+   "dur": 1.1,
+   "text": "Pinned on the glass!",
+   "chunks": [
+    {
+     "text": "Pinned on the glass!",
+     "a": 0.0,
+     "b": 1.1
+    }
+   ]
+  },
+  {
+   "id": "d14",
+   "t": 289.807,
+   "dur": 6.22,
+   "text": "Now look at the clock. From the catch to takeoff, less than a second. Does that look like running out the clock?",
+   "chunks": [
+    {
+     "text": "Now look at the clock",
+     "a": 0.0,
+     "b": 1.56
+    },
+    {
+     "text": "From the catch to takeoff",
+     "a": 1.56,
+     "b": 3.32
+    },
+    {
+     "text": "less than a second",
+     "a": 3.32,
+     "b": 4.46
+    },
+    {
+     "text": "Does that look like",
+     "a": 4.46,
+     "b": 5.16
+    },
+    {
+     "text": "running out the clock?",
+     "a": 5.16,
+     "b": 6.22
+    }
+   ]
+  },
+  {
+   "id": "d15",
+   "t": 297.127,
+   "dur": 5.02,
+   "text": "That one play handed the Knicks a free possession. A whole night's work, gone.",
+   "chunks": [
+    {
+     "text": "That one play handed the",
+     "a": 0.0,
+     "b": 1.36
+    },
+    {
+     "text": "Knicks a free possession",
+     "a": 1.36,
+     "b": 3.1
+    },
+    {
+     "text": "A whole night's work, gone",
+     "a": 3.1,
+     "b": 5.02
+    }
+   ]
+  },
+  {
+   "id": "d16",
+   "t": 307.914,
+   "dur": 5.61,
+   "text": "5.7 seconds left. Brunson fires from 31 feet. Off the iron.",
+   "chunks": [
+    {
+     "text": "5.7 seconds left",
+     "a": 0.0,
+     "b": 2.26
+    },
+    {
+     "text": "Brunson fires from 31 feet",
+     "a": 2.26,
+     "b": 4.76
+    },
+    {
+     "text": "Off the iron",
+     "a": 4.76,
+     "b": 5.61
+    }
+   ]
+  },
+  {
+   "id": "d16b",
+   "t": 313.824,
+   "dur": 3.89,
+   "text": "Everyone's watching him. Nobody picks up Anunoby crashing in.",
+   "chunks": [
+    {
+     "text": "Everyone's watching him",
+     "a": 0.0,
+     "b": 1.68
+    },
+    {
+     "text": "Nobody picks up",
+     "a": 1.68,
+     "b": 2.54
+    },
+    {
+     "text": "Anunoby crashing in",
+     "a": 2.54,
+     "b": 3.89
+    }
+   ]
+  },
+  {
+   "id": "d17",
+   "t": 325.414,
+   "dur": 0.72,
+   "text": "Tipped in!",
+   "chunks": [
+    {
+     "text": "Tipped in!",
+     "a": 0.0,
+     "b": 0.72
+    }
+   ]
+  },
+  {
+   "id": "d18",
+   "t": 329.047,
+   "dur": 4.05,
+   "text": "All game long, the Knicks led for just 53.8 seconds.",
+   "chunks": [
+    {
+     "text": "All game long",
+     "a": 0.0,
+     "b": 1.22
+    },
+    {
+     "text": "the Knicks led for",
+     "a": 1.22,
+     "b": 2.06
+    },
+    {
+     "text": "just 53.8 seconds",
+     "a": 2.06,
+     "b": 4.05
+    }
+   ]
+  },
+  {
+   "id": "e1",
+   "t": 335.897,
+   "dur": 8.72,
+   "text": "So here's the deal. The Spurs didn't just lose to bad shots. A big chunk of that 29-point lead was borrowed, and they paid it back in the second half.",
+   "chunks": [
+    {
+     "text": "So here's the deal",
+     "a": 0.0,
+     "b": 1.5
+    },
+    {
+     "text": "The Spurs didn't just",
+     "a": 1.5,
+     "b": 2.46
+    },
+    {
+     "text": "lose to bad shots",
+     "a": 2.46,
+     "b": 4.04
+    },
+    {
+     "text": "A big chunk of that",
+     "a": 4.04,
+     "b": 4.98
+    },
+    {
+     "text": "29-point lead was borrowed",
+     "a": 4.98,
+     "b": 6.88
+    },
+    {
+     "text": "and they paid it back",
+     "a": 6.88,
+     "b": 7.76
+    },
+    {
+     "text": "in the second half",
+     "a": 7.76,
+     "b": 8.72
+    }
+   ]
+  },
+  {
+   "id": "e2",
+   "t": 344.917,
+   "dur": 5.41,
+   "text": "What really gave it away were the possessions they threw away in the final three and a half minutes.",
+   "chunks": [
+    {
+     "text": "What really gave it away",
+     "a": 0.0,
+     "b": 1.3
+    },
+    {
+     "text": "were the possessions they",
+     "a": 1.3,
+     "b": 2.72
+    },
+    {
+     "text": "threw away in the final",
+     "a": 2.72,
+     "b": 4.18
+    },
+    {
+     "text": "three and a half minutes",
+     "a": 4.18,
+     "b": 5.41
+    }
+   ]
+  },
+  {
+   "id": "e3",
+   "t": 351.127,
+   "dur": 5.56,
+   "text": "Three days later, the Spurs lost Game 5, and the Knicks won their first title since 1973.",
+   "chunks": [
+    {
+     "text": "Three days later",
+     "a": 0.0,
+     "b": 0.88
+    },
+    {
+     "text": "the Spurs lost Game 5",
+     "a": 0.88,
+     "b": 2.66
+    },
+    {
+     "text": "and the Knicks won their",
+     "a": 2.66,
+     "b": 3.56
+    },
+    {
+     "text": "first title since 1973",
+     "a": 3.56,
+     "b": 5.56
+    }
+   ]
+  }
+ ],
+ "shots": [
+  {
+   "a": 0,
+   "b": 6.05,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_tip",
+   "flash": 4.85,
+   "shake": 4.85,
+   "kb": [
+    1.0,
+    1.06
+   ],
+   "cxk": [
+    [
+     0.0,
+     740
+    ],
+    [
+     1.5,
+     670
+    ],
+    [
+     3.0,
+     720
+    ],
+    [
+     4.3,
+     1290
+    ],
+    [
+     6.05,
+     1300
+    ]
+   ]
+  },
+  {
+   "a": 6.05,
+   "b": 8.55,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_crowd",
+   "shake": 6.1499999999999995,
+   "kb": [
+    1.04,
+    1.1
+   ]
+  },
+  {
+   "a": 8.55,
+   "b": 23.76,
+   "sc": "board",
+   "bg": "v_bg_tip",
+   "head": "Q2 3:06 · LARGEST LEAD",
+   "head2": "FINAL",
+   "sas": 71,
+   "nyk": 42,
+   "sas2": 106,
+   "nyk2": 107,
+   "flip": 14.89,
+   "peak": 12.030000000000001,
+   "record": 16.439999999999998,
+   "record24": 19.56
+  },
+  {
+   "a": 23.76,
+   "b": 28.75,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_inside",
+   "cx": 980
+  },
+  {
+   "a": 28.75,
+   "b": 32.55,
+   "sc": "mfull",
+   "segs": [
+    [
+     28.949999999999996,
+     31.849999999999998,
+     0,
+     2880
+    ]
+   ],
+   "huazi": {
+    "t": 30.83,
+    "text": "NOT THAT SIMPLE",
+    "kicker": "Look closer"
+   }
+  },
+  {
+   "a": 32.55,
+   "b": 36.75,
+   "sc": "title",
+   "clip": "v_top_slow",
+   "hit": 33.25
+  },
+  {
+   "a": 36.75,
+   "b": 39.05,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s1_v13",
+   "cxk": [
+    [
+     0.0,
+     1000
+    ],
+    [
+     0.5,
+     1080
+    ],
+    [
+     1.8,
+     1100
+    ],
+    [
+     2.3,
+     1060
+    ]
+   ]
+  },
+  {
+   "a": 39.05,
+   "b": 41.595,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s1_c70",
+   "cxk": [
+    [
+     0.1,
+     432
+    ],
+    [
+     1.1,
+     1144
+    ]
+   ]
+  },
+  {
+   "a": 41.595,
+   "b": 44.14,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s1_w88",
+   "cxk": [
+    [
+     0.1,
+     432
+    ],
+    [
+     1.0,
+     1204
+    ]
+   ]
+  },
+  {
+   "a": 44.14,
+   "b": 46.685,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s1_h325",
+   "cxk": [
+    [
+     0.1,
+     920
+    ]
+   ]
+  },
+  {
+   "a": 46.685,
+   "b": 49.23,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s1_h373",
+   "cxk": [
+    [
+     0.15,
+     1460
+    ]
+   ]
+  },
+  {
+   "a": 49.23,
+   "b": 53.16,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s1_f111",
+   "cxk": [
+    [
+     0.27,
+     960
+    ],
+    [
+     1.27,
+     1000
+    ],
+    [
+     2.07,
+     1200
+    ],
+    [
+     2.87,
+     1260
+    ]
+   ]
+  },
+  {
+   "a": 53.16,
+   "b": 67.97,
+   "sc": "xbars",
+   "n": 1,
+   "e1": 57.24,
+   "r1": 62.620000000000005,
+   "d1": 65.25
+  },
+  {
+   "a": 67.97,
+   "b": 72.29,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s1_h373s",
+   "kb": [
+    1.02,
+    1.1
+   ],
+   "fout": 0.5,
+   "cx": 1460
+  },
+  {
+   "a": 72.29,
+   "b": 78.79,
+   "sc": "board",
+   "delay": 2.3,
+   "bg": "v_bg_jgnc",
+   "head": "Q3 9:27",
+   "sas": 81,
+   "nyk": 52,
+   "lead": "SPURS LEAD BY 29",
+   "leadT": 77.22999999999999,
+   "leadK": "SPURS +29"
+  },
+  {
+   "a": 78.79,
+   "b": 81.75,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s2_elbow",
+   "bug": false,
+   "cxk": [
+    [
+     -0.181,
+     820
+    ],
+    [
+     1.719,
+     820
+    ],
+    [
+     1.769,
+     1000
+    ]
+   ]
+  },
+  {
+   "a": 81.75,
+   "b": 82.71,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s2_ref",
+   "bug": false,
+   "cx": 1060
+  },
+  {
+   "a": 82.71,
+   "b": 87.73,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s2_down",
+   "bug": false,
+   "cxk": [
+    [
+     0.0,
+     930
+    ],
+    [
+     1.0,
+     1000
+    ]
+   ]
+  },
+  {
+   "a": 87.73,
+   "b": 93.33,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s2_rep",
+   "bug": false,
+   "cx": 975
+  },
+  {
+   "a": 93.33,
+   "b": 97.08,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s2_kat",
+   "bug": false,
+   "cxk": [
+    [
+     0.0,
+     1010
+    ],
+    [
+     1.5,
+     1000
+    ],
+    [
+     2.4,
+     900
+    ],
+    [
+     3.1,
+     1020
+    ],
+    [
+     3.9,
+     1060
+    ]
+   ]
+  },
+  {
+   "a": 97.08,
+   "b": 123.58,
+   "sc": "clip",
+   "lay": "panel",
+   "clip": "v_bd_e428",
+   "head": "WIDE-OPEN LANE",
+   "kicker": "BREAKDOWN · 8:49 Q3"
+  },
+  {
+   "a": 123.58,
+   "b": 126.08,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s2_b432",
+   "cxk": [
+    [
+     0.0,
+     900
+    ],
+    [
+     0.6,
+     1015
+    ]
+   ]
+  },
+  {
+   "a": 126.08,
+   "b": 128.58,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s2_o448",
+   "cxk": [
+    [
+     0.65,
+     1420
+    ]
+   ]
+  },
+  {
+   "a": 128.58,
+   "b": 131.08,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s2_h470",
+   "cxk": [
+    [
+     0.95,
+     432
+    ],
+    [
+     1.8,
+     1224
+    ]
+   ]
+  },
+  {
+   "a": 131.08,
+   "b": 137.18,
+   "sc": "shotmix",
+   "q": "Q3",
+   "bar": 131.38000000000002,
+   "three": 131.92000000000002,
+   "result": 133.66000000000003
+  },
+  {
+   "a": 137.18,
+   "b": 141.24,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s2_q3end",
+   "cxk": [
+    [
+     1.225,
+     1330
+    ],
+    [
+     1.625,
+     1150
+    ],
+    [
+     2.025,
+     1000
+    ],
+    [
+     2.425,
+     850
+    ],
+    [
+     2.925,
+     620
+    ],
+    [
+     3.425,
+     540
+    ]
+   ]
+  },
+  {
+   "a": 141.24,
+   "b": 149.44,
+   "sc": "clip",
+   "lay": "quote",
+   "clip": "v_q_barkley",
+   "who": "Charles Barkley",
+   "role": "TNT Analyst · Hall of Famer",
+   "kb": [
+    1.0,
+    1.02
+   ],
+   "kicker": "INSIDE THE NBA · POSTGAME"
+  },
+  {
+   "a": 149.44,
+   "b": 151.22,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s2_inside2",
+   "cx": 880,
+   "bug": false
+  },
+  {
+   "a": 151.22,
+   "b": 155.97,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s2_run",
+   "cxk": [
+    [
+     0.25,
+     800
+    ],
+    [
+     1.25,
+     1000
+    ],
+    [
+     1.85,
+     1130
+    ],
+    [
+     3.75,
+     1130
+    ],
+    [
+     4.75,
+     1020
+    ]
+   ]
+  },
+  {
+   "a": 155.97,
+   "b": 162.03,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s3_drive",
+   "cxk": [
+    [
+     0.0,
+     720
+    ],
+    [
+     0.8,
+     620
+    ],
+    [
+     2.0,
+     560
+    ]
+   ]
+  },
+  {
+   "a": 162.03,
+   "b": 165.52,
+   "sc": "shotmix",
+   "q": "Q4",
+   "bar": 162.23000000000005,
+   "hls": [
+    [
+     "rim",
+     162.93000000000004
+    ]
+   ],
+   "result": 163.19000000000003
+  },
+  {
+   "a": 165.52,
+   "b": 167.94,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s3_contest",
+   "cxk": [
+    [
+     -1.245,
+     680
+    ],
+    [
+     0.255,
+     540
+    ],
+    [
+     1.555,
+     480
+    ]
+   ]
+  },
+  {
+   "a": 167.94,
+   "b": 178.42,
+   "sc": "defdist",
+   "r3": 168.24000000000004,
+   "r4": 170.74000000000004,
+   "m80": 173.86000000000004,
+   "open": 175.26000000000005
+  },
+  {
+   "a": 178.42,
+   "b": 183.99,
+   "sc": "clip",
+   "lay": "quote",
+   "clip": "v_q_q3_1",
+   "who": "Mike Brown",
+   "role": "Knicks · Head Coach",
+   "kb": [
+    1.0,
+    1.02
+   ]
+  },
+  {
+   "a": 183.99,
+   "b": 186.19,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s3_a598",
+   "cx": 1160
+  },
+  {
+   "a": 186.19,
+   "b": 188.39,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s3_b606",
+   "cxk": [
+    [
+     0.0,
+     1050
+    ],
+    [
+     1.0,
+     1200
+    ],
+    [
+     1.8,
+     1380
+    ]
+   ]
+  },
+  {
+   "a": 188.39,
+   "b": 190.59,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s3_t622",
+   "cxk": [
+    [
+     0.3,
+     574
+    ],
+    [
+     1.3,
+     1314
+    ]
+   ]
+  },
+  {
+   "a": 190.59,
+   "b": 192.79,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s3_o632",
+   "cxk": [
+    [
+     0.0,
+     1000
+    ],
+    [
+     1.05,
+     1065
+    ]
+   ]
+  },
+  {
+   "a": 192.79,
+   "b": 194.99,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s3_o658",
+   "cxk": [
+    [
+     0.0,
+     620
+    ],
+    [
+     0.85,
+     634
+    ],
+    [
+     1.55,
+     1354
+    ]
+   ]
+  },
+  {
+   "a": 194.99,
+   "b": 203.96,
+   "sc": "xbars",
+   "n": 2,
+   "e1": 195.19000000000003,
+   "r1": 195.39000000000004,
+   "d1": 195.89000000000004,
+   "e2": 198.97000000000006,
+   "r2": 199.47000000000006,
+   "d2": 200.79000000000005
+  },
+  {
+   "a": 203.96,
+   "b": 211.01,
+   "sc": "mfull",
+   "segs": [
+    [
+     204.26000000000005,
+     205.36,
+     0,
+     2669
+    ]
+   ],
+   "mark": {
+    "t": 207.16000000000003,
+    "g": 2669,
+    "v": 7,
+    "text": "3:31 LEFT · SPURS +7",
+    "sub": "104 : 97"
+   },
+   "huazi": {
+    "t": 208.96000000000004,
+    "text": "HOW?",
+    "kicker": "Up 7 with 3:31 left"
+   }
+  },
+  {
+   "a": 211.01,
+   "b": 221.77,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s4_wem",
+   "cxk": [
+    [
+     0.78,
+     1220
+    ],
+    [
+     1.98,
+     1216
+    ],
+    [
+     2.88,
+     586
+    ],
+    [
+     3.48,
+     600
+    ],
+    [
+     3.98,
+     800
+    ],
+    [
+     4.56,
+     1050
+    ],
+    [
+     4.58,
+     1060
+    ],
+    [
+     5.48,
+     980
+    ],
+    [
+     5.98,
+     1120
+    ],
+    [
+     6.48,
+     1400
+    ],
+    [
+     6.98,
+     1250
+    ],
+    [
+     7.26,
+     1250
+    ],
+    [
+     7.28,
+     560
+    ],
+    [
+     9.28,
+     450
+    ]
+   ]
+  },
+  {
+   "a": 221.77,
+   "b": 234.8,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s4_br27",
+   "cxk": [
+    [
+     0.58,
+     520
+    ],
+    [
+     2.58,
+     850
+    ],
+    [
+     4.58,
+     1000
+    ],
+    [
+     6.58,
+     780
+    ],
+    [
+     7.88,
+     1055
+    ],
+    [
+     9.44,
+     980
+    ],
+    [
+     13.03,
+     820
+    ]
+   ]
+  },
+  {
+   "a": 234.8,
+   "b": 239.6,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s4_ft1",
+   "cxk": [
+    [
+     0.0,
+     850
+    ],
+    [
+     1.98,
+     850
+    ],
+    [
+     2.0,
+     900
+    ]
+   ]
+  },
+  {
+   "a": 239.6,
+   "b": 243.39,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s4_float",
+   "cxk": [
+    [
+     -0.504,
+     1150
+    ],
+    [
+     0.996,
+     1200
+    ],
+    [
+     1.896,
+     1100
+    ],
+    [
+     3.496,
+     900
+    ]
+   ]
+  },
+  {
+   "a": 243.39,
+   "b": 250.93,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s4_castleft",
+   "cx": 950
+  },
+  {
+   "a": 250.93,
+   "b": 283.797,
+   "sc": "clip",
+   "lay": "panel",
+   "clip": "v_bd_e715",
+   "py": 435
+  },
+  {
+   "a": 283.797,
+   "b": 289.407,
+   "sc": "clip",
+   "lay": "quote",
+   "clip": "v_q_q4_2",
+   "who": "Mike Brown",
+   "role": "Knicks · Head Coach",
+   "kb": [
+    1.0,
+    1.02
+   ]
+  },
+  {
+   "a": 289.407,
+   "b": 296.927,
+   "sc": "tl13",
+   "st1": "v_st_fox130",
+   "st2": "v_st_fox125",
+   "bug1": "v_bug_fox130",
+   "bug2": "v_bug_fox125",
+   "t2": 291.947,
+   "t3": 293.127
+  },
+  {
+   "a": 296.927,
+   "b": 302.547,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s4_blkslow",
+   "kb": [
+    1.08,
+    1.16
+   ],
+   "cxk": [
+    [
+     -1.471,
+     980
+    ],
+    [
+     0.329,
+     920
+    ],
+    [
+     1.529,
+     800
+    ],
+    [
+     2.729,
+     690
+    ],
+    [
+     3.929,
+     610
+    ],
+    [
+     5.129,
+     570
+    ]
+   ]
+  },
+  {
+   "a": 302.547,
+   "b": 328.847,
+   "sc": "clip",
+   "lay": "panel",
+   "clip": "v_bd_e727",
+   "head": "THE LAST 5.7 SECONDS",
+   "kicker": "BREAKDOWN · 0:05.7"
+  },
+  {
+   "a": 328.847,
+   "b": 335.297,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s4_msg",
+   "bug": false,
+   "cxk": [
+    [
+     0.0,
+     960
+    ],
+    [
+     1.2,
+     1000
+    ],
+    [
+     1.7,
+     1270
+    ],
+    [
+     2.5,
+     1070
+    ],
+    [
+     3.3,
+     1110
+    ],
+    [
+     4.4,
+     960
+    ],
+    [
+     5.6,
+     760
+    ],
+    [
+     6.2,
+     760
+    ]
+   ]
+  },
+  {
+   "a": 335.297,
+   "b": 350.827,
+   "sc": "summary",
+   "t": [
+    339.937,
+    343.657,
+    345.21700000000004
+   ],
+   "rows": [
+    [
+     "FIRST HALF",
+     "21 points above expectation"
+    ],
+    [
+     "SECOND HALF",
+     "Same looks, 20 points below"
+    ],
+    [
+     "FINAL 3:30",
+     "Possessions they gave away"
+    ]
+   ]
+  },
+  {
+   "a": 350.827,
+   "b": 357.287,
+   "sc": "clip",
+   "lay": "crop",
+   "clip": "v_s5_exit",
+   "cx": 850,
+   "kb": [
+    1.0,
+    1.05
+   ]
+  },
+  {
+   "a": 357.287,
+   "b": 371.157,
+   "sc": "clip",
+   "lay": "quote",
+   "clip": "v_q_q5_1",
+   "who": "Victor Wembanyama",
+   "role": "Spurs · Center",
+   "kb": [
+    1.0,
+    1.02
+   ]
+  },
+  {
+   "a": 371.157,
+   "b": 378.157,
+   "sc": "end",
+   "lines": [
+    [
+     "Game footage",
+     "Tencent Sports NBA archive · NBA · NBA on ESPN"
+    ],
+    [
+     "Press conferences",
+     "NBA Postgame Media Availability · SNY"
+    ],
+    [
+     "Data",
+     "NBA play-by-play · NBA tracking data"
+    ],
+    [
+     "Music",
+     "Kevin MacLeod (incompetech.com) · CC BY 4.0"
+    ],
+    [
+     "",
+     "Lightless Dawn · Hitman · Impact Prelude"
+    ],
+    [
+     "",
+     "The Escalation · Impact Lento · Five Armies"
+    ],
+    [
+     "",
+     "Long Road Ahead"
+    ],
+    [
+     "Narration",
+     "AI-generated voice"
+    ]
+   ]
+  }
+ ],
+ "ov": [
+  {
+   "type": "huazi",
+   "a": 6.15,
+   "b": 8.45,
+   "text": "GAME-WINNER",
+   "x": 540,
+   "y": 805,
+   "size": 130,
+   "anim": "slam",
+   "kicker": "Knicks 107  Spurs 106"
+  },
+  {
+   "type": "huazi",
+   "a": 25.67,
+   "b": 28.75,
+   "text": "BAD SHOTS?",
+   "x": 1020,
+   "y": 615,
+   "size": 104,
+   "bg": "white",
+   "align": "right",
+   "kicker": "Shot selection"
+  },
+  {
+   "type": "huazi",
+   "a": 26.85,
+   "b": 28.75,
+   "text": "MELTDOWN?",
+   "x": 1020,
+   "y": 845,
+   "size": 104,
+   "bg": "red",
+   "align": "right",
+   "kicker": "Mental collapse"
+  },
+  {
+   "type": "chapter",
+   "a": 37.05,
+   "b": 39.65,
+   "num": "01",
+   "title": "A BORROWED LEAD",
+   "kicker": "CHAPTER 1 · FIRST HALF"
+  },
+  {
+   "type": "score",
+   "a": 40.25,
+   "b": 43.21,
+   "keys": [
+    [
+     0,
+     41,
+     22,
+     "END Q1"
+    ]
+   ]
+  },
+  {
+   "type": "huazi",
+   "a": 43.21,
+   "b": 49.13,
+   "text": "14 THREES IN THE HALF",
+   "x": 540,
+   "y": 585,
+   "size": 72,
+   "kicker": "Most in a Finals half"
+  },
+  {
+   "type": "shotcard",
+   "a": 49.53,
+   "b": 53.11,
+   "who": "Fox",
+   "what": "3PT · CONTESTED",
+   "hand": 2.2,
+   "xfg": 33,
+   "hot": true
+  },
+  {
+   "type": "chapter",
+   "a": 72.49,
+   "b": 75.09,
+   "num": "02",
+   "title": "Q3: THE 13-0 RUN",
+   "kicker": "CHAPTER 2 · THIRD QUARTER"
+  },
+  {
+   "type": "fpts",
+   "a": 83.01,
+   "b": 93.33,
+   "keys": [
+    [
+     84.22999999999999,
+     3
+    ]
+   ],
+   "tnote": 87.72999999999999
+  },
+  {
+   "type": "run",
+   "a": 93.63,
+   "b": 97.08,
+   "label": "KNICKS RUN",
+   "steps": [
+    [
+     93.33,
+     0
+    ],
+    [
+     94.25,
+     2
+    ]
+   ]
+  },
+  {
+   "type": "run",
+   "a": 97.08,
+   "b": 123.58,
+   "label": "KNICKS RUN",
+   "steps": [
+    [
+     97.08000000000001,
+     2
+    ],
+    [
+     118.17666666666668,
+     4
+    ]
+   ]
+  },
+  {
+   "type": "run",
+   "a": 123.58,
+   "b": 131.08,
+   "label": "KNICKS RUN",
+   "steps": [
+    [
+     123.58000000000001,
+     4
+    ],
+    [
+     125.08000000000001,
+     7
+    ],
+    [
+     127.73000000000002,
+     10
+    ],
+    [
+     130.58,
+     13
+    ]
+   ]
+  },
+  {
+   "type": "huazi",
+   "a": 130.63,
+   "b": 131.08,
+   "text": "13 : 0",
+   "x": 540,
+   "y": 585,
+   "size": 110,
+   "anim": "slam",
+   "kicker": "Knicks run"
+  },
+  {
+   "type": "score",
+   "a": 136.98,
+   "b": 141.14,
+   "keys": [
+    [
+     0,
+     90,
+     75,
+     "END Q3"
+    ]
+   ]
+  },
+  {
+   "type": "chapter",
+   "a": 156.17,
+   "b": 158.77,
+   "num": "03",
+   "title": "Q4: ATTACKING, STILL MISSING",
+   "kicker": "CHAPTER 3 · FOURTH QUARTER"
+  },
+  {
+   "type": "score",
+   "a": 184.19,
+   "b": 194.99,
+   "keys": [
+    [
+     0,
+     95,
+     75,
+     "Q4 9:33"
+    ],
+    [
+     185.64000000000001,
+     95,
+     78,
+     "9:16"
+    ],
+    [
+     187.84000000000003,
+     95,
+     80,
+     "8:44"
+    ],
+    [
+     190.04000000000002,
+     95,
+     83,
+     "7:28"
+    ],
+    [
+     192.24000000000004,
+     97,
+     86,
+     "7:03"
+    ],
+    [
+     194.44000000000003,
+     99,
+     95,
+     "4:34"
+    ]
+   ]
+  },
+  {
+   "type": "huazi",
+   "a": 194.49,
+   "b": 194.99,
+   "text": "20-4 IN 5 MINUTES",
+   "x": 540,
+   "y": 585,
+   "size": 84,
+   "anim": "slam",
+   "kicker": "Knicks run"
+  },
+  {
+   "type": "chapter",
+   "a": 211.21,
+   "b": 213.81,
+   "num": "04",
+   "title": "THE FINAL 3:31",
+   "kicker": "CHAPTER 4 · CLUTCH"
+  },
+  {
+   "type": "score",
+   "a": 211.21,
+   "b": 221.77,
+   "keys": [
+    [
+     0,
+     102,
+     97,
+     "Q4 3:31"
+    ],
+    [
+     214.15000000000003,
+     104,
+     97,
+     "3:31"
+    ]
+   ]
+  },
+  {
+   "type": "huazi",
+   "a": 218.47,
+   "b": 221.67,
+   "text": "LAST SPURS FIELD GOAL",
+   "x": 540,
+   "y": 585,
+   "size": 66,
+   "kicker": "3:31 Q4"
+  },
+  {
+   "type": "score",
+   "a": 221.97,
+   "b": 234.8,
+   "keys": [
+    [
+     0,
+     104,
+     100,
+     "2:31"
+    ],
+    [
+     231.11000000000004,
+     104,
+     103,
+     "2:21"
+    ]
+   ]
+  },
+  {
+   "type": "huazi",
+   "a": 227.88,
+   "b": 229.95,
+   "text": "27 FEET",
+   "x": 540,
+   "y": 585,
+   "size": 84,
+   "kicker": "Brunson from deep"
+  },
+  {
+   "type": "huazi",
+   "a": 237.8,
+   "b": 239.5,
+   "text": "0 FOR 2 AT THE LINE",
+   "x": 540,
+   "y": 585,
+   "size": 72,
+   "kicker": "1:47 · Spurs lead by 1"
+  },
+  {
+   "type": "score",
+   "a": 239.9,
+   "b": 243.39,
+   "keys": [
+    [
+     0,
+     104,
+     103,
+     "1:22"
+    ],
+    [
+     241.00000000000006,
+     104,
+     105,
+     "1:22"
+    ]
+   ]
+  },
+  {
+   "type": "huazi",
+   "a": 241.3,
+   "b": 243.29,
+   "text": "KNICKS' FIRST LEAD",
+   "x": 540,
+   "y": 585,
+   "size": 72,
+   "bg": "blue",
+   "kicker": "Knicks lead 105-104"
+  },
+  {
+   "type": "score",
+   "a": 243.59,
+   "b": 250.93,
+   "keys": [
+    [
+     0,
+     104,
+     105,
+     "0:32"
+    ],
+    [
+     244.63000000000002,
+     105,
+     105,
+     "0:30.3"
+    ],
+    [
+     245.89000000000004,
+     106,
+     105,
+     "0:30.3"
+    ]
+   ]
+  },
+  {
+   "type": "dual",
+   "a": 257.99,
+   "b": 263.39,
+   "py": 435,
+   "tl": 258.19,
+   "tr": 260.55,
+   "tgt": 261.46999999999997
+  },
+  {
+   "type": "flow",
+   "a": 263.49,
+   "b": 272.413,
+   "nodes": [
+    [
+     "DO NOTHING",
+     "Just hold the ball"
+    ],
+    [
+     "KNICKS MUST FOUL",
+     "You go to the line"
+    ],
+    [
+     "MAKE BOTH",
+     "Up 3"
+    ],
+    [
+     "BEST CASE FOR NYK",
+     "A three only ties it"
+    ]
+   ],
+   "keys": [
+    265.87,
+    268.17,
+    270.66,
+    271.36
+   ]
+  },
+  {
+   "type": "huazi",
+   "a": 331.387,
+   "b": 335.097,
+   "text": "KNICKS LED FOR 53.8 SECONDS",
+   "x": 540,
+   "y": 585,
+   "size": 60,
+   "bg": "blue",
+   "kicker": "The whole game"
+  }
+ ],
+ "quotes": [
+  {
+   "id": "v_q_barkley",
+   "t": 89.64,
+   "chunks": [
+    {
+     "zh": "我就批评这一点，老兄，你们根本投不进啊",
+     "en": "That's my criticism. Like, damn, dude, you ain't making them.",
+     "a": 51.8,
+     "b": 55.0
+    },
+    {
+     "zh": "领先 20 分，根本没理由连着投八九个三分",
+     "en": "There's never a reason to shoot eight or nine in a row when you got a 20-point lead.",
+     "a": 55.9,
+     "b": 59.5
+    }
+   ]
+  },
+  {
+   "id": "v_q_q3_1",
+   "t": 178.42,
+   "chunks": [
+    {
+     "zh": "防守上，我们就是做得更狠、坚持得更久，",
+     "en": "Defensively, we just did it harder for longer stretches,",
+     "a": 0.1,
+     "b": 5.32
+    }
+   ]
+  },
+  {
+   "id": "v_q_q4_2",
+   "t": 278.407,
+   "chunks": [
+    {
+     "zh": "可能他是想突破，",
+     "en": "Maybe he was going to drive",
+     "a": 5.59,
+     "b": 7.15
+    },
+    {
+     "zh": "想一直运着球，把时间耗完。",
+     "en": "and wanted to keep the dribble to run out the clock.",
+     "a": 7.15,
+     "b": 10.75
+    }
+   ]
+  },
+  {
+   "id": "v_q_q5_1",
+   "t": 356.227,
+   "chunks": [
+    {
+     "zh": "我觉得接下来只有两条路。",
+     "en": "I think it's going to go one of two ways.",
+     "a": 1.26,
+     "b": 2.52
+    },
+    {
+     "zh": "两条路，一条坏的，一条好的。",
+     "en": "One of two ways, and a bad one and a good one.",
+     "a": 4.02,
+     "b": 6.66
+    },
+    {
+     "zh": "坏的那条，是就此放弃；",
+     "en": "And I know the bad one would be giving up,",
+     "a": 6.8,
+     "b": 9.78
+    },
+    {
+     "zh": "好的那条，是经历这一场，变得更强、更抱团。",
+     "en": "the good one would be getting stronger through this, getting more together.",
+     "a": 9.94,
+     "b": 12.96
+    },
+    {
+     "zh": "我知道，我们会走好的那条路。",
+     "en": "And I know this is what we're going to do.",
+     "a": 13.16,
+     "b": 14.38
+    }
+   ]
+  }
+ ],
+ "sfx": [
+  [
+   "impact",
+   4.8
+  ],
+  [
+   "stamp",
+   6.15
+  ],
+  [
+   "whoosh",
+   8.45
+  ],
+  [
+   "flip",
+   14.89
+  ],
+  [
+   "stamp",
+   16.44
+  ],
+  [
+   "swish",
+   25.67
+  ],
+  [
+   "swish",
+   26.85
+  ],
+  [
+   "whoosh",
+   28.65
+  ],
+  [
+   "stamp",
+   30.83
+  ],
+  [
+   "riser",
+   31.15
+  ],
+  [
+   "impact",
+   33.2
+  ],
+  [
+   "hit",
+   37.05
+  ],
+  [
+   "swish",
+   43.21
+  ],
+  [
+   "whoosh",
+   53.06
+  ],
+  [
+   "whoosh",
+   72.19
+  ],
+  [
+   "hit",
+   72.49
+  ],
+  [
+   "tick",
+   94.25
+  ],
+  [
+   "tick",
+   118.177
+  ],
+  [
+   "tick",
+   125.08
+  ],
+  [
+   "tick",
+   127.73
+  ],
+  [
+   "tick",
+   130.58
+  ],
+  [
+   "stamp",
+   130.63
+  ],
+  [
+   "whoosh",
+   130.98
+  ],
+  [
+   "swish",
+   141.12
+  ],
+  [
+   "hit",
+   156.17
+  ],
+  [
+   "whoosh",
+   161.93
+  ],
+  [
+   "whoosh",
+   167.84
+  ],
+  [
+   "swish",
+   178.3
+  ],
+  [
+   "flip",
+   185.64
+  ],
+  [
+   "flip",
+   187.84
+  ],
+  [
+   "flip",
+   190.04
+  ],
+  [
+   "flip",
+   192.24
+  ],
+  [
+   "flip",
+   194.44
+  ],
+  [
+   "stamp",
+   194.49
+  ],
+  [
+   "whoosh",
+   194.89
+  ],
+  [
+   "whoosh",
+   203.86
+  ],
+  [
+   "stamp",
+   208.96
+  ],
+  [
+   "hit",
+   211.21
+  ],
+  [
+   "flip",
+   214.15
+  ],
+  [
+   "swish",
+   218.47
+  ],
+  [
+   "swish",
+   227.88
+  ],
+  [
+   "flip",
+   231.11
+  ],
+  [
+   "swish",
+   237.8
+  ],
+  [
+   "flip",
+   241.0
+  ],
+  [
+   "swish",
+   241.3
+  ],
+  [
+   "flip",
+   244.63
+  ],
+  [
+   "flip",
+   245.89
+  ],
+  [
+   "tick",
+   258.19
+  ],
+  [
+   "tick",
+   260.55
+  ],
+  [
+   "tick",
+   265.87
+  ],
+  [
+   "tick",
+   268.17
+  ],
+  [
+   "tick",
+   270.66
+  ],
+  [
+   "tick",
+   271.36
+  ],
+  [
+   "impact",
+   280.147
+  ],
+  [
+   "swish",
+   283.677
+  ],
+  [
+   "whoosh",
+   289.307
+  ],
+  [
+   "stamp",
+   293.277
+  ],
+  [
+   "boom",
+   301.747
+  ],
+  [
+   "impact",
+   325.364
+  ],
+  [
+   "swish",
+   331.387
+  ],
+  [
+   "whoosh",
+   335.197
+  ],
+  [
+   "tick",
+   339.937
+  ],
+  [
+   "tick",
+   343.657
+  ],
+  [
+   "tick",
+   345.217
+  ],
+  [
+   "swish",
+   357.167
+  ]
+ ],
+ "orig": [
+  {
+   "src": "../raw/2606111142181002.mp4",
+   "s0": 1.6,
+   "t": 0,
+   "dur": 6.05,
+   "db": -1,
+   "clip": "v_tip"
+  },
+  {
+   "src": "../online/sOQKRjP3ZJk.mp4",
+   "s0": 15.25,
+   "t": 6.05,
+   "dur": 2.5,
+   "db": 0,
+   "clip": "v_crowd"
+  },
+  {
+   "src": "../online/qIyBGPb7Xdg.mp4",
+   "s0": 340.4,
+   "t": 23.76,
+   "dur": 4.99,
+   "db": -18,
+   "clip": "v_inside"
+  },
+  {
+   "src": "../raw/2606110853187102.mp4",
+   "s0": 4.65,
+   "t": 36.75,
+   "dur": 2.3,
+   "db": 0.0,
+   "clip": "v_s1_v13"
+  },
+  {
+   "src": "../raw/2606110908507902.mp4",
+   "s0": 8.21,
+   "t": 39.05,
+   "dur": 2.545,
+   "db": 0.0,
+   "clip": "v_s1_c70"
+  },
+  {
+   "src": "../raw/2606110908252902.mp4",
+   "s0": 6.84,
+   "t": 41.595,
+   "dur": 2.545,
+   "db": 0.0,
+   "clip": "v_s1_w88"
+  },
+  {
+   "src": "../raw/2606110959171102.mp4",
+   "s0": 5.26,
+   "t": 44.14,
+   "dur": 2.545,
+   "db": 0.0,
+   "clip": "v_s1_h325"
+  },
+  {
+   "src": "../raw/2606111004560502.mp4",
+   "s0": 7.8,
+   "t": 46.685,
+   "dur": 2.545,
+   "db": 0.0,
+   "clip": "v_s1_h373"
+  },
+  {
+   "src": "../raw/2606110913193002.mp4",
+   "s0": 3.77,
+   "t": 49.23,
+   "dur": 3.93,
+   "db": 0.0,
+   "clip": "v_s1_f111"
+  },
+  {
+   "src": "../online/JGnCsKF1JLQ.mp4",
+   "s0": 11.5,
+   "t": 78.79,
+   "dur": 2.96,
+   "db": -2,
+   "clip": "v_s2_elbow"
+  },
+  {
+   "src": "../online/JGnCsKF1JLQ.mp4",
+   "s0": 60.5,
+   "t": 81.75,
+   "dur": 0.96,
+   "db": -8,
+   "clip": "v_s2_ref"
+  },
+  {
+   "src": "../online/JGnCsKF1JLQ.mp4",
+   "s0": 23.5,
+   "t": 82.71,
+   "dur": 5.02,
+   "db": -8,
+   "clip": "v_s2_down"
+  },
+  {
+   "src": "../online/JGnCsKF1JLQ.mp4",
+   "s0": 40.0,
+   "t": 87.73,
+   "dur": 5.6,
+   "db": -8,
+   "clip": "v_s2_rep"
+  },
+  {
+   "src": "../online/JGnCsKF1JLQ.mp4",
+   "s0": 50.5,
+   "t": 93.33,
+   "dur": 3.75,
+   "db": -8,
+   "clip": "v_s2_kat"
+  },
+  {
+   "src": "../raw/2606111033176002.mp4",
+   "s0": 9.75,
+   "t": 123.58,
+   "dur": 2.5,
+   "db": 0.0,
+   "clip": "v_s2_b432"
+  },
+  {
+   "src": "../raw/2606111038291302.mp4",
+   "s0": 3.7,
+   "t": 126.08,
+   "dur": 2.5,
+   "db": 0.0,
+   "clip": "v_s2_o448"
+  },
+  {
+   "src": "../raw/2606111043178802.mp4",
+   "s0": 1.6,
+   "t": 128.58,
+   "dur": 2.5,
+   "db": 0.0,
+   "clip": "v_s2_h470"
+  },
+  {
+   "src": "../raw/2606111112248401.mp4",
+   "s0": 221.84,
+   "t": 137.18,
+   "dur": 4.06,
+   "db": -4,
+   "clip": "v_s2_q3end"
+  },
+  {
+   "src": "assets/footage/inside_barkley.mp4",
+   "s0": 44.0,
+   "t": 149.44,
+   "dur": 1.78,
+   "db": -14,
+   "clip": "v_s2_inside2"
+  },
+  {
+   "src": "../raw/2606111112248401.mp4",
+   "s0": 181.45,
+   "t": 151.22,
+   "dur": 4.75,
+   "db": -6,
+   "clip": "v_s2_run"
+  },
+  {
+   "src": "../raw/2606111151336101.mp4",
+   "s0": 35.6,
+   "t": 155.97,
+   "dur": 6.06,
+   "db": -4,
+   "clip": "v_s3_drive"
+  },
+  {
+   "src": "../raw/2606111151336101.mp4",
+   "s0": 1.68,
+   "t": 165.52,
+   "dur": 2.42,
+   "db": -4,
+   "clip": "v_s3_contest"
+  },
+  {
+   "src": "../raw/2606111112208502.mp4",
+   "s0": 5.35,
+   "t": 183.99,
+   "dur": 2.2,
+   "db": 0.0,
+   "clip": "v_s3_a598"
+  },
+  {
+   "src": "../raw/2606111112181502.mp4",
+   "s0": 4.85,
+   "t": 186.19,
+   "dur": 2.2,
+   "db": 0.0,
+   "clip": "v_s3_b606"
+  },
+  {
+   "src": "../raw/2606111117300602.mp4",
+   "s0": 6.35,
+   "t": 188.39,
+   "dur": 2.2,
+   "db": 0.0,
+   "clip": "v_s3_t622"
+  },
+  {
+   "src": "../raw/2606111117394102.mp4",
+   "s0": 7.35,
+   "t": 190.59,
+   "dur": 2.2,
+   "db": 0.0,
+   "clip": "v_s3_o632"
+  },
+  {
+   "src": "../raw/2606111127259502.mp4",
+   "s0": 6.85,
+   "t": 192.79,
+   "dur": 2.2,
+   "db": 0.0,
+   "clip": "v_s3_o658"
+  },
+  {
+   "src": "../online/dcf8UW7cMOI.mp4",
+   "s0": 256.65,
+   "t": 211.01,
+   "dur": 10.76,
+   "db": -2,
+   "clip": "v_s4_wem"
+  },
+  {
+   "src": "../raw/d676.mp4",
+   "s0": 7.99,
+   "t": 221.77,
+   "dur": 13.03,
+   "db": 0,
+   "clip": "v_s4_br27"
+  },
+  {
+   "src": "../online/dcf8UW7cMOI.mp4",
+   "s0": 386.0,
+   "t": 234.8,
+   "dur": 4.8,
+   "db": -2,
+   "clip": "v_s4_ft1"
+  },
+  {
+   "src": "../online/dcf8UW7cMOI.mp4",
+   "s0": 423.7,
+   "t": 239.6,
+   "dur": 3.79,
+   "db": -2,
+   "clip": "v_s4_float"
+  },
+  {
+   "src": "../online/dcf8UW7cMOI.mp4",
+   "s0": 513.76,
+   "t": 243.39,
+   "dur": 7.54,
+   "db": -2,
+   "clip": "v_s4_castleft"
+  },
+  {
+   "src": "../online/lL4TMc1sYmQ.mp4",
+   "s0": 256.4,
+   "t": 328.847,
+   "dur": 6.45,
+   "db": -4,
+   "clip": "v_s4_msg"
+  }
+ ],
+ "beds": [
+  {
+   "src": "work/bd/e428_vt_en.wav",
+   "t": 97.08,
+   "dur": 26.5
+  },
+  {
+   "src": "work/bd/e715_vt_en.wav",
+   "t": 250.93,
+   "dur": 32.567
+  },
+  {
+   "src": "work/bd/e727_vt_en.wav",
+   "t": 302.547,
+   "dur": 26.3
+  }
+ ],
+ "qaudio": [
+  {
+   "src": "assets/footage/inside_barkley_ext.mp4",
+   "s0": 51.6,
+   "t": 141.24,
+   "dur": 8.2
+  },
+  {
+   "src": "assets/footage/quotes/sny_93iEr0LWF8U.webm",
+   "s0": 501.625,
+   "t": 178.42,
+   "dur": 5.57
+  },
+  {
+   "src": "assets/footage/quotes/sny_93iEr0LWF8U.webm",
+   "s0": 744.36,
+   "t": 283.797,
+   "dur": 5.61
+  },
+  {
+   "src": "assets/footage/quotes/q5_1.mp4",
+   "s0": 1.06,
+   "t": 357.287,
+   "dur": 13.57
+  }
+ ],
+ "music": [
+  {
+   "src": "assets/music/Lightless_Dawn.mp3",
+   "s0": 0.0,
+   "t": 3.6,
+   "dur": 33.55,
+   "db": -13,
+   "fin": 2.0,
+   "fout": 0.6,
+   "push": [
+    [
+     23.909999999999997,
+     33.25,
+     3
+    ]
+   ],
+   "dips": []
+  },
+  {
+   "src": "assets/music/Hitman.mp3",
+   "s0": 15.27,
+   "t": 36.75,
+   "dur": 35.54,
+   "db": -15,
+   "fin": 0.8,
+   "fout": 2.0,
+   "push": [],
+   "dips": []
+  },
+  {
+   "src": "assets/music/Impact_Prelude.mp3",
+   "s0": 48.71,
+   "t": 72.29,
+   "dur": 83.68,
+   "db": -16,
+   "fin": 1.5,
+   "fout": 2.0,
+   "push": [
+    [
+     123.08000000000001,
+     131.08,
+     2
+    ]
+   ],
+   "dips": [
+    [
+     101.963,
+     111.68,
+     -5,
+     500
+    ],
+    [
+     114.997,
+     116.347,
+     -5,
+     500
+    ]
+   ]
+  },
+  {
+   "src": "assets/music/The_Escalation.mp3",
+   "s0": 266.86,
+   "t": 155.97,
+   "dur": 55.34,
+   "db": -15,
+   "fin": 1.5,
+   "fout": 0.4,
+   "push": [
+    [
+     183.99000000000004,
+     194.99000000000004,
+     2
+    ],
+    [
+     204.16000000000003,
+     211.01000000000002,
+     3
+    ]
+   ],
+   "dips": []
+  },
+  {
+   "src": "assets/music/Impact_Lento.mp3",
+   "s0": 60.547,
+   "t": 211.01,
+   "dur": 91.537,
+   "db": -15,
+   "fin": 1.5,
+   "fout": 3.0,
+   "push": [],
+   "dips": [
+    [
+     256.88,
+     272.463,
+     -5,
+     500
+    ],
+    [
+     275.28,
+     277.697,
+     -5,
+     500
+    ]
+   ]
+  },
+  {
+   "src": "assets/music/Five_Armies.mp3",
+   "s0": 113.15,
+   "t": 299.547,
+   "dur": 36.35,
+   "db": -15,
+   "fin": 3.0,
+   "fout": 1.5,
+   "push": [
+    [
+     325.214,
+     329.414,
+     3
+    ]
+   ],
+   "dips": [
+    [
+     306.364,
+     307.814,
+     -5,
+     500
+    ],
+    [
+     311.697,
+     318.614,
+     -5,
+     500
+    ]
+   ]
+  },
+  {
+   "src": "assets/music/Long_Road_Ahead.mp3",
+   "s0": 81.51,
+   "t": 335.297,
+   "dur": 42.86,
+   "db": -15,
+   "fin": 2.5,
+   "fout": 2.5,
+   "push": [],
+   "dips": []
+  }
+ ],
+ "segs": {
+  "seg1": 36.75,
+  "seg2": 72.29,
+  "seg3": 155.97,
+  "seg4": 211.01,
+  "seg5": 335.297
+ }
+}

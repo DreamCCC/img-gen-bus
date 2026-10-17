@@ -1,0 +1,390 @@
+{
+ "_note": "e727 竖版拆解英文版：由 e727_vt_edl.json 经 film/tools/bd_en.py 生成，别手改。",
+ "work": "work/e727",
+ "fps": 30,
+ "size": [
+  1920,
+  1080
+ ],
+ "orig": "work/e727/fr/orig",
+ "slow": {
+  "dir": "work/e727/fr/slow",
+  "from": 110,
+  "mul": 4
+ },
+ "audio_src": "raw/2606111142181002.mp4",
+ "vo": {
+  "lines": "film/audio/vo_vt_en.json",
+  "dir": "film/audio/vo_vt_en"
+ },
+ "vo_gap": 0.3,
+ "out": "film/work/bd/e727_vt_en.mp4",
+ "bed": true,
+ "under_vo": {
+  "db": -5,
+  "carve": 0.75,
+  "pad": [
+   0.25,
+   0.35
+  ],
+  "post": {
+   "d17": 0.08
+  }
+ },
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "badge_xy": [
+  130,
+  52
+ ],
+ "sub_y": 880,
+ "sub_size": 50,
+ "fonts": {
+  "zh": [
+   "film/assets/fonts/NotoSansSC.ttf",
+   "Black"
+  ],
+  "zhr": [
+   "film/assets/fonts/NotoSansSC.ttf",
+   "Medium"
+  ],
+  "num": [
+   "~/Library/Fonts/Action NBA Condensed-Bold.otf",
+   null
+  ],
+  "numw": [
+   "~/Library/Fonts/Action NBA-Bold.otf",
+   null
+  ],
+  "ko": [
+   "/Library/Fonts/Managed/Knockout-67FullBantamwt_348560848.otf",
+   null
+  ]
+ },
+ "colors": {
+  "gold": [
+   232,
+   236,
+   240
+  ],
+  "orange": [
+   245,
+   132,
+   38
+  ],
+  "navy": [
+   35,
+   31,
+   32
+  ],
+  "red": [
+   200,
+   16,
+   46
+  ],
+  "blue": [
+   29,
+   66,
+   138
+  ]
+ },
+ "teams": {
+  "SAS": [
+   196,
+   206,
+   212
+  ],
+  "NYK": [
+   0,
+   107,
+   182
+  ]
+ },
+ "style": {
+  "OG": "orange",
+  "WB": "gold",
+  "FX": "gold",
+  "BR": "team",
+  "CA": "team",
+  "HP": "team",
+  "VS": "team"
+ },
+ "anchors": {
+  "rim": [
+   163,
+   1349,
+   273
+  ]
+ },
+ "keep": [
+  [
+   465,
+   945,
+   1465,
+   1060
+  ]
+ ],
+ "mask_box": {
+  "110": {
+   "FX": [
+    512,
+    484,
+    648,
+    600
+   ],
+   "BR": [
+    520,
+    545,
+    620,
+    706
+   ],
+   "CA": [
+    850,
+    326,
+    936,
+    498
+   ]
+  },
+  "158": {
+   "FX": [
+    735,
+    440,
+    820,
+    688
+   ],
+   "WB": [
+    780,
+    460,
+    863,
+    663
+   ]
+  }
+ },
+ "segments": [
+  {
+   "id": "live",
+   "kind": "play",
+   "from": 0,
+   "to": 110,
+   "speed": 1,
+   "audio_db": -2
+  },
+  {
+   "id": "A",
+   "kind": "freeze",
+   "at": 110,
+   "stop": true,
+   "spot": [
+    "OG",
+    "WB",
+    "FX",
+    "BR",
+    "CA"
+   ],
+   "focus": "OG",
+   "badge": "FREEZE",
+   "sfx": "stop",
+   "glow": true,
+   "zoom": [
+    1.06,
+    "OG"
+   ],
+   "pad": 0.6,
+   "dur": 1.6
+  },
+  {
+   "id": "shot",
+   "kind": "play",
+   "from": 110,
+   "to": 150,
+   "speed": 0.5,
+   "badge": "SLOW-MO ×0.5",
+   "sfx": "resume",
+   "zoom": [
+    1.0,
+    null
+   ],
+   "vo": [
+    [
+     "d16",
+     0.1
+    ]
+   ]
+  },
+  {
+   "id": "rim",
+   "kind": "play",
+   "from": 150,
+   "to": 158,
+   "speed": 0.25,
+   "badge": "SLOW-MO ×0.25"
+  },
+  {
+   "id": "B",
+   "kind": "freeze",
+   "at": 158,
+   "stop": true,
+   "spot": [
+    "OG",
+    "WB",
+    "FX"
+   ],
+   "focus": "OG",
+   "badge": "FREEZE",
+   "sfx": "stop",
+   "glow": true,
+   "zoom": [
+    1.06,
+    "OG"
+   ],
+   "vo": [
+    [
+     "d16b",
+     0.25
+    ]
+   ],
+   "pad": 0.9
+  },
+  {
+   "id": "tip",
+   "kind": "play",
+   "from": 158,
+   "to": 206,
+   "speed": 0.5,
+   "badge": "SLOW-MO ×0.5",
+   "sfx": "resume",
+   "zoom": [
+    1.0,
+    null
+   ]
+  },
+  {
+   "id": "rew",
+   "kind": "rewind",
+   "from": 206,
+   "to": 110,
+   "dur": 0.7,
+   "badge": "REWIND",
+   "sfx": "rewind"
+  },
+  {
+   "id": "real",
+   "kind": "play",
+   "from": 110,
+   "to": 300,
+   "speed": 1,
+   "audio_db": 2,
+   "badge": "REAL TIME",
+   "vo": [
+    [
+     "d17",
+     2.9
+    ]
+   ]
+  }
+ ],
+ "layers": [
+  {
+   "type": "ring",
+   "keys": [
+    "OG"
+   ],
+   "on": "A+0.3",
+   "off": "tip+0.25"
+  },
+  {
+   "type": "tag",
+   "keys": [
+    "OG"
+   ],
+   "on": "A+0.3",
+   "off": "tip+0.25"
+  },
+  {
+   "type": "tag",
+   "keys": [
+    "BR"
+   ],
+   "on": "A+0.3",
+   "off": "B"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WB",
+    "FX"
+   ],
+   "on": "B+0.3",
+   "off": "tip"
+  },
+  {
+   "type": "tag",
+   "keys": [
+    "WB",
+    "FX"
+   ],
+   "on": "B+0.3",
+   "off": "tip"
+  },
+  {
+   "type": "note",
+   "key": "BR",
+   "text": "31-FT HEAVE",
+   "color": "gold",
+   "on": "shot+0.5",
+   "off": "B"
+  },
+  {
+   "id": "pOG",
+   "type": "path",
+   "key": "OG",
+   "from": 118,
+   "to": 158,
+   "color": "orange",
+   "style": "flow",
+   "top": true,
+   "w": 1.4,
+   "head": 1.6,
+   "gap": 2.6,
+   "origin": true,
+   "on": "shot+0.5",
+   "off": "tip+0.25"
+  },
+  {
+   "type": "note",
+   "key": "OG",
+   "text": "NOBODY ON HIM",
+   "color": "orange",
+   "on": "d16b+1.68",
+   "off": "tip"
+  },
+  {
+   "type": "radius",
+   "key": "OG",
+   "defs": [
+    "WB",
+    "FX",
+    "CA",
+    "HP",
+    "VS"
+   ],
+   "on": "d16b+1.58",
+   "anim": [
+    "d16b+1.58",
+    "d16b+2.28"
+   ],
+   "off": "tip"
+  }
+ ],
+ "lang": "en",
+ "names": {
+  "OG": "ANUNOBY",
+  "BR": "BRUNSON",
+  "WB": "WEMBANYAMA",
+  "FX": "FOX",
+  "CA": "CASTLE",
+  "HP": "HARPER",
+  "VS": "VASSELL"
+ }
+}
