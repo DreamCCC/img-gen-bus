@@ -1,0 +1,32 @@
+{
+ "_note": "Simplified cut (fxclip footage + code scenes). Order follows 文稿_横屏2min_en_v3.md shots 1-18; shot 17 is the live broadcast call (Castle loses the inbound, 'It's over') instead of an unverified Brown quote.",
+ "out": "out/final_simple/HOW_DO_YOU_BLOW_29_simple.mp4",
+ "items": [
+  {"id": "s01", "src": "out/s01/s01.mp4", "type": "foot", "spec": "shots/s01.json",
+   "audio": {"src": "raw/2606111142181002.wav", "from": 3.0, "db": -1, "fade_out": 0.35},
+   "subs": [{"at": [1.75, 4.6], "text": "\"Shot no good — *the tip* — it's gone!\"", "who": "LIVE CALL"}]},
+  {"id": "c1", "src": "out/c1/c1.mp4", "type": "code", "vo": [["s02", 0.5]]},
+  {"id": "c2", "src": "out/c2/c2.mp4", "type": "code", "vo": [["s03", 0.4]]},
+  {"id": "s04", "src": "out/s04/s04.mp4", "type": "foot", "vo": [["s04", 0.3]]},
+  {"id": "s05a", "src": "out/s05/s05a.mp4", "type": "foot", "vo": [["s05", 0.5]]},
+  {"id": "c3", "src": "out/c3/c3.mp4", "type": "code", "vo": []},
+  {"id": "s06", "src": "out/s06/s06.mp4", "type": "foot", "spec": "shots/s06.json", "vo": [["s06", 0.2]]},
+  {"id": "c4", "src": "out/c4/c4.mp4", "type": "code", "vo": [["s07", 0.4]]},
+  {"id": "s08", "src": "out/s08/s08.mp4", "type": "foot", "spec": "shots/s08.json", "vo": [["s08", 0.1]]},
+  {"id": "s09", "src": "out/s09/s09.mp4", "type": "foot", "pad": 0.35, "vo": [["s09", 0.1]]},
+  {"id": "sampleA", "src": "out/sampleA/sampleA_clean.mp4", "type": "foot",
+   "audio": {"src": "out/sampleA/sampleA_mix.wav", "from": 0, "db": -1}, "vo_baked": "work/bd/e715_en_h.json"},
+  {"id": "fox", "src": "raw/presser/2606111356236401.mp4", "type": "foot", "trim": [0.2, 3.35], "vertical": true, "keep_h": 1380,
+   "audio_db": 12,
+   "subs": [{"at": [0.08, 3.1], "text": "\"I just thought I'd be able to *outrun him.* That's it.\"", "who": "DE'AARON FOX · POSTGAME"}]},
+  {"id": "c6", "src": "out/c6/c6.mp4", "type": "code", "vo": [["s14", 0.4]]},
+  {"id": "c7", "src": "out/c7/c7.mp4", "type": "code", "vo": [["s15", 0.3]]},
+  {"id": "s16", "src": "out/s16/s16.mp4", "type": "foot", "spec": "shots/s16.json", "audio_db": 4,
+   "vo_split": {"id": "s16", "marks": [3.2, 4.08]},
+   "subs": [{"at": [3.12, 5.45], "text": "*Tip. In.*"}]},
+  {"id": "s17", "src": "raw/presser/2606111429332601.mp4", "type": "foot", "trim": [606.65, 614.2], "audio_db": 3.5,
+   "subs": [{"at": [0.3, 3.95], "text": "\"Castle has it — *lost it.* That's it. It's over.\"", "who": "LIVE CALL"},
+            {"at": [4.05, 7.5], "text": "\"The greatest comeback in *NBA playoff history.*\"", "who": "LIVE CALL"}]},
+  {"id": "c8", "src": "out/c8/c8.mp4", "type": "code", "vo": [["s18", 0.4]]}
+ ]
+}

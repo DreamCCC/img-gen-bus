@@ -23,6 +23,7 @@ BD = ROOT / "work/bd/e715_en_h"
 OUT = ROOT / "out/sampleA"
 SR = 48000
 TARGET = -16.0
+NOSUB = __import__("os").environ.get("NOSUB") == "1"
 
 
 def run(args, **kw):
@@ -95,15 +96,31 @@ def main() -> None:
           f"[1:v]trim=start_frame=0:end_frame={r1 - r0},setpts=PTS-STARTPTS[c];"
           f"[0:v]trim=start_frame={r1}:end_frame={n_all},setpts=PTS-STARTPTS[b];"
           f"[a][c][b]concat=n=3:v=1:a=0,format=yuv420p,"
-          f"{flash(r1, fps, 0.8, 7)},{flash(round(p_at * fps), fps, 0.65, 9)},"
-          f"subtitles=out/sampleA/sampleA.ass:fontsdir=assets/fonts[v]")
+          f"{flash(r1, fps, 0.8, 7)},{flash(round(p_at * fps), fps, 0.65, 9)}"
+          + ("[v]" if NOSUB else ",subtitles=out/sampleA/sampleA.ass:fontsdir=assets/fonts[v]"))
     defs = json.loads((ROOT / "subs_en.json").read_text(encoding="utf-8"))
     vo_at = {v["id"]: v["t"] for v in man["vo"]}
     subs.build([d for d in defs if d.get("vo") in vo_at], vo_at, subs.load_words(ROOT / "audio/vo_en"), OUT / "sampleA.ass")
-    master = OUT / "sampleA_master.mp4"
+    master = OUT / ("sampleA_clean.mp4" if NOSUB else "sampleA_master.mp4")
+    if NOSUB:
+        run(["ffmpeg", "-y", "-loglevel", "error", "-i", BD.with_suffix(".mp4"), "-i", c5, "-filter_complex", fc,
+             "-map", "[v]", "-r", fps, "-c:v", "libx264", "-preset", "medium", "-crf", 14, "-pix_fmt", "yuv420p", master])
+        build_mix(seg, p_at)
+        print(f"clean picture -> {master}, mix -> {OUT / 'sampleA_mix.wav'}")
+        return
     run(["ffmpeg", "-y", "-loglevel", "error", "-i", BD.with_suffix(".mp4"), "-i", c5, "-filter_complex", fc,
          "-map", "[v]", "-r", fps, "-c:v", "libx264", "-preset", "medium", "-crf", 14, "-pix_fmt", "yuv420p", master])
+    mix = build_mix(seg, p_at)
 
+    gain = TARGET - lufs(mix) + 0.3
+    final = OUT / "sampleA.mp4"
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", master, "-i", mix, "-map", "0:v", "-map", "1:a",
+         "-c:v", "copy", "-af", f"volume={gain:.1f}dB,aresample=192000,alimiter=limit=0.75:attack=2:release=60:level=false,"
+         "aresample=48000", "-c:a", "aac", "-b:a", "256k", "-shortest", "-movflags", "+faststart", final])
+    print(f"rule {r0}-{r1} ({dur:.2f}s), P at {p_at:.2f}s, gain {gain:+.1f} dB -> {final}, {lufs(final):.1f} LUFS")
+
+
+def build_mix(seg: dict, p_at: float) -> Path:
     base = OUT / "footage_mix.wav"
     run(["ffmpeg", "-y", "-loglevel", "error", "-i", BD.with_suffix(".mp4"), "-vn", "-ac", 1, "-ar", SR, base])
     y, _ = sf.read(base)
@@ -119,13 +136,7 @@ def main() -> None:
     y = y / max(1.0, np.abs(y).max() / 0.95)
     mix = OUT / "sampleA_mix.wav"
     sf.write(mix, np.c_[y, y].astype(np.float32), SR)
-
-    gain = TARGET - lufs(mix) + 0.3
-    final = OUT / "sampleA.mp4"
-    run(["ffmpeg", "-y", "-loglevel", "error", "-i", master, "-i", mix, "-map", "0:v", "-map", "1:a",
-         "-c:v", "copy", "-af", f"volume={gain:.1f}dB,aresample=192000,alimiter=limit=0.75:attack=2:release=60:level=false,"
-         "aresample=48000", "-c:a", "aac", "-b:a", "256k", "-shortest", "-movflags", "+faststart", final])
-    print(f"rule {r0}-{r1} ({dur:.2f}s), P at {p_at:.2f}s, gain {gain:+.1f} dB -> {final}, {lufs(final):.1f} LUFS")
+    return mix
 
 
 if __name__ == "__main__":
