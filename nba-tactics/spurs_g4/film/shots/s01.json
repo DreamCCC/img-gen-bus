@@ -1,0 +1,17 @@
+{
+ "_note": "Shot 1 cold open (no VO): e727 Anunoby tip-in in 0.25x slow-mo pushed in on the rim, flash at the net, freeze greys out. Arena sound comes from the master mix (MSG roar), so this clip carries none.",
+ "src": "raw/2606111142181002.mp4",
+ "out": "out/s01/s01.mp4",
+ "audio_db": -14,
+ "segs": [
+  {"kind": "play", "from": 172, "to": 201, "speed": 0.25},
+  {"kind": "freeze", "at": 201, "dur": 1.0, "spot": [[1380, 290, 70, 60]]}
+ ],
+ "zoom": [[0, 1.55, 1330, 380], [3.86, 1.75, 1370, 330], [4.86, 1.85, 1385, 320]],
+ "flash": [[3.86, 0.8, 9]],
+ "shake": [[3.86, 0.35, 10]],
+ "callouts": [
+  {"t": [0.2, 3.8], "kind": "badge", "text": "NBA FINALS · GAME 4"},
+  {"t": [3.95, 4.86], "kind": "label", "x": 960, "y": 760, "text": "JUNE 10, 2026 · MADISON SQUARE GARDEN", "color": "white", "size": 44}
+ ]
+}

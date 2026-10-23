@@ -1,0 +1,349 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// C5 end-game math: GAME 0:13 vs SHOT 24, Knicks in the penalty (8 Q4 team fouls, 5th at 7:14), hold vs attack.
+// Beat times live in c5_endgame.json so the sfx track in sample_a.py stays in sync.
+const W = 1920, H = 1080;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const C = {
+  navy: '#0A1428', red: '#C8102E', blue: '#1D428A', blueHi: '#3D7BFF', silver: '#C4CED4', white: '#F4F6F8',
+  green: '#2BD67B', neg: '#FF3B3B', nyk: '#F58426',
+};
+const cl = (x) => Math.min(1, Math.max(0, x));
+const eo = (x) => 1 - Math.pow(1 - cl(x), 3);
+const back = (x, k = 1.8) => { x = cl(x) - 1; return 1 + x * x * ((k + 1) * x + k); };
+const lerp = (a, b, t) => a + (b - a) * t;
+let B = {}, bg = null;
+const P = (t, k, d = 0.25) => eo((t - B[k]) / d);
+
+function font(size, weight = 800, italic = true) { ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px BC`; }
+function text(s, x, y, size, color, { weight = 800, italic = true, align = 'left', alpha = 1, track = 0 } = {}) {
+  font(size, weight, italic);
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'alphabetic';
+  if (track) ctx.letterSpacing = track + 'px';
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function plate(x, y, w, h, fill, skew = 16, alpha = 1) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(x + skew, y); ctx.lineTo(x + w + skew, y); ctx.lineTo(x + w - skew, y + h); ctx.lineTo(x - skew, y + h);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function panel(x, y, w, h, alpha = 1, edge = C.red) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  const g = ctx.createLinearGradient(0, y, 0, y + h);
+  g.addColorStop(0, 'rgba(22,38,70,0.92)'); g.addColorStop(1, 'rgba(8,16,32,0.92)');
+  ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(x, y, w, 3);
+  ctx.fillStyle = edge; ctx.fillRect(x, y + 3, 8, h - 3);
+  ctx.restore();
+}
+function glowLine(pts, color, width, alpha = 1, frac = 1) {
+  if (frac <= 0) return;
+  const len = [0];
+  for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const want = len[len.length - 1] * frac;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const [w, a] of [[width * 4, 0.18], [width * 2, 0.35], [width, 1]]) {
+    ctx.strokeStyle = color; ctx.globalAlpha = alpha * a; ctx.lineWidth = w;
+    ctx.beginPath(); ctx.moveTo(...pts[0]);
+    for (let i = 1; i < pts.length; i++) {
+      if (len[i] <= want) ctx.lineTo(...pts[i]);
+      else { const f = (want - len[i - 1]) / (len[i] - len[i - 1]); ctx.lineTo(lerp(pts[i - 1][0], pts[i][0], f), lerp(pts[i - 1][1], pts[i][1], f)); break; }
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function curve(a, b, n = 24) {
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, s = t * t * (3 - 2 * t);
+    out.push([lerp(a[0], b[0], t), lerp(a[1], b[1], s)]);
+  }
+  return out;
+}
+function flash(t, at, d = 0.22, peak = 0.55) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return;
+  ctx.save(); ctx.globalAlpha = peak * Math.pow(1 - a, 2); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+function shakeAt(t, at, amp = 10, d = 0.25) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return [0, 0];
+  const k = amp * (1 - a);
+  return [k * Math.sin(t * 173), k * Math.cos(t * 131)];
+}
+
+// ---------------------------------------------------------------- layers
+
+function drawBg(t) {
+  const q = eo(t / 0.4);
+  ctx.save();
+  ctx.filter = `blur(${lerp(0, 14, q)}px) saturate(${lerp(1, 0, q)})`;
+  ctx.drawImage(bg, -30, -17, W + 60, H + 34);
+  ctx.restore();
+  ctx.fillStyle = `rgba(10,20,40,${lerp(0.15, 0.84, q)})`;
+  ctx.fillRect(0, 0, W, H);
+  const sx = ((t * 260) % (W + 900)) - 600;
+  const g = ctx.createLinearGradient(sx, 0, sx + 500, H);
+  g.addColorStop(0, 'rgba(61,123,255,0)'); g.addColorStop(0.5, 'rgba(61,123,255,0.07)'); g.addColorStop(1, 'rgba(61,123,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,255,255,0.025)';
+  for (let y = 0; y < H; y += 6) ctx.fillRect(0, y, W, 1);
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.55)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+}
+
+function drawHeader(t) {
+  const q = eo((t - 0.08) / 0.3);
+  if (q <= 0) return;
+  const x = lerp(-520, 70, q);
+  plate(x, 56, 430, 74, C.red);
+  text('END-GAME MATH', x + 24, 116, 64, C.white, { weight: 900 });
+  plate(x + 6, 136, 420, 40, 'rgba(29,66,138,0.95)', 12);
+  text('SAS 106  ·  NYK 105  ·  4TH 0:13.0', x + 24, 166, 28, C.white, { weight: 600, italic: false, track: 1 });
+}
+
+const SEC = 1260 / 24, BX = -630, HORN = BX + 13 * SEC;
+
+function clockTile(t, x, label, value, color, at) {
+  const q = eo((t - at) / 0.28);
+  if (q <= 0) return;
+  ctx.save();
+  ctx.translate(0, lerp(50, 0, q));
+  ctx.globalAlpha = q;
+  panel(x, 0, 570, 228, 1, color === C.white ? C.silver : C.blueHi);
+  text(label, x + 34, 52, 32, C.silver, { weight: 700, italic: false, track: 4 });
+  const s = lerp(1.35, 1, back((t - at) / 0.35));
+  ctx.save();
+  ctx.translate(x + 34, 196); ctx.scale(s, s);
+  text(value, 0, 0, 160, color, { weight: 900 });
+  ctx.restore();
+  ctx.restore();
+}
+
+function bar(y, frac, color, label, alpha) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillRect(BX, y, 1260, 40);
+  const w = 1260 * frac;
+  const g = ctx.createLinearGradient(BX, 0, BX + w, 0);
+  g.addColorStop(0, color); g.addColorStop(1, color + 'cc');
+  ctx.fillStyle = g; ctx.fillRect(BX, y, w, 40);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(BX + w - 4, y - 4, 4, 48);
+  text(label, BX + 14, y + 31, 30, C.navy, { weight: 800, italic: false, alpha: cl(w / 160) });
+  ctx.restore();
+}
+
+function drawClocks(t) {
+  const sq = eo((t - B.squeeze) / 0.4);
+  ctx.save();
+  ctx.translate(960, lerp(290, 190, sq));
+  ctx.scale(lerp(1, 0.52, sq), lerp(1, 0.52, sq));
+  clockTile(t, -630, 'GAME CLOCK', '0:13.0', C.white, B.game_tile);
+  clockTile(t, 60, 'SHOT CLOCK', '24', C.blueHi, B.shot_tile);
+
+  const ab = eo((t - B.game_bar + 0.1) / 0.2);
+  if (ab > 0) {
+    const gf = (13 / 24) * eo((t - B.game_bar) / 0.38);
+    const sf = cl((t - B.shot_bar) / ((B.horn_cross - B.shot_bar) * 24 / 13));
+    bar(290, gf, '#E8ECF0', 'GAME  0:13', ab);
+    bar(352, sf, C.blueHi, 'SHOT  24', ab);
+    const hq = eo((t - B.game_bar - 0.3) / 0.25);
+    ctx.save();
+    ctx.globalAlpha = hq;
+    ctx.setLineDash([10, 8]); ctx.strokeStyle = C.white; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(HORN, 262); ctx.lineTo(HORN, 410); ctx.stroke();
+    ctx.restore();
+    text('FINAL HORN', HORN, 252, 26, C.white, { weight: 700, italic: false, align: 'center', alpha: hq, track: 3 });
+    const over = sf * 24 - 13;
+    if (over > 0) {
+      const x0 = HORN, x1 = BX + 1260 * sf;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(x0, 352, x1 - x0, 40); ctx.clip();
+      ctx.fillStyle = C.green; ctx.fillRect(x0, 352, x1 - x0, 40);
+      ctx.strokeStyle = 'rgba(10,20,40,0.35)'; ctx.lineWidth = 8;
+      for (let x = x0 - 60; x < x1 + 60; x += 22) { ctx.beginPath(); ctx.moveTo(x, 396); ctx.lineTo(x + 40, 348); ctx.stroke(); }
+      ctx.restore();
+      ctx.save(); ctx.shadowColor = C.green; ctx.shadowBlur = 30; ctx.fillStyle = 'rgba(43,214,123,0.25)';
+      ctx.fillRect(x0, 352, x1 - x0, 40); ctx.restore();
+      text(`+${over.toFixed(1)} SEC`, x1 - 10, 340, 34, C.green, { weight: 800, align: 'right' });
+    }
+    const oq = eo((t - B.outlast) / 0.3) * (1 - eo((t - B.squeeze) / 0.2));
+    if (oq > 0) {
+      ctx.save(); ctx.translate(lerp(40, 0, oq), 0);
+      text('THE SHOT CLOCK OUTLASTS THE GAME', 630, 460, 44, C.green, { weight: 900, align: 'right', alpha: oq });
+      text('NO PRESSURE TO SHOOT', 630, 500, 28, C.silver, { weight: 600, italic: false, align: 'right', alpha: oq, track: 3 });
+      ctx.restore();
+    }
+  }
+  ctx.restore();
+}
+
+function drawFouls(t) {
+  const q = eo((t - B.fouls) / 0.3);
+  if (q <= 0) return;
+  const y = 425;
+  ctx.save();
+  ctx.translate(lerp(-80, 0, q), 0);
+  ctx.globalAlpha = q;
+  panel(330, y, 1260, 118, 1, C.nyk);
+  text('NYK  4TH-QTR TEAM FOULS', 370, y + 48, 32, C.silver, { weight: 700, italic: false, track: 3 });
+  text('5TH FOUL AT 7:14  ·  EVERY FOUL = 2 FREE THROWS', 370, y + 92, 26, C.silver, { weight: 500, italic: false, alpha: 0.85 });
+  for (let i = 0; i < 8; i++) {
+    const on = cl((t - B.fouls - 0.12 - i * 0.065) / 0.08);
+    const cx = 850 + i * 46 + (i >= 4 ? 30 : 0), cy = y + 54;
+    ctx.beginPath(); ctx.arc(cx, cy, 17, 0, 7);
+    ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fill();
+    if (on > 0) {
+      ctx.save(); ctx.globalAlpha *= on; ctx.shadowColor = C.nyk; ctx.shadowBlur = 18;
+      ctx.beginPath(); ctx.arc(cx, cy, 17 * lerp(1.5, 1, on), 0, 7); ctx.fillStyle = C.nyk; ctx.fill(); ctx.restore();
+    }
+  }
+  const lx = 850 + 3 * 46 + 38;
+  ctx.fillStyle = C.white; ctx.fillRect(lx - 2, y + 26, 4, 58);
+  text('PENALTY →', lx + 6, y + 106, 18, C.white, { weight: 700, italic: false, align: 'left', track: 2 });
+  ctx.restore();
+  const s = (t - B.penalty);
+  if (s > 0) {
+    const k = lerp(1.6, 1, back(s / 0.3, 2.4)), a = cl(s / 0.08);
+    ctx.save();
+    ctx.translate(1420, y + 59); ctx.rotate(-0.04); ctx.scale(k, k);
+    ctx.globalAlpha = a;
+    plate(-150, -38, 300, 76, C.red, 14);
+    text('KNICKS', 0, -6, 34, C.white, { weight: 900, align: 'center' });
+    text('IN THE PENALTY', 0, 28, 30, C.white, { weight: 800, align: 'center' });
+    ctx.restore();
+  }
+}
+
+function node(x, y, w, label, sub, color, q, hi = 0) {
+  if (q <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= q;
+  ctx.translate(lerp(-30, 0, q), 0);
+  if (hi > 0) { ctx.save(); ctx.shadowColor = color; ctx.shadowBlur = 40 * hi; ctx.fillStyle = color; ctx.globalAlpha *= 0.35 * hi; ctx.fillRect(x - 6, y - 6, w + 12, 96); ctx.restore(); }
+  ctx.fillStyle = 'rgba(8,16,32,0.94)'; ctx.fillRect(x, y, w, 84);
+  ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.strokeRect(x + 1.5, y + 1.5, w - 3, 81);
+  ctx.fillStyle = color; ctx.fillRect(x, y, 10, 84);
+  text(label, x + 28, y + (sub ? 46 : 58), sub ? 38 : 44, C.white, { weight: 900 });
+  if (sub) text(sub, x + 28, y + 74, 24, C.silver, { weight: 600, italic: false, track: 1 });
+  ctx.restore();
+}
+function arrow(a, b, color, frac) {
+  glowLine([a, b], color, 4, 1, frac);
+  if (frac >= 1) {
+    ctx.save(); ctx.fillStyle = color; ctx.beginPath();
+    ctx.moveTo(b[0] + 4, b[1]); ctx.lineTo(b[0] - 14, b[1] - 10); ctx.lineTo(b[0] - 14, b[1] + 10); ctx.fill(); ctx.restore();
+  }
+}
+
+function drawTree(t) {
+  const q0 = eo((t - B.hold + 0.25) / 0.3);
+  if (q0 <= 0) return;
+  const root = [120, 676];
+  node(root[0], root[1], 300, 'FOX', 'BALL IN HAND · 0:13', C.silver, q0);
+  const fork = [420, 718];
+  const yH = 576, yA = 768;
+  const hq = eo((t - B.hold) / 0.3);
+  glowLine(curve(fork, [560, yH + 42]), C.green, 5, 1, hq);
+  node(560, yH, 230, 'HOLD IT', null, C.green, eo((t - B.hold - 0.12) / 0.25), 0.6);
+  arrow([800, yH + 42], [850, yH + 42], C.green, eo((t - B.must_foul + 0.15) / 0.15));
+  const hit = eo((t - B.must_foul_hit) / 0.2) * (1 - 0.5 * eo((t - B.must_foul_hit - 0.4) / 0.4));
+  node(860, yH, 390, 'KNICKS MUST FOUL', 'THEY CAN\'T LET 0:13 RUN', C.green, eo((t - B.must_foul) / 0.25), hit);
+  arrow([1260, yH + 42], [1310, yH + 42], C.green, eo((t - B.fts + 0.12) / 0.12));
+  node(1320, yH, 230, '2 FTs', 'IN THE PENALTY', C.green, eo((t - B.fts) / 0.25));
+  arrow([1560, yH + 42], [1610, yH + 42], C.green, eo((t - B.up3 + 0.12) / 0.12));
+  const u = t - B.up3;
+  if (u > 0) {
+    const k = lerp(1.5, 1, back(u / 0.3, 2.2));
+    ctx.save(); ctx.translate(1720, yH + 42); ctx.scale(k, k); ctx.globalAlpha = cl(u / 0.08);
+    ctx.shadowColor = C.green; ctx.shadowBlur = 30;
+    plate(-110, -42, 220, 84, C.green, 12);
+    ctx.shadowBlur = 0;
+    text('UP 3', 0, 6, 54, C.navy, { weight: 900, align: 'center' });
+    text('MAKE BOTH', 0, 32, 22, C.navy, { weight: 800, italic: false, align: 'center', track: 2 });
+    ctx.restore();
+  }
+  const aq = eo((t - B.attack) / 0.2);
+  glowLine(curve(fork, [560, yA + 42]), C.neg, 5, 1, aq);
+  node(560, yA, 230, 'ATTACK', null, C.neg, eo((t - B.attack - 0.06) / 0.18), 0.6);
+  arrow([800, yA + 42], [850, yA + 42], C.neg, eo((t - B.miss + 0.1) / 0.1));
+  node(860, yA, 470, 'MISS = KNICKS BALL', 'TIME LEFT FOR A LAST SHOT', C.neg, eo((t - B.miss) / 0.2));
+  const f = t - B.fox_goes;
+  if (f > 0) {
+    const k = lerp(1.9, 1, back(f / 0.25, 2.6));
+    ctx.save(); ctx.translate(1600, yA + 40); ctx.rotate(-0.07); ctx.scale(k, k); ctx.globalAlpha = cl(f / 0.06);
+    ctx.shadowColor = C.neg; ctx.shadowBlur = 40;
+    plate(-200, -56, 400, 112, C.red, 18);
+    ctx.shadowBlur = 0;
+    text('FOX GOES', 0, 26, 84, C.white, { weight: 900, align: 'center' });
+    ctx.restore();
+  }
+}
+
+function drawOut(t) {
+  const a = (t - B.out) / (window.DURATION - B.out);
+  if (a <= 0) return;
+  const x = lerp(-W * 0.3, W * 1.1, eo(a));
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.moveTo(x - 240, 0); ctx.lineTo(x + 60, 0); ctx.lineTo(x - 140, H); ctx.lineTo(x - 440, H);   ctx.fill();
+  ctx.restore();
+  const up = cl((t - (window.DURATION - 0.13)) / 0.1);
+  ctx.save(); ctx.globalAlpha = 0.85 * up * up; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+
+window.renderFrame = async (t) => {
+  ctx.clearRect(0, 0, W, H);
+  drawBg(t);
+  const [sx, sy] = [B.horn_cross, B.penalty, B.up3, B.fox_goes].map((a) => shakeAt(t, a, 9)).reduce((p, q) => [p[0] + q[0], p[1] + q[1]]);
+  ctx.save(); ctx.translate(sx, sy);
+  drawHeader(t);
+  drawClocks(t);
+  drawFouls(t);
+  drawTree(t);
+  ctx.restore();
+  for (const k of ['horn_cross', 'penalty', 'up3', 'fox_goes']) flash(t, B[k], 0.2, 0.35);
+  drawOut(t);
+};
+
+window.FPS = 30;
+window.ready = (async () => {
+  const cfg = await (await fetch('c5_endgame.json')).json();
+  B = cfg.beats;
+  const q = new URLSearchParams(location.search);
+  window.DURATION = parseFloat(q.get('dur') || cfg.dur);
+  for (const [file, w, st] of [['Medium', 500, 'normal'], ['SemiBold', 600, 'normal'], ['Bold', 700, 'normal'], ['ExtraBold', 800, 'normal'],
+    ['Black', 900, 'normal'], ['BoldItalic', 700, 'italic'], ['ExtraBoldItalic', 800, 'italic'], ['ExtraBoldItalic', 900, 'italic']]) {
+    const f = new FontFace('BC', `url(../assets/fonts/BarlowCondensed-${file}.ttf)`, { weight: String(w), style: st });
+    document.fonts.add(await f.load());
+  }
+  bg = new Image();
+  bg.src = q.get('bg') || cfg.bg;
+  await bg.decode();
+})();
+</script>
+</body>
+</html>

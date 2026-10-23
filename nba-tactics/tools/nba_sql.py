@@ -49,6 +49,7 @@ def query(sql: str, *, db: str | None = None, timeout: int = 90) -> list[dict]:
         input=payload + "\n",
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=timeout + 30,
     )
     if proc.returncode != 0:

@@ -1,0 +1,38 @@
+{
+ "_note": "Shot 4 montage clip 2/4. e70 Castle #5 26' 3PT (Vassell ast), Q1 6:59 PBP (scorebug 7:00), SAS 16-10 -> 19-10. NGSS expFieldGoalPct 0.3947 -> 'xFG 39%', made. Catch ~f233, release f247, ball through rim f286. Speed 1 only; arena audio is replaced afterwards by the source window at -14 dB (film/out/s04/_tools/build_s04.py), render_play's own mix is not used.",
+ "work": "work/e70",
+ "fps": 30,
+ "size": [1920, 1080],
+ "orig": "work/e70/fr/orig",
+ "audio_src": "work/e70/2606110908507902.wav",
+ "vo": {"lines": "film/audio/vo_en/lines.json", "dir": "film/audio/vo_en"},
+ "out": "film/out/s04/clips/e70_s04.mp4",
+ "bed": false,
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "lang": "en",
+ "fonts": {
+  "zh": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "zhr": ["../assets/fonts/BarlowCondensed-Medium.ttf", null],
+  "num": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "numw": ["../assets/fonts/BarlowCondensed-Black.ttf", null]
+ },
+ "colors": {"gold": [232, 236, 240], "green": [40, 205, 110], "orange": [245, 132, 38], "navy": [35, 31, 32], "red": [200, 16, 46], "blue": [29, 66, 138]},
+ "teams": {"SAS": [196, 206, 212], "NYK": [0, 107, 182]},
+ "style": {"SC": "gold", "SCg": "green"},
+ "names": {"SC": "CASTLE", "SCg": "CASTLE"},
+ "anchors": {"rim": [286, 1228, 233]},
+ "segments": [
+  {"id": "live", "kind": "play", "from": 243, "to": 293, "speed": 1, "audio_db": -14}
+ ],
+ "layers": [
+  {"type": "ring", "keys": ["SC"], "pulse": true, "on": "live", "off": "live+0.45"},
+  {"type": "ring", "keys": ["SC"], "on": "live", "off": "live+1.583"},
+  {"type": "tag", "keys": ["SC"], "on": "live", "off": "live.end+1"},
+  {"type": "note", "key": "SC", "text": "xFG 39%", "color": "gold", "on": "live+0.133", "off": "live+1.533"},
+  {"type": "ring", "keys": ["SCg"], "on": "live+1.333", "off": "live.end+1"},
+  {"type": "ring", "keys": ["SCg"], "pulse": true, "on": "live+1.433", "off": "live.end+1"},
+  {"type": "note", "key": "SCg", "text": "xFG 39%", "color": "green", "on": "live+1.433", "off": "live.end+1"}
+ ]
+}

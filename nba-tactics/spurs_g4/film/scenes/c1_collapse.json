@@ -1,0 +1,37 @@
+{
+ "_note": "C1 lead collapse. Times are seconds from scene start; VO s02 starts at vo_offset (scene times: up 0.50, 29 0.64, NBA 1.58, Finals 1.88, Spurs 2.84, lost 3.16, by 3.42, one 4.06, ends 4.46).",
+ "dur": 5.6,
+ "vo_line": "s02",
+ "vo_offset": 0.5,
+ "beats": {
+  "draw0": 0.1,
+  "peak": 0.78,
+  "cam": 1.15,
+  "collapse0": 1.2,
+  "collapse1": 2.85,
+  "flip": 3.2,
+  "final": 4.06,
+  "title": 4.62
+ },
+ "sfx": [[0.08, "whoosh"], [0.78, "thud"], [1.2, "whoosh"], [3.2, "hit"], [4.06, "thud"], [4.5, "whoosh"], [4.62, "thud"], [4.62, "hit"]],
+ "data": {
+  "bucket_s": 30,
+  "bars": [2, 3, 5, 5, 8, 10, 10, 9, 6, 6, 9, 12, 13, 13, 13, 13, 13, 15, 15, 15, 15, 15, 19, 21, 19, 19, 23, 23, 21, 24, 25, 25, 25, 25, 25, 23, 24, 24, 24, 26, 27, 29, 29, 28, 25, 26, 27, 27, 27, 27, 27, 27, 29, 29, 27, 25, 22, 22, 22, 19, 19, 16, 18, 20, 20, 19, 17, 15, 18, 18, 18, 15, 15, 17, 18, 18, 20, 20, 17, 15, 15, 15, 11, 11, 9, 9, 7, 7, 7, 7, 4, 4, 1, -1, 1, -1],
+  "peak_idx": 41,
+  "peak_idx_all": [41, 42, 52, 53],
+  "max_lead": 29,
+  "peak_label": "2ND QTR · 3:06",
+  "peak_score": "SAS 71-42",
+  "final_sas": 106,
+  "final_nyk": 107,
+  "final_margin": -1
+ },
+ "_sources": {
+  "all numbers": "spurs_g4/data/pbp.json (game_id 0042500404), computed by film/work/c1_data.py",
+  "sides": "SAS = score_away (extend_info.location \"v\"), NYK = score_home (\"h\")",
+  "game time": "elapsed = (period-1)*720 + (720 - clock), events sorted by order_number",
+  "bars": "96 bars x 30 s; each bar = the SAS-minus-NYK margin with the largest |value| inside its 30-s window (ties -> later value), so the +29 peak and the closing -1 both show",
+  "max_lead": "+29: first at 2ND QTR 3:06 (SAS 71-42 NYK, Harper 2' Running Layup (12 PTS)); reached again at 3RD QTR 9:40 (SAS 81-52); callout shows the first",
+  "final": "SAS 106 - NYK 107 (last scoring event: score_away/score_home)"
+ }
+}

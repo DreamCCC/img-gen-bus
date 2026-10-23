@@ -1,0 +1,19 @@
+[
+ {"vo": "s02", "text": "Up *29* in the NBA Finals. And the Spurs lost — *by one.*"},
+ {"vo": "s03", "text": "Every shot gets graded. Distance, defender, angle — that's *expected field goal %.*"},
+ {"vo": "s04", "text": "First half, the Spurs kept beating those odds. From the field: expected *49*, scored *70.*"},
+ {"vo": "s05", "text": "Then the bill came. After the break: *19 points* on shots worth *39.*"},
+ {"vo": "s06", "text": "Mike Brown's answer: *go small.* Towns at center, four guys spaced around him."},
+ {"vo": "s07", "text": "That pulls Wembanyama *away from the rim.* One screen, one switch —"},
+ {"vo": "s08", "text": "and the league's best rim protector is guarding Brunson *27 feet out.* Bang."},
+ {"vo": "s09", "text": "At the other end: *4 of 19* in the fourth, with a defender's hand *2.5 feet* from the ball."},
+ {"vo": "a1", "text": "Spurs up one. *13 seconds* left."},
+ {"vo": "a2", "w": [0, 14], "text": "The shot clock is *longer than the game*, and the Knicks are *in the penalty.*"},
+ {"vo": "a2", "w": [15, 22], "text": "Hold the ball, and they *have to foul you.*"},
+ {"vo": "a3", "text": "Instead, Fox goes. A *coin-flip* layup nobody needed."},
+ {"vo": "a4", "text": "*Denied.*"},
+ {"vo": "s14", "text": "*5.7* left. The Spurs use their foul to give. Brown answers with *five shooters.*"},
+ {"vo": "s15", "text": "Fox and Wemby both jump Brunson. *Nobody touches Anunoby.*"},
+ {"vo": "s16", "text": "*Tip. In.*"},
+ {"vo": "s18", "text": "The Knicks led this game for *53.8 seconds.* It was enough."}
+]

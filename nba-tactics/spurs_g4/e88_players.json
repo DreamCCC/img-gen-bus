@@ -1,0 +1,7 @@
+{
+ "_note": "e88 Wembanyama #1 3PT (Harper ast), Q1 5:51. Track 9001 = SAM2 video follow (seed f199); he leaves frame left after ~f244. VWg = same player, green style for the made-shot ring.",
+ "players": [
+  {"key": "VW", "name": "Wembanyama", "num": "1", "team": "SAS", "ids": [[9001, 190, 250]], "air": [[197, 215]]},
+  {"key": "VWg", "name": "Wembanyama", "num": "1", "team": "SAS", "ids": [[9001, 190, 250]], "air": [[197, 215]]}
+ ]
+}

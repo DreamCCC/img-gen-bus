@@ -1,0 +1,592 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// C2 WHAT IS xFG: event 74 (Vassell 3PT) on an oblique 3D half court; DISTANCE / DEFENDER / ANGLE cards converge into the xFG gauge.
+// Beats and shot data live in c2_xfg.json (shot block is written by film/work/c2_compute.py).
+const W = 1920, H = 1080;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const C = {
+  navy: '#0A1428', red: '#C8102E', blue: '#1D428A', blueHi: '#3D7BFF', silver: '#C4CED4', white: '#F4F6F8',
+  green: '#2BD67B', neg: '#FF3B3B', nyk: '#006BB6', nykO: '#F58426',
+};
+const cl = (x) => Math.min(1, Math.max(0, x));
+const eo = (x) => 1 - Math.pow(1 - cl(x), 3);
+const eio = (x) => { x = cl(x); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const back = (x, k = 1.8) => { x = cl(x) - 1; return 1 + x * x * ((k + 1) * x + k); };
+const lerp = (a, b, t) => a + (b - a) * t;
+let B = {}, S = null;
+
+function text(s, x, y, size, color, { weight = 800, italic = true, align = 'left', alpha = 1, track = 0, fam = 'BC', base = 'alphabetic' } = {}) {
+  ctx.save();
+  ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px ${fam}`;
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = base;
+  if (track) ctx.letterSpacing = track + 'px';
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function measure(s, size, weight = 800, italic = true, fam = 'BC', track = 0) {
+  ctx.save(); ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px ${fam}`; if (track) ctx.letterSpacing = track + 'px';
+  const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+function plate(x, y, w, h, fill, skew = 16, alpha = 1) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(x + skew, y); ctx.lineTo(x + w + skew, y); ctx.lineTo(x + w - skew, y + h); ctx.lineTo(x - skew, y + h);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function panel(x, y, w, h, alpha = 1, edge = C.red) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  const g = ctx.createLinearGradient(0, y, 0, y + h);
+  g.addColorStop(0, 'rgba(22,38,70,0.94)'); g.addColorStop(1, 'rgba(8,16,32,0.94)');
+  ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(x, y, w, 3);
+  ctx.fillStyle = edge; ctx.fillRect(x, y + 3, 8, h - 3);
+  ctx.restore();
+}
+function glowLine(pts, color, width, alpha = 1, frac = 1, dash = null) {
+  if (frac <= 0 || pts.length < 2) return;
+  const len = [0];
+  for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const want = len[len.length - 1] * frac;
+  ctx.save();
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (dash) ctx.setLineDash(dash);
+  for (const [w, a] of [[width * 4, 0.16], [width * 2, 0.32], [width, 1]]) {
+    ctx.strokeStyle = color; ctx.globalAlpha = alpha * a; ctx.lineWidth = w;
+    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) {
+      if (len[i] <= want) ctx.lineTo(pts[i][0], pts[i][1]);
+      else { const f = (want - len[i - 1]) / (len[i] - len[i - 1]); ctx.lineTo(lerp(pts[i - 1][0], pts[i][0], f), lerp(pts[i - 1][1], pts[i][1], f)); break; }
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function flash(t, at, d = 0.2, peak = 0.4) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return;
+  ctx.save(); ctx.globalAlpha = peak * Math.pow(1 - a, 2); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+function shakeAt(t, at, amp = 10, d = 0.25) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return [0, 0];
+  const k = amp * (1 - a);
+  return [k * Math.sin(t * 173), k * Math.cos(t * 131)];
+}
+function rnd(i) { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+
+// ---------------------------------------------------------------- background
+
+function drawBg(t) {
+  const g = ctx.createRadialGradient(W * 0.42, H * 0.42, 0, W * 0.42, H * 0.42, W * 0.75);
+  g.addColorStop(0, '#13244A'); g.addColorStop(0.45, '#0A1428'); g.addColorStop(1, '#010205');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(120,160,255,0.045)';
+  const off = (t * 6) % 48;
+  for (let x = -off; x < W; x += 48) ctx.fillRect(x, 0, 1, H);
+  for (let y = -off; y < H; y += 48) ctx.fillRect(0, y, W, 1);
+  ctx.save();
+  for (let i = 0; i < 70; i++) {
+    const sp = 8 + rnd(i) * 22;
+    const x = (rnd(i + 100) * (W + 200) + t * sp) % (W + 200) - 100;
+    const y = (rnd(i + 200) * (H + 100) - t * sp * 0.6 + H + 100) % (H + 100) - 50;
+    const r = 1 + rnd(i + 300) * 2.2;
+    ctx.globalAlpha = 0.12 + 0.22 * rnd(i + 400) * (0.6 + 0.4 * Math.sin(t * 2 + i));
+    ctx.fillStyle = rnd(i + 500) > 0.7 ? C.blueHi : '#fff';
+    ctx.fillRect(x, y, r, r);
+  }
+  ctx.restore();
+  const s = ((t * 220) % (W + 1200)) - 700;
+  const sg = ctx.createLinearGradient(s, 0, s + 600, H);
+  sg.addColorStop(0, 'rgba(61,123,255,0)'); sg.addColorStop(0.5, 'rgba(61,123,255,0.05)'); sg.addColorStop(1, 'rgba(61,123,255,0)');
+  ctx.fillStyle = sg; ctx.fillRect(0, 0, W, H);
+}
+function drawVignette() {
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.4, W / 2, H / 2, H * 1.0);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.5)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  const b = ctx.createLinearGradient(0, 760, 0, H);
+  b.addColorStop(0, 'rgba(1,3,8,0)'); b.addColorStop(0.45, 'rgba(1,3,8,0.75)'); b.addColorStop(1, 'rgba(1,3,8,0.92)');
+  ctx.fillStyle = b; ctx.fillRect(0, 760, W, H - 760);
+}
+
+// ---------------------------------------------------------------- camera (world in feet: x toward rim, y lateral, z up)
+
+const HOOP = [41.75, 0];
+let CAM = null;
+function setCam(t) {
+  const intro = eo(t / 0.55);
+  const d = eio(t / window.DURATION);
+  const C0 = [lerp(-30, -19, intro) + 2.5 * d, lerp(9, 4, intro) - 5 * d, lerp(92, 62, intro) - 4 * d];
+  const T0 = [31.5, lerp(-2, -1, d), 0];
+  let f = [T0[0] - C0[0], T0[1] - C0[1], T0[2] - C0[2]];
+  const n = Math.hypot(...f); f = f.map((v) => v / n);
+  let r = [f[1], -f[0], 0]; const rn = Math.hypot(...r); r = r.map((v) => v / rn);
+  const u = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];
+  CAM = { p: C0, f, r, u, F: 1720, cx: 585, cy: 600 };
+}
+function pj(x, y, z = 0) {
+  const d = [x - CAM.p[0], y - CAM.p[1], z - CAM.p[2]];
+  const zc = d[0] * CAM.f[0] + d[1] * CAM.f[1] + d[2] * CAM.f[2];
+  const xc = d[0] * CAM.r[0] + d[1] * CAM.r[1] + d[2] * CAM.r[2];
+  const yc = d[0] * CAM.u[0] + d[1] * CAM.u[1] + d[2] * CAM.u[2];
+  return [CAM.cx + CAM.F * xc / zc, CAM.cy - CAM.F * yc / zc, zc];
+}
+const pl = (pts, z = 0) => pts.map(([x, y]) => pj(x, y, z));
+function arcPts(cx, cy, r, a0, a1, n = 48) {
+  const out = [];
+  for (let i = 0; i <= n; i++) { const a = lerp(a0, a1, i / n); out.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); }
+  return out;
+}
+function strokePts(pts, color, w, alpha, dash) {
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineJoin = 'round';
+  if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.stroke(); ctx.restore();
+}
+function fillPts(pts, fill, alpha = 1) {
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.fillStyle = fill;
+  ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath(); ctx.fill(); ctx.restore();
+}
+
+function drawCourt(t, dim) {
+  const q = eo(t / 0.45);
+  ctx.save();
+  ctx.globalAlpha = q * dim;
+  const floor = pl([[-1, -26], [48, -26], [48, 26], [-1, 26]]);
+  const fg = ctx.createLinearGradient(0, floor[1][1], 0, 900);
+  fg.addColorStop(0, 'rgba(36,70,140,0.42)'); fg.addColorStop(1, 'rgba(14,28,60,0.25)');
+  fillPts(floor, fg);
+  fillPts(pl([[28, -8], [47, -8], [47, 8], [28, 8]]), 'rgba(29,66,138,0.35)');
+  const L = 'rgba(220,232,255,0.55)', lw = 2.2;
+  strokePts(pl([[0, -25], [47, -25], [47, 25], [0, 25], [0, -25]]), L, lw, 1);
+  strokePts(pl(arcPts(0, 0, 6, -Math.PI / 2, Math.PI / 2)), L, lw, 1);
+  strokePts(pl([[47, -8], [28, -8], [28, 8], [47, 8]]), L, lw, 1);
+  strokePts(pl(arcPts(28, 0, 6, Math.PI / 2, Math.PI * 1.5)), L, lw, 1);
+  strokePts(pl(arcPts(28, 0, 6, -Math.PI / 2, Math.PI / 2)), L, lw, 0.7, [10, 10]);
+  strokePts(pl(arcPts(HOOP[0], 0, 4, Math.PI / 2, Math.PI * 1.5)), L, lw, 0.8);
+  const a3 = Math.acos(22 / 23.75);
+  const xi = HOOP[0] - Math.sqrt(23.75 * 23.75 - 22 * 22);
+  strokePts(pl([[47, -22], [xi, -22], ...arcPts(HOOP[0], 0, 23.75, -Math.PI / 2 - a3, -Math.PI * 1.5 + a3).slice(1), [47, 22]]), 'rgba(235,242,255,0.8)', 2.6, 1);
+  ctx.restore();
+}
+function drawHoop(t, dim) {
+  const q = eo((t - 0.15) / 0.35);
+  if (q <= 0) return;
+  ctx.save(); ctx.globalAlpha = q * dim;
+  const g = pj(HOOP[0], 0, 0), top = pj(HOOP[0], 0, 10);
+  strokePts([g, top], 'rgba(255,255,255,0.35)', 1.5, 1, [4, 6]);
+  fillPts(pl([[43, -3], [43, 3], [43, 3], [43, -3]].map((p) => p)), 'rgba(0,0,0,0)');
+  const bd = [pj(43, -3, 9), pj(43, 3, 9), pj(43, 3, 12.5), pj(43, -3, 12.5)];
+  fillPts(bd, 'rgba(200,220,255,0.12)');
+  strokePts([...bd, bd[0]], 'rgba(255,255,255,0.85)', 2.5, 1);
+  const ib = [pj(43, -1, 10), pj(43, 1, 10), pj(43, 1, 11.5), pj(43, -1, 11.5)];
+  strokePts([...ib, ib[0]], 'rgba(255,255,255,0.7)', 2, 1);
+  strokePts([pj(43, 0, 10), pj(42.5, 0, 10)], '#fff', 2, 1);
+  strokePts(pl(arcPts(HOOP[0], 0, 0.75, 0, Math.PI * 2, 32), 10), '#FF7A2F', 3.5, 1);
+  ctx.save(); ctx.globalAlpha *= 0.5; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(g[0], g[1], 4, 0, 7); ctx.fill(); ctx.restore();
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------- players
+
+const byId = (id) => S.players.find((p) => p.id === id);
+function dot(p, q, hi, dim) {
+  if (q <= 0) return;
+  const c = pj(p.x, p.y, 0);
+  const r = CAM.F * 1.05 / c[2];
+  const sas = p.team === 'SAS';
+  ctx.save();
+  ctx.globalAlpha *= cl(q * 1.5) * dim;
+  const k = lerp(1.8, 1, back(q, 2.2));
+  ctx.translate(c[0], c[1]); ctx.scale(k, k * 0.62);
+  if (hi > 0) {
+    ctx.save(); ctx.globalAlpha *= hi; ctx.shadowColor = sas ? '#fff' : C.nykO; ctx.shadowBlur = 30;
+    ctx.beginPath(); ctx.arc(0, 0, r * 1.7, 0, 7); ctx.strokeStyle = sas ? '#fff' : C.nykO; ctx.lineWidth = 4; ctx.stroke(); ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(0, 4, r * 1.05, 0, 7); ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, 7);
+  ctx.fillStyle = sas ? C.silver : C.nyk; ctx.fill();
+  ctx.lineWidth = 4; ctx.strokeStyle = sas ? '#0B0D10' : C.nykO; ctx.stroke();
+  ctx.restore();
+}
+function nameTag(p, q, dim, { dx = 0, dy = 30, big = false } = {}) {
+  if (q <= 0) return;
+  const c = pj(p.x, p.y, 0);
+  const s = p.last.toUpperCase();
+  ctx.save(); ctx.globalAlpha *= q * dim;
+  ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 8;
+  text(s, c[0] + dx, c[1] + dy, big ? 22 : 17, p.team === 'SAS' ? C.white : '#9CC7FF', { fam: 'IN', weight: 700, italic: false, align: 'center', track: 1.5 });
+  ctx.restore();
+}
+
+function drawPlayers(t, dim) {
+  const sh = byId(S.shooter_id), df = byId(S.defender_id);
+  const order = [...S.players].sort((a, b) => Math.hypot(a.x - sh.x, a.y - sh.y) - Math.hypot(b.x - sh.x, b.y - sh.y));
+  const tagOff = { Wembanyama: [34, -16], Castle: [0, 30], Champagnie: [0, 30], Harper: [0, 32], Anunoby: [0, 30], Hart: [-10, -24] };
+  order.forEach((p, i) => {
+    if (p.id === sh.id) return;
+    const q = eo((t - B.shot - 0.06 - i * 0.04) / 0.25);
+    const hi = p.id === df.id ? eo((t - B.defender) / 0.25) * (0.75 + 0.25 * Math.sin(t * 9)) : 0;
+    dot(p, q, hi, dim);
+    const [dx, dy] = tagOff[p.last] || [0, 30];
+    nameTag(p, eo((t - B.shot - 0.2 - i * 0.04) / 0.25), dim, { dx, dy });
+  });
+  const q = eo((t - B.shot) / 0.25);
+  dot(sh, q, 1, dim);
+}
+
+function shotLight(t, dim) {
+  const sh = byId(S.shooter_id);
+  const a = t - B.shot;
+  if (a < -0.05) return;
+  const c = pj(sh.x, sh.y, 0), top = pj(sh.x, sh.y, 15);
+  ctx.save(); ctx.globalAlpha = dim;
+  const bq = eo(a / 0.2) * (1 - 0.55 * eo((a - 0.5) / 0.6));
+  const bw = 26;
+  const g = ctx.createLinearGradient(0, top[1], 0, c[1]);
+  g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, `rgba(220,235,255,${0.5 * bq})`);
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.moveTo(top[0] - bw * 0.4, top[1]); ctx.lineTo(top[0] + bw * 0.4, top[1]); ctx.lineTo(c[0] + bw, c[1]); ctx.lineTo(c[0] - bw, c[1]); ctx.fill();
+  for (let k = 0; k < 3; k++) {
+    const ph = ((a - k * 0.35) % 1.05) / 1.05;
+    if (a - k * 0.35 < 0) continue;
+    const rr = lerp(1.2, 5.5, eo(ph));
+    strokePts(pl(arcPts(sh.x, sh.y, rr, 0, Math.PI * 2, 40)), '#fff', 2.5, (1 - ph) * 0.8);
+  }
+  const fl = ctx.createRadialGradient(c[0], c[1], 0, c[0], c[1], 90);
+  fl.addColorStop(0, `rgba(200,225,255,${0.35 * bq})`); fl.addColorStop(1, 'rgba(200,225,255,0)');
+  ctx.save(); ctx.translate(c[0], c[1]); ctx.scale(1, 0.6); ctx.translate(-c[0], -c[1]); ctx.fillStyle = fl; ctx.fillRect(c[0] - 90, c[1] - 90, 180, 180); ctx.restore();
+  ctx.restore();
+}
+
+function shooterTag(t, dim) {
+  const q = eo((t - B.shot - 0.08) / 0.28);
+  if (q <= 0) return;
+  const sh = byId(S.shooter_id);
+  const c = pj(sh.x, sh.y, 0);
+  const x = c[0] - 40, y = c[1] + 34;
+  ctx.save(); ctx.globalAlpha *= q * dim;
+  ctx.translate(lerp(30, 0, q), 0);
+  strokePts([[c[0], c[1] + 10], [x + 30, y]], '#fff', 2, 0.8);
+  plate(x, y, 210, 46, '#0B0D10', 10);
+  plate(x, y, 210, 4, C.silver, 1);
+  text('VASSELL', x + 18, y + 36, 34, C.white, { weight: 900 });
+  plate(x + 8, y + 50, 194, 30, C.silver, 8);
+  text(`${S.clock}  ·  3PT`, x + 22, y + 72, 17, '#0B0D10', { fam: 'IN', weight: 700, italic: false, track: 1 });
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------- factor visuals on court
+
+function midLabel(s, x, y, color, q, size = 30) {
+  if (q <= 0) return;
+  const w = measure(s, size, 900) + 26;
+  ctx.save(); ctx.globalAlpha *= q;
+  const k = lerp(1.4, 1, back(q, 2));
+  ctx.translate(x, y); ctx.scale(k, k);
+  plate(-w / 2, -size * 0.62, w, size * 1.24, 'rgba(6,12,26,0.92)', 8);
+  plate(-w / 2 - 4, -size * 0.62, 10, size * 1.24, color, 8);
+  text(s, 0, size * 0.36, size, color, { weight: 900, align: 'center' });
+  ctx.restore();
+}
+
+function drawDistance(t, dim) {
+  const a = t - B.distance;
+  if (a < 0) return;
+  const sh = byId(S.shooter_id);
+  const fr = eo(a / 0.4);
+  const P0 = [sh.x, sh.y], P1 = [HOOP[0], 0];
+  const pts = [];
+  for (let i = 0; i <= 20; i++) pts.push(pj(lerp(P0[0], P1[0], i / 20), lerp(P0[1], P1[1], i / 20), 0));
+  glowLine(pts, '#FFFFFF', 3.5, dim, fr);
+  const L = Math.hypot(P1[0] - P0[0], P1[1] - P0[1]);
+  const nx = -(P1[1] - P0[1]) / L, ny = (P1[0] - P0[0]) / L;
+  for (let d = 5; d < L; d += 5) {
+    if (d / L > fr) break;
+    const f = d / L, x = lerp(P0[0], P1[0], f), y = lerp(P0[1], P1[1], f);
+    strokePts([pj(x - nx * 0.7, y - ny * 0.7), pj(x + nx * 0.7, y + ny * 0.7)], '#fff', 2.5, dim * 0.9);
+  }
+  const m = pj(lerp(P0[0], P1[0], 0.21) - nx * 2.4, lerp(P0[1], P1[1], 0.21) - ny * 2.4);
+  midLabel(`${S.distance_ft.toFixed(1)} FT`, m[0], m[1], '#FFFFFF', eo((a - 0.3) / 0.25) * dim);
+}
+
+function drawDefender(t, dim) {
+  const a = t - B.defender;
+  if (a < 0) return;
+  const sh = byId(S.shooter_id), df = byId(S.defender_id);
+  const R = S.defender_ft;
+  const ang0 = Math.atan2(df.y - sh.y, df.x - sh.x);
+  const fr = eo(a / 0.45);
+  const ring = pl(arcPts(sh.x, sh.y, R, ang0, ang0 + Math.PI * 2 * fr, 96));
+  ctx.save(); ctx.globalAlpha = dim;
+  fillPts(pl(arcPts(sh.x, sh.y, R, 0, Math.PI * 2, 96)), 'rgba(245,132,38,0.07)', eo(a / 0.45));
+  ctx.restore();
+  glowLine(ring, C.nykO, 3, dim, 1, null);
+  const e = [sh.x + R * Math.cos(ang0), sh.y + R * Math.sin(ang0)];
+  const hq = eo((a - 0.25) / 0.2);
+  if (hq > 0) {
+    const pe = pj(...e);
+    ctx.save(); ctx.globalAlpha = dim * hq; ctx.fillStyle = C.nykO; ctx.shadowColor = C.nykO; ctx.shadowBlur = 16;
+    ctx.beginPath(); ctx.arc(pe[0], pe[1], 6, 0, 7); ctx.fill(); ctx.restore();
+  }
+  const la = ang0 + 2.35;
+  const lp = pj(sh.x + (R + 0.2) * Math.cos(la), sh.y + (R + 0.2) * Math.sin(la));
+  midLabel(`${S.defender_ft.toFixed(1)} FT`, lp[0] + 6, lp[1] + 8, C.nykO, eo((a - 0.32) / 0.25) * dim);
+}
+
+function drawAngle(t, dim) {
+  const a = t - B.angle;
+  if (a < 0) return;
+  const sh = byId(S.shooter_id);
+  const R = 9;
+  const aRef = Math.PI;
+  let aSh = Math.atan2(sh.y, sh.x - HOOP[0]);
+  if (aSh < 0) aSh += Math.PI * 2;
+  const fr = eo((a - 0.12) / 0.4);
+  const rq = eo(a / 0.25);
+  const ref = [];
+  for (let i = 0; i <= 10; i++) ref.push(pj(HOOP[0] - 15 * i / 10, 0));
+  glowLine(ref, C.blueHi, 2.5, dim * rq, rq, [10, 9]);
+  const aEnd = lerp(aRef, aSh, fr);
+  const wedge = [[HOOP[0], 0], ...arcPts(HOOP[0], 0, R, aRef, aEnd, 40)];
+  fillPts(pl(wedge), 'rgba(61,123,255,0.28)', dim * rq);
+  glowLine(pl(arcPts(HOOP[0], 0, R, aRef, aEnd, 40)), C.blueHi, 3.5, dim, fr > 0 ? 1 : 0);
+  const sp = pj(HOOP[0] + 15.5 * Math.cos(aSh), 15.5 * Math.sin(aSh));
+  const hp = pj(HOOP[0], 0);
+  glowLine([hp, sp], C.blueHi, 2.5, dim * fr, fr, [10, 9]);
+  const z0 = pj(HOOP[0] - 16.5, 0);
+  text('0°', z0[0] - 6, z0[1] + 8, 24, C.blueHi, { weight: 800, align: 'right', alpha: dim * rq });
+  const am = (aRef + aSh) / 2;
+  const lp = pj(HOOP[0] + (R + 4.5) * Math.cos(am), (R + 4.5) * Math.sin(am));
+  midLabel(`${S.angle_deg}°`, lp[0], lp[1], C.blueHi, eo((a - 0.36) / 0.25) * dim, 34);
+}
+
+// ---------------------------------------------------------------- cards + gauge
+
+const CX = 1350, CW = 500, CH = 150;
+const CARDS = [
+  { key: 'distance', label: 'DISTANCE', color: '#FFFFFF', y: 236, sub: ['SHOOTER', 'TO RIM'] },
+  { key: 'defender', label: 'DEFENDER', color: C.nykO, y: 410, sub: [], subFn: () => [`${S.defender.toUpperCase()} · NEAREST`, 'HAND TO BALL'] },
+  { key: 'angle', label: 'ANGLE', color: C.blueHi, y: 584, sub: ['0° = STRAIGHT ON', '90° = BASELINE'] },
+];
+const GX = 1600, GY = 452, GR = 150;
+
+function cardValue(c, t) {
+  const p = eo((t - B[c.key] - 0.12) / 0.35);
+  if (c.key === 'angle') return [`${Math.round(S.angle_deg * p)}`, '°'];
+  const v = (c.key === 'distance' ? S.distance_ft : S.defender_ft) * p;
+  return [v.toFixed(1), ' FT'];
+}
+function drawCard(c, i, t) {
+  const at = B[c.key];
+  const q = back((t - at + 0.06) / 0.28, 1.6);
+  if (t < at - 0.06) return;
+  const cv = eio((t - B.converge - i * 0.05) / 0.4);
+  if (cv >= 1) return;
+  ctx.save();
+  const x0 = lerp(W + 40, CX, q), y0 = c.y;
+  const x = lerp(x0, GX - CW / 2, cv), y = lerp(y0, GY - CH / 2, cv);
+  const s = lerp(1, 0.25, cv);
+  ctx.translate(x + CW / 2, y + CH / 2); ctx.scale(s, s); ctx.translate(-CW / 2, -CH / 2);
+  ctx.globalAlpha = cl(q * 2) * (1 - cv * cv);
+  panel(0, 0, CW, CH, 1, c.color);
+  text(`0${i + 1}`, CW - 22, 40, 26, 'rgba(255,255,255,0.28)', { weight: 900, align: 'right' });
+  text(c.label, 34, 44, 30, C.silver, { weight: 700, italic: false, track: 5 });
+  const [num, unit] = cardValue(c, t);
+  const land = t - at - 0.47;
+  const k = land > 0 ? lerp(1.18, 1, eo(land / 0.2)) : 1;
+  ctx.save(); ctx.translate(32, 128); ctx.scale(k, k);
+  text(num, 0, 0, 92, c.color === '#FFFFFF' ? C.white : c.color, { weight: 900 });
+  const nw = measure(num, 92, 900);
+  text(unit, nw + 4, 0, unit === '°' ? 92 : 46, c.color === '#FFFFFF' ? C.white : c.color, { weight: 900 });
+  ctx.restore();
+  const sub = c.subFn ? c.subFn() : c.sub;
+  sub.forEach((ln, j) => text(ln, CW - 24, 94 + j * 26, 17, C.silver, { fam: 'IN', weight: 600, italic: false, align: 'right', track: 1.2, alpha: 0.9 }));
+  ctx.restore();
+  if (land > 0 && land < 0.12) {
+    ctx.save(); ctx.globalAlpha = (1 - land / 0.12) * 0.5 * (1 - cv); ctx.fillStyle = '#fff'; ctx.fillRect(x, y, CW, CH); ctx.restore();
+  }
+}
+
+function drawGauge(t) {
+  const a = t - B.gauge;
+  if (a < 0) return;
+  const q = back(a / 0.3, 1.6);
+  const burst = eo(a / 0.35);
+  ctx.save();
+  if (a < 0.45) {
+    ctx.globalAlpha = (1 - burst) * 0.8;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.arc(GX, GY, lerp(30, GR * 1.6, burst), 0, 7); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+  ctx.translate(GX, GY); ctx.scale(lerp(0.4, 1, q), lerp(0.4, 1, q));
+  ctx.globalAlpha = cl(a / 0.12);
+  const disc = ctx.createRadialGradient(0, 0, 0, 0, 0, GR + 40);
+  disc.addColorStop(0, 'rgba(22,40,80,0.95)'); disc.addColorStop(0.8, 'rgba(8,16,34,0.95)'); disc.addColorStop(1, 'rgba(8,16,34,0)');
+  ctx.fillStyle = disc; ctx.beginPath(); ctx.arc(0, 0, GR + 40, 0, 7); ctx.fill();
+  ctx.lineWidth = 28; ctx.strokeStyle = 'rgba(255,255,255,0.09)';
+  ctx.beginPath(); ctx.arc(0, 0, GR, 0, 7); ctx.stroke();
+  for (let i = 0; i < 20; i++) {
+    const an = -Math.PI / 2 + i / 20 * Math.PI * 2;
+    ctx.strokeStyle = i % 5 ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.45)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(Math.cos(an) * (GR + 20), Math.sin(an) * (GR + 20)); ctx.lineTo(Math.cos(an) * (GR + (i % 5 ? 28 : 34)), Math.sin(an) * (GR + (i % 5 ? 28 : 34))); ctx.stroke();
+  }
+  const fp = eio((t - B.expected) / (B.land - B.expected));
+  const v = S.xfg_pct * fp;
+  if (fp > 0) {
+    const a1 = -Math.PI / 2 + Math.PI * 2 * v / 100;
+    ctx.save();
+    ctx.lineCap = 'butt';
+    ctx.shadowColor = C.blueHi; ctx.shadowBlur = 26;
+    const gg = ctx.createLinearGradient(-GR, -GR, GR, GR);
+    gg.addColorStop(0, '#FFFFFF'); gg.addColorStop(1, '#7FB0FF');
+    ctx.strokeStyle = gg; ctx.lineWidth = 28;
+    ctx.beginPath(); ctx.arc(0, 0, GR, -Math.PI / 2, a1); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(Math.cos(a1) * GR, Math.sin(a1) * GR, 9, 0, 7); ctx.fill();
+  }
+  text('xFG', 0, -62, 40, C.silver, { weight: 800, align: 'center', track: 3 });
+  const lk = t > B.land ? lerp(1.3, 1, back((t - B.land) / 0.3, 2.4)) : 1;
+  ctx.save(); ctx.scale(lk, lk);
+  const ns = `${Math.round(v)}`;
+  const nw = measure(ns, 150, 900);
+  text(ns, -16, 52, 150, C.white, { weight: 900, align: 'center' });
+  text('%', -16 + nw / 2 + 4, 52, 64, C.white, { weight: 900 });
+  ctx.restore();
+  ctx.restore();
+
+  const lq = eo((t - B.expected) / 0.3);
+  text('EXPECTED FIELD GOAL %', GX, GY + GR + 74, 40, C.white, { weight: 900, align: 'center', alpha: lq });
+  const cq = eo((t - B.expected - 0.25) / 0.3);
+  if (cq > 0) {
+    const parts = [[`${S.distance_ft.toFixed(1)} FT`, C.white], [`${S.defender_ft.toFixed(1)} FT`, C.nykO], [`${S.angle_deg}°`, C.blueHi]];
+    const ws = parts.map(([s]) => measure(s, 30, 800) + 40);
+    let x = GX - ws.reduce((p, q) => p + q, 0) / 2;
+    parts.forEach(([s, col], i) => {
+      ctx.save(); ctx.globalAlpha = eo((t - B.expected - 0.25 - i * 0.07) / 0.25);
+      ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fillRect(x + 4, GY + GR + 98, ws[i] - 8, 42);
+      ctx.fillStyle = col; ctx.fillRect(x + 4, GY + GR + 98, 4, 42);
+      text(s, x + ws[i] / 2 + 2, GY + GR + 130, 30, col, { weight: 800, align: 'center' });
+      ctx.restore();
+      x += ws[i];
+    });
+  }
+  const r = t - B.result;
+  if (r > 0 && S.made) {
+    const k = lerp(1.6, 1, back(r / 0.28, 2.4));
+    ctx.save(); ctx.translate(GX + GR + 6, GY - GR + 6); ctx.rotate(-0.06); ctx.scale(k, k); ctx.globalAlpha = cl(r / 0.06);
+    ctx.shadowColor = C.green; ctx.shadowBlur = 24;
+    plate(-84, -26, 168, 52, C.green, 10);
+    ctx.shadowBlur = 0;
+    text('MADE IT', 0, 15, 40, C.navy, { weight: 900, align: 'center' });
+    ctx.restore();
+  }
+}
+
+function drawHeader(t) {
+  const q = eo((t - B.header) / 0.3);
+  if (q <= 0) return;
+  const x = lerp(-560, 70, q);
+  plate(x, 56, 420, 74, C.red);
+  text('WHAT IS xFG', x + 24, 116, 64, C.white, { weight: 900 });
+  const g = eo((t - B.graded) / 0.25);
+  plate(x + 6, 136, lerp(300, 470, g), 40, 'rgba(29,66,138,0.95)', 12);
+  if (g < 1) text('EXPECTED FIELD GOAL %', x + 24, 166, 26, C.white, { weight: 600, italic: false, track: 1, alpha: 1 - g, fam: 'IN' });
+  if (g > 0) {
+    ctx.save(); ctx.beginPath(); ctx.rect(x, 136, 520, 40); ctx.clip();
+    text('EVERY SHOT GETS GRADED', x + 24, 166 + lerp(30, 0, g), 26, C.white, { weight: 700, italic: false, track: 1.5, fam: 'IN' });
+    ctx.restore();
+  }
+}
+
+function drawScan(t) {
+  const a = (t - B.graded) / 0.5;
+  if (a < 0 || a > 1) return;
+  const X = lerp(48, 4, eio(a));
+  const p0 = pj(X, -25), p1 = pj(X, 25);
+  glowLine([p0, p1], '#BFD6FF', 3, (1 - a) * 0.9 + 0.1, 1);
+  const band = [pj(X, -25), pj(X, 25), pj(X + 4, 25), pj(X + 4, -25)];
+  fillPts(band, 'rgba(160,200,255,0.12)', 1 - a);
+}
+
+function drawFoot(t) {
+  const q = eo((t - 0.6) / 0.4);
+  text('SOURCE: NBA TRACKING · SHOT_DETAIL · 2026 FINALS G4 · EVENT 74', 1850, 842, 17, C.silver, { fam: 'IN', weight: 500, italic: false, track: 1.2, alpha: 0.6 * q, align: 'right' });
+}
+
+function drawOut(t) {
+  const a = (t - B.out) / (window.DURATION - B.out);
+  if (a <= 0) return;
+  const x = lerp(-W * 0.3, W * 1.1, eo(a));
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.moveTo(x - 240, 0); ctx.lineTo(x + 60, 0); ctx.lineTo(x - 140, H); ctx.lineTo(x - 440, H); ctx.fill();
+  ctx.restore();
+  const up = cl((t - (window.DURATION - 0.13)) / 0.1);
+  ctx.save(); ctx.globalAlpha = 0.85 * up * up; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+
+window.renderFrame = async (t) => {
+  ctx.clearRect(0, 0, W, H);
+  drawBg(t);
+  setCam(t);
+  const [sx, sy] = [B.shot, B.gauge, B.land].map((a, i) => shakeAt(t, a, [6, 6, 12][i])).reduce((p, q) => [p[0] + q[0], p[1] + q[1]]);
+  ctx.save(); ctx.translate(sx, sy);
+  const dim = 1 - 0.45 * eo((t - B.converge) / 0.5);
+  drawCourt(t, dim);
+  drawScan(t);
+  drawAngle(t, dim);
+  drawDistance(t, dim);
+  drawDefender(t, dim);
+  shotLight(t, dim);
+  drawHoop(t, dim);
+  drawPlayers(t, dim);
+  shooterTag(t, dim);
+  drawVignette();
+  CARDS.forEach((c, i) => drawCard(c, i, t));
+  drawGauge(t);
+  drawHeader(t);
+  drawFoot(t);
+  ctx.restore();
+  flash(t, B.shot, 0.15, 0.25);
+  flash(t, B.land - 0.001, 0.034, 0.85);
+  flash(t, B.land + 0.033, 0.25, 0.28);
+  drawOut(t);
+};
+
+window.FPS = 30;
+window.ready = (async () => {
+  const cfg = await (await fetch('c2_xfg.json')).json();
+  B = cfg.beats;
+  S = cfg.shot;
+  const q = new URLSearchParams(location.search);
+  window.DURATION = parseFloat(q.get('dur') || cfg.dur);
+  for (const [file, w, st] of [['Medium', 500, 'normal'], ['SemiBold', 600, 'normal'], ['Bold', 700, 'normal'], ['ExtraBold', 800, 'normal'],
+    ['Black', 900, 'normal'], ['BoldItalic', 700, 'italic'], ['ExtraBoldItalic', 800, 'italic'], ['ExtraBoldItalic', 900, 'italic']]) {
+    const f = new FontFace('BC', `url(../assets/fonts/BarlowCondensed-${file}.ttf)`, { weight: String(w), style: st });
+    document.fonts.add(await f.load());
+  }
+  for (const [file, w] of [['Medium', 500], ['SemiBold', 600], ['Bold', 700]]) {
+    const f = new FontFace('IN', `url(../assets/fonts/Inter-${file}.ttf)`, { weight: String(w), style: 'normal' });
+    document.fonts.add(await f.load());
+  }
+})();
+</script>
+</body>
+</html>

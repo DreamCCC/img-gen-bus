@@ -1,0 +1,34 @@
+{
+ "_note": "Brunson 25ft pull-up 3PT (Bridges ast), Q3 8:23, NYK 59-81; make f355; xFG 0.289",
+ "src": "raw/2606111033176002.mp4",
+ "out": "out/s05/s05a_e432.mp4",
+ "audio_db": -14,
+ "segs": [
+  {
+   "kind": "play",
+   "from": 343,
+   "to": 361,
+   "speed": 1
+  }
+ ],
+ "flash": [
+  [
+   0.0,
+   0.5,
+   3
+  ]
+ ],
+ "callouts": [
+  {
+   "t": [
+    0.0,
+    1.0
+   ],
+   "kind": "tag",
+   "x": 250,
+   "y": 845,
+   "text": "#11 BRUNSON",
+   "color": "nyk"
+  }
+ ]
+}

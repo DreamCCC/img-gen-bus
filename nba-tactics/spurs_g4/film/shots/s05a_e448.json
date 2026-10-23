@@ -1,0 +1,34 @@
+{
+ "_note": "Anunoby 24ft 3PT (Towns ast), Q3 6:50, NYK 62-81; make f171; xFG 0.425",
+ "src": "raw/2606111038291302.mp4",
+ "out": "out/s05/s05a_e448.mp4",
+ "audio_db": -14,
+ "segs": [
+  {
+   "kind": "play",
+   "from": 159,
+   "to": 177,
+   "speed": 1
+  }
+ ],
+ "flash": [
+  [
+   0.0,
+   0.5,
+   3
+  ]
+ ],
+ "callouts": [
+  {
+   "t": [
+    0.0,
+    1.0
+   ],
+   "kind": "tag",
+   "x": 250,
+   "y": 845,
+   "text": "#8 ANUNOBY",
+   "color": "nyk"
+  }
+ ]
+}

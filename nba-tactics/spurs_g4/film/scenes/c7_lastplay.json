@@ -1,0 +1,216 @@
+{
+ "_note": "C7 WHO'S OPEN (e725). Times are seconds from scene start; VO s15 starts at vo_offset (words: Fox 0.00, and 0.24, Wemby 0.42, both 0.78, jump 1.06, Brunson 1.36, Nobody 1.94, touches 2.50, Anunoby 2.90). data/_sources are written by film/work/c7_data.py.",
+ "dur": 4.6,
+ "vo_offset": 0.3,
+ "header_clock": "0:04.4",
+ "camA": {
+  "eye": [6, -58, 34],
+  "target": [14.5, -6, 0],
+  "fov": 17,
+  "center": [930, 560]
+ },
+ "camB": {
+  "eye": [12, -80, 50],
+  "target": [27, 4, 0],
+  "fov": 28,
+  "center": [1090, 462]
+ },
+ "beats": {
+  "court": 0.0,
+  "header": 0.12,
+  "dots": 0.22,
+  "fox": 0.3,
+  "fox_land": 0.55,
+  "wemby": 0.72,
+  "wemby_land": 0.97,
+  "ball": 1.4,
+  "pull": 1.95,
+  "pull_end": 2.7,
+  "nobody": 2.24,
+  "circle": 2.5,
+  "circle_land": 2.85,
+  "unboxed": 3.2,
+  "crash": 3.32,
+  "crash_end": 3.8
+ },
+ "sfx": [
+  [0.04, "whoosh"],
+  [0.12, "thud"],
+  [0.3, "tick"],
+  [0.55, "thud"],
+  [0.72, "tick"],
+  [0.97, "thud"],
+  [1.4, "hit"],
+  [1.95, "whoosh"],
+  [2.24, "tick"],
+  [2.85, "thud"],
+  [3.2, "hit"],
+  [3.32, "whoosh"]
+ ],
+ "data": {
+  "event_id": 725,
+  "period": 4,
+  "clock_tracking": "4.4",
+  "clock_pbp": "PT00M04.40S",
+  "shot_clock": 0.0,
+  "shot_distance": 31.38,
+  "score": {
+   "sas": 106,
+   "nyk": 105
+  },
+  "pbp_desc": "MISS Brunson 31' 3PT Pullup Jump Shot",
+  "hoop": [41.75, 0.0],
+  "players": [
+   {
+    "id": 1628384,
+    "name": "ANUNOBY",
+    "full": "OG Anunoby",
+    "team": "NYK",
+    "x": 17.96,
+    "y": 19.18,
+    "d_rim": 30.56
+   },
+   {
+    "id": 1628969,
+    "name": "BRIDGES",
+    "full": "Mikal Bridges",
+    "team": "NYK",
+    "x": 46.82,
+    "y": -17.06,
+    "d_rim": 17.8
+   },
+   {
+    "id": 1628973,
+    "name": "BRUNSON",
+    "full": "Jalen Brunson",
+    "team": "NYK",
+    "x": 11.43,
+    "y": -8.06,
+    "d_rim": 31.37
+   },
+   {
+    "id": 1629013,
+    "name": "SHAMET",
+    "full": "Landry Shamet",
+    "team": "NYK",
+    "x": 37.55,
+    "y": -23.88,
+    "d_rim": 24.24
+   },
+   {
+    "id": 1626157,
+    "name": "TOWNS",
+    "full": "Karl-Anthony Towns",
+    "team": "NYK",
+    "x": 27.5,
+    "y": 14.55,
+    "d_rim": 20.36
+   },
+   {
+    "id": 1642264,
+    "name": "CASTLE",
+    "full": "Stephon Castle",
+    "team": "SAS",
+    "x": 28.07,
+    "y": 11.65,
+    "d_rim": 17.97
+   },
+   {
+    "id": 1628368,
+    "name": "FOX",
+    "full": "De'Aaron Fox",
+    "team": "SAS",
+    "x": 13.92,
+    "y": -4.39,
+    "d_rim": 28.17
+   },
+   {
+    "id": 1641705,
+    "name": "WEMBANYAMA",
+    "full": "Victor Wembanyama",
+    "team": "SAS",
+    "x": 17.11,
+    "y": -8.74,
+    "d_rim": 26.14
+   }
+  ],
+  "missing": [
+   {
+    "id": 1630170,
+    "name": "VASSELL",
+    "team": "SAS"
+   },
+   {
+    "id": 1642844,
+    "name": "HARPER",
+    "team": "SAS"
+   }
+  ],
+  "fox_brunson_ft": 4.4,
+  "wemby_brunson_ft": 5.7,
+  "brunson_rim_ft": 31.4,
+  "anunoby_rim_ft": 30.6,
+  "nearest_spur": {
+   "name": "CASTLE",
+   "ft": 12.6
+  },
+  "spurs_by_dist": [
+   [
+    "CASTLE",
+    12.61
+   ],
+   [
+    "FOX",
+    23.91
+   ],
+   [
+    "WEMBANYAMA",
+    27.93
+   ]
+  ],
+  "tip": {
+   "event_id": 727,
+   "x": 38.74,
+   "y": -1.44,
+   "d_rim": 3.3,
+   "clock": "2.2",
+   "score": {
+    "sas": 106,
+    "nyk": 107
+   },
+   "desc": "Anunoby Tip Layup Shot (33 PTS)",
+   "tracked": [
+    "ANUNOBY",
+    "BRIDGES",
+    "BRUNSON",
+    "SHAMET",
+    "TOWNS",
+    "CASTLE",
+    "HARPER",
+    "VASSELL",
+    "WEMBANYAMA"
+   ],
+   "missing": [
+    "FOX"
+   ]
+  },
+  "closest_def_joint": "WEMBANYAMA",
+  "closest_def_com": "FOX"
+ },
+ "_sources": {
+  "positions": "data/shot_detail.json row event_id=725 (game 0042500404), ext.playersOnCourt[].centroid / 12 -> ft",
+  "hoop": "rim center (41.75, 0) ft; check |Brunson - hoop| = 31.37 vs ext.features.shotDistance 31.38",
+  "fox_brunson_ft": "hypot(Fox(1628368) - Brunson(1628973)) = 4.443 ft; ext.defensiveInfo.comDefenderId = Fox",
+  "wemby_brunson_ft": "hypot(Wembanyama(1641705) - Brunson) = 5.725 ft; ext.defensiveInfo.jointDefenderId = Wembanyama (closest joint 2.57 ft from ball)",
+  "nearest_spur": "min over TRACKED Spurs of hypot(Spur - Anunoby(1628384)): [['Castle', 12.607], ['Fox', 23.908], ['Wembanyama', 27.932]]",
+  "anunoby_rim_ft": "hypot(Anunoby - hoop) = 30.56 ft",
+  "tip_spot": "shot_detail event_id=727 (Anunoby tip, made) shooter centroid / 12 = (38.74, -1.44) ft; used only as the crash-arrow end point",
+  "clock": "tracking ext.gameClockTime 4.4; pbp action 725 clock PT00M04.40S",
+  "score": "pbp 725: SAS 106 NYK 105; pbp 727: SAS 106 NYK 107",
+  "lineup": "pbs.json starters + every pbp substitution row before action 725 (by person_id)",
+  "missing": [
+   "Devin Vassell",
+   "Dylan Harper"
+  ]
+ }
+}

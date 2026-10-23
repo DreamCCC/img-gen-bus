@@ -1,0 +1,34 @@
+{
+ "_note": "Hart 25ft 3PT (Brunson ast), Q3 5:31, NYK 65-81; make f115; xFG 0.386",
+ "src": "raw/2606111043178802.mp4",
+ "out": "out/s05/s05a_e470.mp4",
+ "audio_db": -14,
+ "segs": [
+  {
+   "kind": "play",
+   "from": 103,
+   "to": 121,
+   "speed": 1
+  }
+ ],
+ "flash": [
+  [
+   0.0,
+   0.5,
+   3
+  ]
+ ],
+ "callouts": [
+  {
+   "t": [
+    0.0,
+    1.0
+   ],
+   "kind": "tag",
+   "x": 250,
+   "y": 845,
+   "text": "#3 HART",
+   "color": "nyk"
+  }
+ ]
+}

@@ -1,0 +1,62 @@
+{
+ "_note": "Vassell 26ft 3PT (Castle ast), Q1 11:09, SAS 5-2. Release f141, ball through rim f185. xFG = shot_detail.expected_fg 0.3469.",
+ "src": "raw/2606110853187102.mp4",
+ "out": "out/s04/s04_e13.mp4",
+ "audio_db": -14,
+ "segs": [
+  {
+   "kind": "play",
+   "from": 137,
+   "to": 192,
+   "speed": 1
+  }
+ ],
+ "flash": [
+  [
+   1.6,
+   0.5,
+   5
+  ]
+ ],
+ "callouts": [
+  {
+   "t": [
+    0.103,
+    0.753
+   ],
+   "kind": "tag",
+   "x": 640,
+   "y": 760,
+   "text": "#24 VASSELL",
+   "color": "silver",
+   "to": [
+    860,
+    740
+   ]
+  },
+  {
+   "t": [
+    0.133,
+    2.233
+   ],
+   "kind": "stat",
+   "x": 70,
+   "y": 845,
+   "label": "xFG",
+   "value": "35%",
+   "color": "white"
+  },
+  {
+   "t": [
+    1.53,
+    2.233
+   ],
+   "kind": "label",
+   "x": 1120,
+   "y": 258,
+   "text": "+3",
+   "color": "green",
+   "size": 110
+  }
+ ]
+}

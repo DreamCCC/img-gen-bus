@@ -1,0 +1,19 @@
+{
+ "_note": "Shot 16: e725 Brunson 31-ft miss -> e727 Anunoby tip-in (Q4 0:02.1, NYK 107-106). Release f118 (clock 4.4), rim f156-160, tip f186 (2.1), net ~f200. VO s16 is split in the master: 'Tip.' on the tip (t=3.20), 'In.' on the net (t=4.13).",
+ "src": "raw/2606111142181002.mp4",
+ "out": "out/s16/s16.mp4",
+ "audio_db": -12,
+ "segs": [
+  {"kind": "play", "from": 100, "to": 176, "speed": 1},
+  {"kind": "play", "from": 176, "to": 204, "speed": 0.5},
+  {"kind": "freeze", "at": 204, "dur": 1.1, "spot": [[1255, 470, 150, 230]]}
+ ],
+ "zoom": [[0, 1, 960, 540], [2.3, 1, 960, 540], [3.3, 1.45, 1330, 360], [4.4, 1.5, 1340, 360], [5.5, 1.56, 1340, 360]],
+ "flash": [[4.13, 0.85, 9]],
+ "shake": [[4.13, 0.45, 16]],
+ "callouts": [
+  {"t": [0.25, 2.4], "kind": "badge", "text": "FINAL POSSESSION · 0:05.7"},
+  {"t": [2.53, 4.1], "kind": "badge", "text": "SLOW-MO ×0.5"},
+  {"t": [4.42, 5.5], "kind": "big", "text": "NYK 107–106", "sub": "ANUNOBY TIP-IN · 0:02.1", "color": "orange", "y": 420}
+ ]
+}

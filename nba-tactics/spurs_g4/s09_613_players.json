@@ -1,0 +1,158 @@
+{
+ "_note": "Shot 9 clip A = PBP 613 (Q4 8:21, Wembanyama 21' pullup MISS, NGSS defender Towns 20.751 in = 1.73 ft). Video work/q4miss/e613.mp4 = Q4 reel 2606111151336101.mp4 from 74.0 s (clip f0 = reel 74.0 s). Scorebug f120 = 8:23 / shot clock 4.1. Release ~f123, ball off rim f146-150. Track 9 = Wembanyama f99-150; track 11 = Towns f96-123 (after that it merges both players, so Towns' feet are read by hand). WB = Wembanyama #1, KT = Towns #32; WBA / WBR = same feet as WB, used only for the yellow tightening rings / red miss ring.",
+ "players": [
+  {
+   "key": "WB",
+   "name": "Wembanyama",
+   "num": "1",
+   "team": "SAS",
+   "ids": [
+    [
+     9,
+     99,
+     150
+    ]
+   ],
+   "manual": [
+    [
+     106,
+     505,
+     815
+    ],
+    [
+     112,
+     515,
+     815
+    ],
+    [
+     156,
+     380,
+     866
+    ]
+   ],
+   "air": [
+    [
+     117,
+     132
+    ]
+   ]
+  },
+  {
+   "key": "WBR",
+   "name": "Wembanyama",
+   "num": "1",
+   "team": "SAS",
+   "ids": [
+    [
+     9,
+     99,
+     150
+    ]
+   ],
+   "manual": [
+    [
+     106,
+     505,
+     815
+    ],
+    [
+     112,
+     515,
+     815
+    ],
+    [
+     156,
+     380,
+     866
+    ]
+   ],
+   "air": [
+    [
+     117,
+     132
+    ]
+   ]
+  },
+  {
+   "key": "WBA",
+   "name": "Wembanyama",
+   "num": "1",
+   "team": "SAS",
+   "ids": [
+    [
+     9,
+     99,
+     150
+    ]
+   ],
+   "manual": [
+    [
+     106,
+     505,
+     815
+    ],
+    [
+     112,
+     515,
+     815
+    ],
+    [
+     156,
+     380,
+     866
+    ]
+   ],
+   "air": [
+    [
+     117,
+     132
+    ]
+   ]
+  },
+  {
+   "key": "KT",
+   "name": "Towns",
+   "num": "32",
+   "team": "NYK",
+   "ids": [
+    [
+     11,
+     96,
+     123
+    ]
+   ],
+   "manual": [
+    [
+     124,
+     505,
+     740
+    ],
+    [
+     130,
+     490,
+     795
+    ],
+    [
+     138,
+     490,
+     815
+    ],
+    [
+     146,
+     470,
+     812
+    ],
+    [
+     154,
+     470,
+     840
+    ],
+    [
+     156,
+     455,
+     846
+    ]
+   ]
+  }
+ ]
+}

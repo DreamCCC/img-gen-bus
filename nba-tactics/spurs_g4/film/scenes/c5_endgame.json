@@ -1,0 +1,14 @@
+{
+ "_note": "C5 end-game math. Times are seconds from scene start; VO a2 starts at 0.5 (words: longer 0.72, game 1.32, Knicks 2.0, penalty 2.58, Hold 3.06, foul 4.62, end 5.1). sfx is read by film/tools/sample_a.py.",
+ "dur": 6.6,
+ "bg": "../out/sampleA/bgA.jpg",
+ "beats": {
+  "game_tile": 0.3, "shot_tile": 0.5, "game_bar": 0.62, "shot_bar": 0.9, "horn_cross": 1.22, "outlast": 1.45,
+  "squeeze": 2.25, "fouls": 2.42, "penalty": 3.08, "hold": 3.5, "must_foul": 4.15, "must_foul_hit": 5.12,
+  "fts": 5.3, "up3": 5.6, "attack": 5.86, "miss": 6.02, "fox_goes": 6.18, "out": 6.42
+ },
+ "sfx": [
+  [0.3, "thud"], [0.5, "thud"], [1.22, "hit"], [2.25, "whoosh"], [3.08, "hit"], [3.5, "tick"],
+  [4.15, "tick"], [5.12, "thud"], [5.3, "tick"], [5.6, "hit"], [5.86, "whoosh"], [6.18, "hit"], [6.42, "whoosh"]
+ ]
+}

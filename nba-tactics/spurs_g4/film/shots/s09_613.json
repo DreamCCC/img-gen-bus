@@ -1,0 +1,115 @@
+{
+ "_note": "PBP 613 Q4 8:21 Wembanyama 21ft pullup MISS. Src = Q4 reel 74.0-82.0 s (clip f0 = reel 74.0 s); scorebug f120 = 8:23, shot clock 4.1 (= NGSS shotClockTime). Release f123, ball off rim f146-150. NGSS defensiveInfo.jointBallDistance 20.751 in = 1.7 ft, defender Towns #32 (lPinky). Line = Towns raised hand (461,429) -> ball (450,372) on f123.",
+ "src": "work/q4miss/s09_e613.mp4",
+ "out": "out/s09/s09_613.mp4",
+ "audio_db": -14,
+ "segs": [
+  {
+   "kind": "play",
+   "from": 110,
+   "to": 123,
+   "speed": 1
+  },
+  {
+   "kind": "freeze",
+   "at": 123,
+   "dur": 0.55,
+   "spot": [
+    [
+     445,
+     600,
+     78,
+     250
+    ],
+    [
+     495,
+     600,
+     66,
+     190
+    ]
+   ]
+  },
+  {
+   "kind": "play",
+   "from": 123,
+   "to": 156,
+   "speed": 1
+  }
+ ],
+ "flash": [
+  [
+   0.433,
+   0.35,
+   3
+  ]
+ ],
+ "callouts": [
+  {
+   "t": [
+    0,
+    2.3833333333333333
+   ],
+   "kind": "stat",
+   "x": 1600,
+   "y": 250,
+   "label": "Q4 FG",
+   "value": "4/19",
+   "color": "white"
+  },
+  {
+   "t": [
+    0.4633333333333334,
+    0.9833333333333334
+   ],
+   "kind": "tag",
+   "x": 230,
+   "y": 330,
+   "text": "#1 WEMBANYAMA",
+   "color": "silver",
+   "to": [
+    425,
+    505
+   ]
+  },
+  {
+   "t": [
+    0.5133333333333333,
+    0.9833333333333334
+   ],
+   "kind": "line",
+   "a": [
+    461,
+    429
+   ],
+   "b": [
+    450,
+    372
+   ],
+   "color": "gold"
+  },
+  {
+   "t": [
+    0.5333333333333333,
+    0.9833333333333334
+   ],
+   "kind": "label",
+   "x": 640,
+   "y": 395,
+   "text": "HAND 1.7 FT",
+   "color": "gold",
+   "size": 58
+  },
+  {
+   "t": [
+    1.75,
+    2.3833333333333333
+   ],
+   "kind": "label",
+   "x": 705,
+   "y": 170,
+   "text": "MISS",
+   "color": "red",
+   "size": 84
+  }
+ ]
+}

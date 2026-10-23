@@ -1,0 +1,40 @@
+{
+ "_note": "C6 foul to give. Times are seconds from scene start; VO s14 starts at vo_offset 0.4 (words +0.4: 5 0.40, left 1.06, Spurs 1.78, use 2.10, foul 2.48, give 2.86, Brown 3.26, answers 3.72, five 4.36, shooters 4.62; VO ends ~5.26). sfx is read by the mixer.",
+ "dur": 5.8,
+ "vo_offset": 0.4,
+ "bg": "",
+ "beats": {
+  "header": 0.08, "clock": 0.4, "squeeze": 1.42, "fouls": 1.42, "pip1": 1.62, "rule": 1.98, "pip2": 2.48, "nofts": 2.84,
+  "lineup": 3.26, "chips": [3.42, 3.6, 3.78, 3.96, 4.14], "five": 4.62, "out": 5.6
+ },
+ "sfx": [
+  [0.4, "thud"], [1.42, "whoosh"], [1.62, "tick"], [1.98, "whoosh"], [2.48, "thud"], [2.84, "hit"], [3.26, "whoosh"],
+  [3.42, "tick"], [3.6, "tick"], [3.78, "tick"], [3.96, "tick"], [4.14, "tick"], [4.62, "hit"], [5.6, "whoosh"]
+ ],
+ "facts": {
+  "header": "SAS 106 · NYK 105 · 4TH 0:05.7",
+  "sas_fouls": [
+   {"n": 1, "who": "CASTLE", "clock": "6:09"},
+   {"n": 2, "who": "FOX", "clock": "0:05.7"}
+  ],
+  "lineup": [
+   {"first": "JALEN", "last": "BRUNSON", "num": "11", "fg3": "3-6"},
+   {"first": "LANDRY", "last": "SHAMET", "num": "44", "fg3": "0-2", "sub": "IN FOR HART"},
+   {"first": "MIKAL", "last": "BRIDGES", "num": "25", "fg3": "1-3", "sub": "IN FOR ALVARADO"},
+   {"first": "OG", "last": "ANUNOBY", "num": "8", "fg3": "7-9"},
+   {"first": "KARL-ANTHONY", "last": "TOWNS", "num": "32", "fg3": "1-1"}
+  ],
+  "lineup_fg3": "12-21"
+ },
+ "_sources": {
+  "script": "film/work/c6_data.py (reads spurs_g4/data/pbp.json + pbs.json)",
+  "score_clock": "pbp #718 (Q4 0:05.7) 'Fox P.FOUL (P3.T2) (C.Kirkland)', score_away SAS 106 / score_home NYK 105",
+  "sas_foul_1": "pbp #643 (Q4 6:09) 'Castle S.FOUL (P5.T1) (C.Kirkland)' = SAS Q4 team foul 1; no other SAS Q4 foul until #718",
+  "sas_foul_2": "pbp #718 (Q4 0:05.7) 'Fox P.FOUL (P3.T2)' = team foul 2, marker T2 (not PN), no free-throw rows follow",
+  "nyk_penalty_contrast": "NYK Q4 fouls carry PN from the 5th (#624 7:14 'Alvarado S.FOUL (P4.PN)'), confirming the feed's PN marker",
+  "penalty_rule": "NBA Rule 12B Sec. V: 4 team fouls per period without penalty (5th = 2 FTs); if a team has fewer than 4 team fouls at the 2:00 mark it is permitted ONE team foul in the last 2:00 without penalty. SAS had 1 at 2:00 -> Fox's foul was that one free foul; the next SAS foul would have been 2 FTs.",
+  "timeout": "pbp #720 (Q4 0:05.7) 'KNICKS Timeout: Regular (Full 6 Short 0)'",
+  "lineup": "NYK five tracked from the 5 pbs starters through every NYK substitution row of the game (asserts each SUB-out player was on the floor); state after #724 = Brunson, Anunoby, Bridges, Shamet, Towns. Last changes: #721/#723 'SUB: Shamet FOR Hart', #722/#724 'SUB: Bridges FOR Alvarado'.",
+  "fg3": "3PT makes/attempts per player from pbp 3pt rows before #725 (Brunson's 31' miss on the final play, which is why his box line reads 3-7). Anunoby 7-9, Towns 1-1, Shamet 0-2, Bridges 1-3 equal their final box lines (pbs fg3m/fg3a). Five combined 12-21."
+ }
+}

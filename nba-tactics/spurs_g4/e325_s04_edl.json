@@ -1,0 +1,38 @@
+{
+ "_note": "Shot 4 montage clip 4/4. e325 Harper #2 26' 3PT (Fox ast), Q2 3:47 PBP (scorebug 3:50), SAS 66-42 -> 69-42. NGSS expFieldGoalPct 0.3733 -> 'xFG 37%', made. Release f171, ball through rim f201. Speed 1 only; arena audio is replaced afterwards by the source window at -14 dB (film/out/s04/_tools/build_s04.py), render_play's own mix is not used.",
+ "work": "work/e325",
+ "fps": 30,
+ "size": [1920, 1080],
+ "orig": "work/e325/fr/orig",
+ "audio_src": "work/e325/2606110959171102.wav",
+ "vo": {"lines": "film/audio/vo_en/lines.json", "dir": "film/audio/vo_en"},
+ "out": "film/out/s04/clips/e325_s04.mp4",
+ "bed": false,
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "lang": "en",
+ "fonts": {
+  "zh": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "zhr": ["../assets/fonts/BarlowCondensed-Medium.ttf", null],
+  "num": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "numw": ["../assets/fonts/BarlowCondensed-Black.ttf", null]
+ },
+ "colors": {"gold": [232, 236, 240], "green": [40, 205, 110], "orange": [245, 132, 38], "navy": [35, 31, 32], "red": [200, 16, 46], "blue": [29, 66, 138]},
+ "teams": {"SAS": [196, 206, 212], "NYK": [0, 107, 182]},
+ "style": {"DH": "gold", "DHg": "green"},
+ "names": {"DH": "HARPER", "DHg": "HARPER"},
+ "anchors": {"rim": [201, 1247, 239]},
+ "segments": [
+  {"id": "live", "kind": "play", "from": 167, "to": 208, "speed": 1, "audio_db": -14}
+ ],
+ "layers": [
+  {"type": "ring", "keys": ["DH"], "pulse": true, "on": "live", "off": "live+0.45"},
+  {"type": "ring", "keys": ["DH"], "on": "live", "off": "live+1.283"},
+  {"type": "tag", "keys": ["DH"], "on": "live", "off": "live.end+1"},
+  {"type": "note", "key": "DH", "text": "xFG 37%", "color": "gold", "on": "live+0.133", "off": "live+1.233"},
+  {"type": "ring", "keys": ["DHg"], "on": "live+1.033", "off": "live.end+1"},
+  {"type": "ring", "keys": ["DHg"], "pulse": true, "on": "live+1.133", "off": "live.end+1"},
+  {"type": "note", "key": "DHg", "text": "xFG 37%", "color": "green", "on": "live+1.133", "off": "live.end+1"}
+ ]
+}

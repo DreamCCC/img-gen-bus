@@ -1,0 +1,146 @@
+{
+ "_note": "C2 WHAT IS xFG. Times are seconds from scene start. VO s03 starts at vo_offset (words, line-relative: Every 0.00, shot 0.22, graded 0.68, Distance 1.36, defender 1.96, angle 2.84, That's 3.78, expected 4.44, percentage 5.26). 'shot' is written by film/work/c2_compute.py.",
+ "dur": 6.9,
+ "vo_line": "s03",
+ "vo_offset": 0.4,
+ "beats": {
+  "header": 0.08,
+  "shot": 0.62,
+  "graded": 1.08,
+  "distance": 1.76,
+  "defender": 2.36,
+  "angle": 3.24,
+  "converge": 4.18,
+  "gauge": 4.55,
+  "expected": 4.84,
+  "land": 5.66,
+  "result": 6.05,
+  "out": 6.62
+ },
+ "sfx": [
+  [
+   0.62,
+   "hit"
+  ],
+  [
+   1.08,
+   "tick"
+  ],
+  [
+   1.72,
+   "whoosh"
+  ],
+  [
+   2.1,
+   "tick"
+  ],
+  [
+   2.32,
+   "whoosh"
+  ],
+  [
+   2.7,
+   "tick"
+  ],
+  [
+   3.2,
+   "whoosh"
+  ],
+  [
+   3.58,
+   "tick"
+  ],
+  [
+   4.18,
+   "whoosh"
+  ],
+  [
+   4.55,
+   "hit"
+  ],
+  [
+   5.66,
+   "thud"
+  ],
+  [
+   6.05,
+   "tick"
+  ],
+  [
+   6.62,
+   "whoosh"
+  ]
+ ],
+ "shot": {
+  "event_id": 74,
+  "clock": "Q1 6:24",
+  "shooter_id": 1630170,
+  "made": true,
+  "xfg_pct": 42,
+  "distance_ft": 24.1,
+  "defender_ft": 10.2,
+  "defender": "Hart",
+  "defender_id": 1628404,
+  "angle_deg": 64,
+  "players": [
+   {
+    "id": 1630170,
+    "last": "Vassell",
+    "team": "SAS",
+    "x": 31.972,
+    "y": -22.051
+   },
+   {
+    "id": 1641705,
+    "last": "Wembanyama",
+    "team": "SAS",
+    "x": 41.352,
+    "y": -4.512
+   },
+   {
+    "id": 1642264,
+    "last": "Castle",
+    "team": "SAS",
+    "x": 40.865,
+    "y": 21.83
+   },
+   {
+    "id": 1630577,
+    "last": "Champagnie",
+    "team": "SAS",
+    "x": 24.78,
+    "y": 17.944
+   },
+   {
+    "id": 1642844,
+    "last": "Harper",
+    "team": "SAS",
+    "x": 16.506,
+    "y": -0.288
+   },
+   {
+    "id": 1628404,
+    "last": "Hart",
+    "team": "NYK",
+    "x": 37.018,
+    "y": -10.906
+   },
+   {
+    "id": 1628384,
+    "last": "Anunoby",
+    "team": "NYK",
+    "x": 37.348,
+    "y": 10.529
+   }
+  ]
+ },
+ "_sources": {
+  "shot": "data/shot_detail.json row event_id=74 (ext JSON). Shooter ext.shooterId=1630170 (Devin Vassell, pbs.json); made = row success=1 / pbp action 74 \"Vassell 25' 3PT Running Jump Shot\", ext.ngssEventInfo.type=3pt, qualifier fastbreak.",
+  "xfg_pct": "ext.expFieldGoalPct = 0.41975 -> 42% (row expected_fg = 0.42).",
+  "distance_ft": "ext.features.shotDistance = 24.13 ft (equals shooter centroid in playersOnCourt to rim at (41.75 ft, 0); release-point distance ext.shotReleaseInfo.shotDistance = 24.44 ft).",
+  "defender_ft": "ext.features.jointBallDistance = 10.19 ft: closest joint of nearest defender to the ball; defender ext.defensiveInfo.jointDefenderId = 1628404 (Josh Hart), closestJoint = lPinky. (defensiveInfo.jointBallDistance = 121.5 in = 10.13 ft, measured slightly differently.)",
+  "angle_deg": "ext.features.shotAngleAbs = 64.27 deg: shooter position angle around the rim measured from the rim-to-midcourt center line (0 = straight on, 90 = along the baseline); matches atan2(|y|, 41.75 - x) of the shooter centroid within 0.4 deg median for 20+ ft shots (66.1 deg geometric here).",
+  "players": "ext.playersOnCourt[].centroid (inches, origin center court) / 12, flipped so the attacked hoop is +x (attackingPositiveX = true, so no flip). Only 7 of 10 players are present in the tracking snapshot (5 SAS, 2 NYK).",
+  "names": "data/pbs.json extend_info.familyName / team_id."
+ }
+}

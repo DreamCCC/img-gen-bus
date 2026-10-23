@@ -1,0 +1,375 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// C8 time with the lead: one 48:00 bar (SAS / tied / NYK), zoom into the last 1:30, 53.8 SECONDS, final, fade out.
+// Numbers and beat times live in c8_lead.json (data block written by film/work/c8_data.py).
+const W = 1920, H = 1080;
+const main = document.getElementById('c'), ctx0 = main.getContext('2d');
+let ctx = ctx0;
+const C = {
+  navy: '#0A1428', red: '#C8102E', blue: '#1D428A', blueHi: '#3D7BFF', silver: '#C4CED4', white: '#F4F6F8',
+  green: '#2BD67B', neg: '#FF3B3B', nyk: '#F58426', nykBlue: '#006BB6', tie: '#3A4558',
+};
+const cl = (x) => Math.min(1, Math.max(0, x));
+const eo = (x) => 1 - Math.pow(1 - cl(x), 3);
+const eio = (x) => { x = cl(x); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const back = (x, k = 1.8) => { x = cl(x) - 1; return 1 + x * x * ((k + 1) * x + k); };
+const lerp = (a, b, t) => a + (b - a) * t;
+let B = {}, D = {};
+
+function font(size, weight = 800, italic = true, fam = 'BC') { ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px ${fam}`; }
+function text(s, x, y, size, color, { weight = 800, italic = true, align = 'left', alpha = 1, track = 0, fam = 'BC' } = {}) {
+  font(size, weight, italic, fam);
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'alphabetic';
+  if (track) ctx.letterSpacing = track + 'px';
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function inter(s, x, y, size, color, o = {}) { text(s, x, y, size, color, { weight: 600, italic: false, fam: 'IN', ...o }); }
+function measure(s, size, weight = 800, italic = true, fam = 'BC', track = 0) {
+  font(size, weight, italic, fam);
+  ctx.save(); if (track) ctx.letterSpacing = track + 'px';
+  const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+function plate(x, y, w, h, fill, skew = 16, alpha = 1) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(x + skew, y); ctx.lineTo(x + w + skew, y); ctx.lineTo(x + w - skew, y + h); ctx.lineTo(x - skew, y + h);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function flash(t, at, d = 0.12, peak = 0.6) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return;
+  ctx.save(); ctx.globalAlpha = peak * Math.pow(1 - a, 2); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+function shakeAt(t, at, amp = 10, d = 0.25) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return [0, 0];
+  const k = amp * (1 - a);
+  return [k * Math.sin(t * 173), k * Math.cos(t * 131)];
+}
+function rng(seed) {
+  return () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let r = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r; return ((r ^ (r >>> 14)) >>> 0) / 4294967296; };
+}
+const R = rng(538);
+const PARTS = Array.from({ length: 90 }, () => ({ x: R() * W, y: R() * H, v: 6 + R() * 22, a: 0.08 + R() * 0.3, s: R() < 0.25 ? 2 : 1, ph: R() * 6.28, dash: R() < 0.3 }));
+
+// ---------------------------------------------------------------- background
+
+function drawCourt() {
+  const k = 19, cx = W / 2, cy = H / 2 + 20, hw = 47 * k, hh = 25 * k;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(160,190,255,0.045)'; ctx.lineWidth = 2;
+  ctx.strokeRect(cx - hw, cy - hh, hw * 2, hh * 2);
+  ctx.beginPath(); ctx.moveTo(cx, cy - hh); ctx.lineTo(cx, cy + hh); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, 6 * k, 0, 7); ctx.stroke();
+  for (const sd of [-1, 1]) {
+    const bx = cx + sd * (hw - 5.25 * k);
+    ctx.strokeRect(sd < 0 ? cx - hw : cx + hw - 19 * k, cy - 8 * k, 19 * k, 16 * k);
+    ctx.beginPath(); ctx.arc(cx + sd * (hw - 19 * k), cy, 6 * k, 0, 7); ctx.stroke();
+    const ang = Math.asin(22 / 23.75);
+    ctx.beginPath();
+    if (sd < 0) ctx.arc(bx, cy, 23.75 * k, -ang, ang); else ctx.arc(bx, cy, 23.75 * k, Math.PI - ang, Math.PI + ang);
+    ctx.stroke();
+    const xe = bx + sd * -Math.cos(ang) * 23.75 * k;
+    ctx.beginPath(); ctx.moveTo(sd < 0 ? cx - hw : cx + hw, cy - 22 * k); ctx.lineTo(xe, cy - 22 * k);
+    ctx.moveTo(sd < 0 ? cx - hw : cx + hw, cy + 22 * k); ctx.lineTo(xe, cy + 22 * k); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawBg(t) {
+  const g = ctx.createRadialGradient(W * 0.5, H * 0.42, 0, W * 0.5, H * 0.42, W * 0.72);
+  g.addColorStop(0, '#132650'); g.addColorStop(0.45, '#0A1428'); g.addColorStop(1, '#000000');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,255,255,0.028)';
+  for (let x = 0; x < W; x += 40) ctx.fillRect(x, 0, 1, H);
+  for (let y = 0; y < H; y += 40) ctx.fillRect(0, y, W, 1);
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  for (let x = 0; x < W; x += 200) ctx.fillRect(x, 0, 1, H);
+  for (let y = 0; y < H; y += 200) ctx.fillRect(0, y, W, 1);
+  drawCourt();
+  for (const p of PARTS) {
+    const x = (p.x + t * p.v) % (W + 40) - 20, y = p.y + Math.sin(t * 0.6 + p.ph) * 14;
+    ctx.fillStyle = `rgba(150,190,255,${p.a * (0.6 + 0.4 * Math.sin(t * 2 + p.ph))})`;
+    if (p.dash) ctx.fillRect(x, y, 10, 1.5); else ctx.fillRect(x, y, p.s * 2, p.s * 2);
+  }
+  const sx = ((t * 300) % (W + 900)) - 600;
+  const sw = ctx.createLinearGradient(sx, 0, sx + 500, H);
+  sw.addColorStop(0, 'rgba(61,123,255,0)'); sw.addColorStop(0.5, 'rgba(61,123,255,0.05)'); sw.addColorStop(1, 'rgba(61,123,255,0)');
+  ctx.fillStyle = sw; ctx.fillRect(0, 0, W, H);
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.4, W / 2, H / 2, H * 1.0);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.6)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+}
+
+function drawHeader(t) {
+  const q = eo((t - 0.05) / 0.3);
+  if (q <= 0) return;
+  const x = lerp(-560, 70, q);
+  plate(x, 56, 420, 74, C.red);
+  text('TIME LEADING', x + 24, 116, 64, C.white, { weight: 900 });
+  plate(x + 6, 136, 470, 40, 'rgba(29,66,138,0.95)', 12);
+  inter('NBA FINALS  ·  GAME 4  ·  SAS @ NYK', x + 26, 164, 22, C.white, { weight: 700, track: 2 });
+}
+
+// ---------------------------------------------------------------- the 48:00 bar
+
+const BX0 = 120, BX1 = 1800, BY = 584, BH = 84;
+let view = { a: 0, b: 2880, z: 0 };
+const TXp = (sec) => BX0 + (sec - view.a) / (view.b - view.a) * (BX1 - BX0);
+
+function setView(t) {
+  const z = eio((t - B.zoom0) / (B.zoom1 - B.zoom0));
+  const span = 2880 * Math.pow((2880 - D.zoom_t0) / 2880, z);
+  view = { a: 2880 - span, b: 2880, z };
+}
+
+function segColor(st) { return st === 'SAS' ? null : st === 'NYK' ? C.nyk : C.tie; }
+
+function drawBar(t) {
+  const rev = eo((t - B.draw0) / (B.draw1 - B.draw0));
+  if (rev <= 0) return;
+  const tEnd = lerp(0, 2880, rev);
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fillRect(BX0, BY, BX1 - BX0, BH);
+  ctx.beginPath(); ctx.rect(BX0, BY - 40, BX1 - BX0, BH + 80); ctx.clip();
+  const sasG = ctx.createLinearGradient(0, BY, 0, BY + BH);
+  sasG.addColorStop(0, '#E6ECF0'); sasG.addColorStop(1, '#8C99A2');
+  for (const [a, b, st] of D.segments) {
+    if (a >= tEnd) continue;
+    let x0 = TXp(a), x1 = TXp(Math.min(b, tEnd));
+    if (x1 < BX0 - 5 || x0 > BX1 + 5) continue;
+    if (st === 'NYK' && x1 - x0 < 3) { const m = (x0 + x1) / 2; x0 = Math.min(m - 1.5, BX1 - 3); x1 = x0 + 3; }
+    if (st === 'SAS') { ctx.fillStyle = sasG; ctx.fillRect(x0, BY, x1 - x0, BH); }
+    else if (st === 'TIE') { ctx.fillStyle = C.tie; ctx.fillRect(x0, BY, x1 - x0, BH); }
+  }
+  // NYK on top with glow
+  let ringAt = null;
+  D.segments.forEach(([a, b, st], idx) => {
+    if (st !== 'NYK' || a >= tEnd) return;
+    let x0 = TXp(a), x1 = TXp(Math.min(b, tEnd));
+    if (x1 - x0 < 3) { const m = (x0 + x1) / 2; x0 = Math.min(m - 1.5, BX1 - 3); x1 = x0 + 3; }
+    const last = idx === D.segments.length - 1;
+    const e = t - B.enough;
+    const pulse = last && e > 0 ? Math.exp(-e * 1.6) * (0.5 + 0.5 * Math.cos(e * 10)) : 0;
+    ctx.save();
+    ctx.shadowColor = C.nyk; ctx.shadowBlur = 22 + 50 * pulse;
+    ctx.fillStyle = C.nyk;
+    const grow = 26 * pulse;
+    ctx.fillRect(x0, BY - grow, x1 - x0, BH + grow * 2);
+    if (pulse > 0) { ctx.fillStyle = `rgba(255,255,255,${0.7 * pulse})`; ctx.fillRect(x0, BY - grow, x1 - x0, BH + grow * 2); }
+    ctx.restore();
+    if (last && e > 0) ringAt = [(x0 + x1) / 2, e];
+  });
+  ctx.restore();
+  if (ringAt) {
+    for (const d of [0, 0.22]) {
+      const r = cl((ringAt[1] - d) / 0.6);
+      if (r <= 0 || r >= 1) continue;
+      ctx.save(); ctx.globalAlpha = 1 - r; ctx.strokeStyle = C.nyk; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(ringAt[0], BY + BH / 2, 30 + r * 120, 0, 7); ctx.stroke(); ctx.restore();
+    }
+  }
+  ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(BX0, BY - 3, (BX1 - BX0) * (view.z > 0 ? 1 : rev), 3);
+  if (rev < 1) {
+    const hx = BX0 + (BX1 - BX0) * rev;
+    const g = ctx.createLinearGradient(hx - 60, 0, hx, 0);
+    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(255,255,255,0.7)');
+    ctx.fillStyle = g; ctx.fillRect(hx - 60, BY, 60, BH);
+    ctx.fillStyle = '#fff'; ctx.fillRect(hx - 2, BY - 10, 3, BH + 20);
+  }
+  // pings on the NYK slivers before the zoom
+  const p = (t - B.ping);
+  if (p > 0 && p < 0.6) {
+    for (const s of D.nyk_segments) {
+      const x = (TXp(s.t0) + TXp(s.t1)) / 2;
+      ctx.save(); ctx.globalAlpha = 1 - p / 0.6; ctx.strokeStyle = C.nyk; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(x, BY + BH / 2, 14 + p * 110, 0, 7); ctx.stroke(); ctx.restore();
+    }
+  }
+}
+
+function drawTicks(t) {
+  const q = eo((t - B.draw0) / 0.4);
+  if (q <= 0) return;
+  const z = view.z;
+  // quarter ticks + labels (full view)
+  const labels = ['1ST QTR', '2ND QTR', '3RD QTR', '4TH QTR'];
+  for (let k = 0; k <= 4; k++) {
+    const x = TXp(k * 720);
+    if (x < BX0 - 1 || x > BX1 + 1) continue;
+    ctx.fillStyle = `rgba(255,255,255,${0.8 * q})`; ctx.fillRect(x - 1.5, BY + BH, 3, 16);
+  }
+  const qa = q * (1 - cl(z * 3));
+  if (qa > 0) {
+    for (let k = 0; k < 4; k++) text(labels[k], TXp(k * 720 + 360), BY + BH + 50, 28, C.silver, { weight: 700, italic: false, align: 'center', alpha: qa * 0.85, track: 4 });
+    text('0:00', BX0, BY - 16, 24, C.silver, { weight: 700, italic: false, alpha: qa * 0.7 });
+    text('48:00', BX1, BY - 16, 24, C.silver, { weight: 700, italic: false, align: 'right', alpha: qa * 0.7 });
+  }
+  // fine clock ticks once zoomed
+  const za = cl((z - 0.6) / 0.4);
+  if (za > 0) {
+    for (let s = Math.ceil(view.a / 10) * 10; s <= 2880; s += 10) {
+      const x = TXp(s), major = s % 30 === 0;
+      ctx.fillStyle = `rgba(255,255,255,${(major ? 0.85 : 0.35) * za})`;
+      ctx.fillRect(x - (major ? 1.5 : 1), BY + BH, major ? 3 : 2, major ? 16 : 9);
+      if (major) {
+        const left = 2880 - s;
+        const lab = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+        const al = s === 2880 ? 'right' : s === view.a ? 'left' : 'center';
+        text(lab, x, BY + BH + 48, 30, C.silver, { weight: 700, italic: false, align: al, alpha: za * 0.9, track: 2 });
+      }
+    }
+    inter(D.zoom_label, BX0, BY - 18, 20, C.silver, { weight: 700, track: 3, alpha: za * (1 - eo((t - B.segs) / 0.25)) });
+  }
+}
+
+function drawLegend(t) {
+  const q = eo((t - 0.3) / 0.3) * (1 - eo((t - B.zoom0) / 0.25));
+  if (q <= 0) return;
+  const items = [['SAS LEADING', '#D5DCE1'], ['TIED', C.tie], ['NYK LEADING', C.nyk]];
+  let x = BX0;
+  ctx.save(); ctx.globalAlpha = q; ctx.translate(0, lerp(16, 0, q));
+  for (const [lab, col] of items) {
+    ctx.fillStyle = col; ctx.fillRect(x, BY + BH + 92, 28, 18);
+    inter(lab, x + 40, BY + BH + 108, 20, C.silver, { weight: 700, track: 3 });
+    x += 40 + measure(lab, 20, 700, false, 'IN', 3) + 50;
+  }
+  ctx.restore();
+}
+
+function drawSegLabels(t) {
+  const q0 = t - B.segs;
+  if (q0 <= 0) return;
+  D.nyk_segments.forEach((s, i) => {
+    const q = eo((q0 - i * 0.12) / 0.25);
+    if (q <= 0) return;
+    const x0 = TXp(s.t0), x1 = TXp(s.t1), yb = BY - 18;
+    ctx.save(); ctx.globalAlpha = q;
+    ctx.strokeStyle = C.nyk; ctx.lineWidth = 3;
+    const w = (x1 - x0) * q, cx = (x0 + x1) / 2;
+    ctx.beginPath(); ctx.moveTo(cx - w / 2, yb + 10); ctx.lineTo(cx - w / 2, yb); ctx.lineTo(cx + w / 2, yb); ctx.lineTo(cx + w / 2, yb + 10); ctx.stroke();
+    const last = i === D.nyk_segments.length - 1;
+    const tx = last ? x1 : cx, al = last ? 'right' : 'center';
+    ctx.translate(0, lerp(14, 0, q));
+    text(`${s.dur} SEC`, tx, yb - 14, 46, C.nyk, { weight: 800, align: al });
+    inter(s.range, tx, yb - 66, 20, C.silver, { weight: 600, align: al, track: 1 });
+    ctx.restore();
+  });
+}
+
+function drawBig(t) {
+  const s53 = t - B.n53;
+  if (s53 <= -0.3) return;
+  const size = 230, ss = 104;
+  const wInt = measure(D.nyk_total_int, size, 900), wFrac = measure(D.nyk_total_frac, size, 900), wSec = measure('SECONDS', ss, 800);
+  const gap = 26, total = wInt + wFrac + gap + wSec;
+  const x0 = W / 2 - total / 2, y = 404;
+  const out = 1;
+  const kq = eo((s53 + 0.25) / 0.3);
+  if (kq > 0) inter('KNICKS LED THIS GAME FOR', W / 2, y - 196, 24, C.white, { weight: 700, align: 'center', track: 6, alpha: kq * out * 0.9 });
+  // count-up into the landing
+  const cu = cl((s53 + 0.3) / 0.3);
+  const shown = s53 < 0 ? String(Math.round(eo(cu) * Number(D.nyk_total_int))) : D.nyk_total_int;
+  const k = s53 < 0 ? 0.92 : lerp(1.35, 1, back(s53 / 0.25, 2.2));
+  ctx.save();
+  ctx.globalAlpha = cl(cu * 2) * out;
+  ctx.translate(x0 + wInt, y); ctx.scale(k, k);
+  ctx.shadowColor = 'rgba(245,132,38,0.7)'; ctx.shadowBlur = s53 > 0 ? 40 * Math.exp(-s53 * 2) + 12 : 8;
+  text(shown, 0, 0, size, C.nyk, { weight: 900, align: 'right' });
+  ctx.restore();
+  const s8 = t - B.n8;
+  if (s8 > 0) {
+    const k8 = lerp(1.6, 1, back(s8 / 0.22, 2.4));
+    ctx.save(); ctx.globalAlpha = cl(s8 / 0.05) * out;
+    ctx.translate(x0 + wInt, y); ctx.scale(k8, k8);
+    ctx.shadowColor = 'rgba(245,132,38,0.7)'; ctx.shadowBlur = 40 * Math.exp(-s8 * 2) + 12;
+    text(D.nyk_total_frac, 0, 0, size, C.nyk, { weight: 900 });
+    ctx.restore();
+  }
+  const sq = eo((t - B.n8 - 0.18) / 0.3);
+  if (sq > 0) {
+    ctx.save(); ctx.globalAlpha = sq * out; ctx.translate(lerp(-30, 0, sq), 0);
+    text('SECONDS', x0 + wInt + wFrac + gap, y, ss, C.white, { weight: 800 });
+    ctx.restore();
+  }
+  const iq = eo((t - B.secs) / 0.3);
+  if (iq > 0) inter(`OF ${D.game_s_label} GAME SECONDS`, W / 2, y + 58, 28, C.silver, { weight: 600, align: 'center', track: 5, alpha: iq * out });
+}
+
+function drawFinal(t) {
+  const f = t - B.enough;
+  if (f <= 0) return;
+  const q = eo(f / 0.25), bk = back(f / 0.35, 1.6);
+  const label = 'FINAL', l2 = `NYK ${D.final_nyk}  –  SAS ${D.final_sas}`;
+  const w1 = measure(label, 44, 900), w2 = measure(l2, 60, 900);
+  const pw = w1 + w2 + 120, x0 = W / 2 - pw / 2, y0 = 764;
+  ctx.save(); ctx.globalAlpha = q; ctx.translate(0, lerp(40, 0, bk));
+  plate(x0, y0, w1 + 56, 72, C.red, 14);
+  text(label, x0 + 28, y0 + 54, 44, C.white, { weight: 900 });
+  plate(x0 + w1 + 56, y0, w2 + 64, 72, 'rgba(8,16,32,0.94)', 14);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(x0 + w1 + 70, y0, w2 + 64, 3);
+  const nx = x0 + w1 + 88;
+  const wN = measure(`NYK ${D.final_nyk}`, 60, 900), wD = measure('  –  ', 60, 900);
+  text(`NYK ${D.final_nyk}`, nx, y0 + 58, 60, C.nyk, { weight: 900 });
+  text('  –  ', nx + wN, y0 + 58, 60, C.silver, { weight: 700 });
+  text(`SAS ${D.final_sas}`, nx + wN + wD, y0 + 58, 60, C.silver, { weight: 800 });
+  ctx.restore();
+}
+
+window.renderFrame = async (t) => {
+  ctx.clearRect(0, 0, W, H);
+  drawBg(t);
+  setView(t);
+  const hits = [[B.n53, 8], [B.n8, 10], [B.enough, 6]];
+  const [sx, sy] = hits.map(([a, amp]) => shakeAt(t, a, amp)).reduce((p, q) => [p[0] + q[0], p[1] + q[1]]);
+  ctx.save(); ctx.translate(sx, sy);
+  drawHeader(t);
+  drawTicks(t);
+  drawBar(t);
+  drawLegend(t);
+  drawSegLabels(t);
+  drawBig(t);
+  drawFinal(t);
+  ctx.restore();
+  flash(t, B.n53, 0.1, 0.45);
+  flash(t, B.n8, 0.1, 0.5);
+  flash(t, B.enough, 0.1, 0.3);
+  const fo = cl((t - (window.DURATION - 0.4)) / 0.4);
+  if (fo > 0) { ctx.fillStyle = `rgba(0,0,0,${eio(fo)})`; ctx.fillRect(0, 0, W, H); }
+};
+
+window.FPS = 30;
+window.ready = (async () => {
+  const cfg = await (await fetch('c8_lead.json')).json();
+  B = cfg.beats; D = cfg.data;
+  const q = new URLSearchParams(location.search);
+  window.DURATION = parseFloat(q.get('dur') || cfg.dur);
+  for (const [file, w, st] of [['Medium', 500, 'normal'], ['SemiBold', 600, 'normal'], ['Bold', 700, 'normal'], ['ExtraBold', 800, 'normal'],
+    ['Black', 900, 'normal'], ['BoldItalic', 700, 'italic'], ['ExtraBoldItalic', 800, 'italic'], ['ExtraBoldItalic', 900, 'italic']]) {
+    const f = new FontFace('BC', `url(../assets/fonts/BarlowCondensed-${file}.ttf)`, { weight: String(w), style: st });
+    document.fonts.add(await f.load());
+  }
+  for (const [file, w] of [['Medium', 500], ['SemiBold', 600], ['Bold', 700]]) {
+    const f = new FontFace('IN', `url(../assets/fonts/Inter-${file}.ttf)`, { weight: String(w), style: 'normal' });
+    document.fonts.add(await f.load());
+  }
+})();
+</script>
+</body>
+</html>

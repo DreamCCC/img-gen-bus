@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""news_id -> videoPlay 签名 m3u8 -> mp4。本机直连即可，不需要白名单；接口偶发 403 限流，会退避重试。
+"""news_id -> videoPlay 签名 m3u8 -> mp4。国内出口直连即可；接口偶发 403 限流，会退避重试。
+海外出口（如洛杉矶的 Windows 机）一律 403：签名地址改由 SSH 到白名单服务器去取，视频分片仍由本机直连 CDN 下载。
 
 用法: python fetch_clip.py <news_id> [<news_id> ...] -d raw/
 """
@@ -19,18 +20,39 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120 Safari/537.36",
     "Referer": "https://testapi.nba.cn/",
 }
+SSH_HOST = "root@8.152.222.232"
+
+_REMOTE = r'''
+import sys, urllib.request
+req = urllib.request.Request(sys.stdin.readline().strip(), headers=%r)
+with urllib.request.urlopen(req, timeout=30) as r:
+    sys.stdout.write(r.read().decode())
+''' % HEADERS
+
+
+def _get_json_via_ssh(url: str) -> dict:
+    script = _REMOTE.replace("'", "'\"'\"'")
+    proc = subprocess.run(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", SSH_HOST, f"python3 -c '{script}'"],
+                          input=url + "\n", capture_output=True, text=True, encoding="utf-8", timeout=90)
+    if proc.returncode != 0:
+        raise RuntimeError(f"ssh videoPlay failed ({proc.returncode}): {proc.stderr.strip()[:300]}")
+    return json.loads(proc.stdout)
 
 
 def play_url(news_id: str, tries: int = 6) -> str:
-    req = urllib.request.Request(f"{ENDPOINT}?{urllib.parse.urlencode({'newsId': news_id})}", headers=HEADERS)
+    url = f"{ENDPOINT}?{urllib.parse.urlencode({'newsId': news_id})}"
+    req = urllib.request.Request(url, headers=HEADERS)
     for i in range(tries):
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
                 obj = json.loads(r.read().decode())
             break
         except urllib.error.HTTPError as e:
-            if e.code != 403 or i == tries - 1:
+            if e.code != 403:
                 raise
+            if i >= 1:
+                obj = _get_json_via_ssh(url)
+                break
             time.sleep(2 * (i + 1))
     if obj.get("code") != 0 or not (obj.get("data") or {}).get("url"):
         raise RuntimeError(f"videoPlay {news_id}: code={obj.get('code')} msg={obj.get('msg')}")

@@ -1,0 +1,95 @@
+{
+ "_note": "Shot 9 clip C = PBP 593 (Q4 9:38, Wembanyama 1' driving floating jump shot MISS, NGSS defender Jalen Brunson #11, 20.29 in = 1.69 ft). Video work/q4miss/e593.mp4 = Q4 reel 2606111151336101.mp4 from 34.0 s. Scorebug 9:39 / shot clock 7. Wembanyama #1 = track 7 f64-76, track 1 f80-100, track 4 f102-110; floater release ~f90, ball off the rim ~f98-100, then the tip-ins. Brunson cannot be identified in frame (Towns #32 is the visible body in front), so no defender ring/tag in this clip. Broadcast flash on f82 (frame replaced by the f81/f83 average in fr/orig). Camera chained from ref f96 (ref f80 drifted after the flash).",
+ "players": [
+  {
+   "key": "WB",
+   "name": "Wembanyama",
+   "num": "1",
+   "team": "SAS",
+   "ids": [
+    [
+     7,
+     64,
+     76
+    ],
+    [
+     1,
+     80,
+     100
+    ],
+    [
+     4,
+     102,
+     110
+    ]
+   ],
+   "manual": [],
+   "air": [
+    [
+     86,
+     98
+    ]
+   ]
+  },
+  {
+   "key": "WBA",
+   "name": "Wembanyama",
+   "num": "1",
+   "team": "SAS",
+   "ids": [
+    [
+     7,
+     64,
+     76
+    ],
+    [
+     1,
+     80,
+     100
+    ],
+    [
+     4,
+     102,
+     110
+    ]
+   ],
+   "manual": [],
+   "air": [
+    [
+     86,
+     98
+    ]
+   ]
+  },
+  {
+   "key": "WBR",
+   "name": "Wembanyama",
+   "num": "1",
+   "team": "SAS",
+   "ids": [
+    [
+     7,
+     64,
+     76
+    ],
+    [
+     1,
+     80,
+     100
+    ],
+    [
+     4,
+     102,
+     110
+    ]
+   ],
+   "manual": [],
+   "air": [
+    [
+     86,
+     98
+    ]
+   ]
+  }
+ ]
+}

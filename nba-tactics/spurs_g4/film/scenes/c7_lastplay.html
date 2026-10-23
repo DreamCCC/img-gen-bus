@@ -1,0 +1,301 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="court3d.js"></script>
+<script>
+// C7 WHO'S OPEN: e725 tracking snapshot (Brunson's final 3, missed). Fox + Wemby on the ball, nearest tracked Spur 12.6 ft from Anunoby.
+// The crash arrow is diagrammatic: it runs from Anunoby's e725 spot to his e727 tip spot; the path between is not tracked.
+const W = 1920, H = 1080;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const { Court, C, D, camLerp, backdrop, vignette, loadFonts, glowStroke, ease: { cl, eo, eio, back, lerp } } = Court3D;
+let cfg, B, DATA, court;
+const pl = {};
+const LAYOUT = {
+  BRUNSON: { stem: 1.4, dx: -205 }, FOX: { stem: 6 }, WEMBANYAMA: { stem: 4.5, dx: 90 }, ANUNOBY: { stem: 5 },
+  CASTLE: { stem: 2.2, dx: 135 }, TOWNS: { stem: 7.5, dx: 90 }, BRIDGES: { stem: 5 }, SHAMET: { stem: 4 },
+};
+
+function text(s, x, y, size, color, { weight = 800, italic = true, align = 'left', alpha = 1, track = 0, fam = 'BC' } = {}) {
+  ctx.save();
+  ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px ${fam}`;
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'alphabetic';
+  if (track) ctx.letterSpacing = track + 'px';
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function measure(s, size, weight = 800, italic = true, track = 0, fam = 'BC') {
+  ctx.save(); ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px ${fam}`; if (track) ctx.letterSpacing = track + 'px';
+  const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+function plate(x, y, w, h, fill, skew = 16, alpha = 1) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(x + skew, y); ctx.lineTo(x + w + skew, y); ctx.lineTo(x + w - skew, y + h); ctx.lineTo(x - skew, y + h);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function flash(t, at, d = 0.12, peak = 0.35) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return;
+  ctx.save(); ctx.globalAlpha = peak * Math.pow(1 - a, 2); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+function shakeAt(t, at, amp = 10, d = 0.25) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return [0, 0];
+  const k = amp * (1 - a);
+  return [k * Math.sin(t * 173), k * Math.cos(t * 131)];
+}
+const teamColor = (p) => (p.team === 'NYK' ? C.nyk : C.sas);
+
+// ---------------------------------------------------------------- layers
+
+function drawHeader(t) {
+  const q = eo((t - B.header) / 0.3);
+  if (q <= 0) return;
+  const x = lerp(-760, 70, back((t - B.header) / 0.36, 1.2));
+  const title = 'FINAL POSSESSION', clock = cfg.header_clock;
+  const tw = measure(title, 72, 900), cw = measure(clock, 52, 800);
+  plate(x, 52, 24 + tw + 30 + cw + 34, 80, C.red);
+  text(title, x + 24, 117, 72, C.white, { weight: 900 });
+  ctx.save(); ctx.globalAlpha = 0.55; ctx.fillStyle = '#fff'; ctx.fillRect(x + 24 + tw + 12, 70, 4, 46); ctx.restore();
+  text(clock, x + 24 + tw + 30, 113, 52, C.white, { weight: 800 });
+  const s = DATA.score;
+  const x2 = lerp(-760, 76, eo((t - B.header - 0.1) / 0.3));
+  plate(x2, 138, 580, 40, 'rgba(29,66,138,0.95)', 12);
+  text(`SAS ${s.sas}  ·  NYK ${s.nyk}  ·  BRUNSON ${Math.round(DATA.shot_distance)}-FT PULL-UP 3`, x2 + 22, 167, 27, C.white, { weight: 600, italic: false, track: 1 });
+  const fq = eo((t - B.pull_end + 0.2) / 0.3);
+  ctx.save();
+  ctx.globalAlpha = fq;
+  ctx.fillStyle = C.red; ctx.fillRect(1846, 58, 4, 44);
+  ['NBA TRACKING · POSITIONS AT RELEASE', DATA.missing.map((m) => m.name).join(', ') + ' NOT CAPTURED'].forEach((s, i) =>
+    text(s, 1834, 76 + i * 22, 15, i ? 'rgba(196,206,212,0.6)' : 'rgba(196,206,212,0.85)', { weight: 600, italic: false, track: 2, fam: 'IN', align: 'right' }));
+  ctx.restore();
+}
+
+// defender -> Brunson pressure lines (floor), stopped short of Brunson's ring
+function pressureLine(t, who, at, land) {
+  if (t < at) return;
+  const d = pl[who], b = pl.BRUNSON;
+  const L = Math.hypot(b.x - d.x, b.y - d.y), ux = (b.x - d.x) / L, uy = (b.y - d.y) / L;
+  const a0 = [d.x + ux * 0.6, d.y + uy * 0.6], b0 = [b.x - ux * 1.45, b.y - uy * 1.45];
+  const f = eio((t - at) / (land - at));
+  const fade = 1 - 0.45 * eo((t - B.nobody) / 0.4);
+  court.path([a0, b0], { color: '#FFFFFF', width: 4.5, frac: f, arrow: true, head: 0.95, alpha: fade, glow: 1.3 });
+}
+
+function distTag(t, who, at, land, val, off) {
+  if (t < land - 0.05) return;
+  const d = pl[who], b = pl.BRUNSON;
+  const m = court.project([(d.x + b.x) / 2, (d.y + b.y) / 2, 0]);
+  const u = t - land;
+  const k = lerp(1.5, 1, back(u / 0.28, 2.4)) * lerp(1, 0.78, eo((t - B.pull) / 0.6));
+  const fade = 1 - 0.5 * eo((t - B.nobody) / 0.4);
+  const sc = m[3] / court.project([pl.BRUNSON.x, pl.BRUNSON.y, 0])[3];
+  ctx.save();
+  ctx.translate(m[0] + off[0] * sc * k, m[1] + off[1] * sc * k);
+  ctx.scale(k, k);
+  ctx.globalAlpha = cl(u / 0.06) * fade;
+  const s = `${val.toFixed(1)} FT`, w = measure(s, 46, 900) + 34;
+  plate(-w / 2, -28, w, 52, 'rgba(6,12,26,0.9)', 10);
+  ctx.fillStyle = C.white; ctx.fillRect(-w / 2 - 6, -28, w + 12, 3);
+  text(s, 0, 15, 46, C.white, { weight: 900, align: 'center' });
+  ctx.restore();
+}
+
+function ballTag(t) {
+  const u = t - B.ball;
+  if (u < 0) return;
+  const b = court.project([pl.BRUNSON.x, pl.BRUNSON.y, 0]);
+  const s0 = 40;
+  const sc = b[3] / s0;
+  const k = lerp(1.8, 1, back(u / 0.3, 2.6)) * lerp(1, 0.62, eo((t - B.pull) / 0.6));
+  const fade = 1 - 0.35 * eo((t - B.nobody) / 0.4);
+  ctx.save();
+  ctx.translate(b[0] - 250 * Math.max(0.55, sc), b[1] + 120 * Math.max(0.55, sc));
+  ctx.rotate(-0.04); ctx.scale(k, k);
+  ctx.globalAlpha = cl(u / 0.06) * fade;
+  ctx.shadowColor = C.neg; ctx.shadowBlur = 36;
+  const w = measure('2 ON THE BALL', 76, 900) + 64;
+  plate(-w / 2, -50, w, 92, C.red, 16);
+  ctx.shadowBlur = 0;
+  text('2 ON THE BALL', 0, 18, 76, C.white, { weight: 900, align: 'center' });
+  ctx.restore();
+}
+
+function drawCircle(t) {
+  if (t < B.circle) return;
+  const a = pl.ANUNOBY, c = pl.CASTLE;
+  const ang = Math.atan2(c.y - a.y, c.x - a.x);
+  const f = eio((t - B.circle) / (B.circle_land - B.circle));
+  const r = DATA.nearest_spur.ft;
+  court.circle(a.x, a.y, r, { color: C.neg, width: 3.2, dash: [16, 12], dashOffset: -t * 40, frac: f, a0: ang, fill: C.neg, fillAlpha: 0.1, glow: 1, n: 120 });
+  if (f >= 1) court.floorGlow(a.x, a.y, r, C.neg, 0.18, { stops: [[0, 0.0], [0.8, 0.25], [1, 0.6]] });
+  court.path([[a.x, a.y], [c.x, c.y]], { color: '#FFFFFF', width: 2.6, frac: eio((t - B.circle) / 0.3), glow: 0.8 });
+}
+
+function circleTag(t) {
+  const u = t - B.circle_land;
+  if (u < 0) return;
+  const a = pl.ANUNOBY, c = pl.CASTLE;
+  const m = court.project([lerp(a.x, c.x, 0.55), lerp(a.y, c.y, 0.55), 0]);
+  const k = lerp(1.6, 1, back(u / 0.3, 2.4));
+  ctx.save();
+  ctx.translate(m[0] - 48, m[1] - 40); ctx.rotate(-0.03); ctx.scale(k, k);
+  ctx.globalAlpha = cl(u / 0.06);
+  const s = `${DATA.nearest_spur.ft.toFixed(1)} FT`, w = measure(s, 64, 900) + 40;
+  plate(-20, -54, w, 70, 'rgba(6,12,26,0.92)', 12);
+  ctx.fillStyle = C.neg; ctx.fillRect(-26, -54, w + 12, 3);
+  text(s, 0, 2, 64, C.white, { weight: 900 });
+  text(`NEAREST SPUR · ${DATA.nearest_spur.name}`, -10, -66, 18, '#FFB3B3', { weight: 700, italic: false, fam: 'IN', track: 3 });
+  ctx.restore();
+}
+
+function crashPts() {
+  const a = pl.ANUNOBY, tip = DATA.tip;
+  const mx = (a.x + tip.x) / 2, my = (a.y + tip.y) / 2;
+  const dx = tip.x - a.x, dy = tip.y - a.y, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L;
+  const c = [mx - nx * 5, my - ny * 5];
+  const pts = [];
+  for (let i = 0; i <= 24; i++) {
+    const s = i / 24;
+    pts.push([(1 - s) * (1 - s) * a.x + 2 * (1 - s) * s * c[0] + s * s * tip.x, (1 - s) * (1 - s) * a.y + 2 * (1 - s) * s * c[1] + s * s * tip.y]);
+  }
+  return pts;
+}
+
+function drawCrash(t) {
+  if (t < B.crash) return;
+  const f = eio((t - B.crash) / (B.crash_end - B.crash));
+  const pts = crashPts();
+  court.path(pts.slice(1), { color: C.nyk, width: 7, frac: f, arrow: true, head: 3.2, glow: 1.4 });
+  court.path(pts.slice(1), { color: '#FFE2C4', width: 2.2, frac: f, dash: [3, 22], dashOffset: -t * 160, glow: 0 });
+  if (f >= 1) {
+    const ph = ((t - B.crash_end) / 0.7) % 1;
+    court.circle(DATA.tip.x, DATA.tip.y, 1.2 + 2.2 * ph, { color: C.nyk, width: 2.4, alpha: 1 - ph, glow: 0.6, n: 48 });
+  }
+}
+
+function crashTag(t) {
+  const u = t - B.crash - 0.2;
+  if (u < 0) return;
+  const pts = crashPts();
+  const m = court.project([...pts[11], 0]);
+  ctx.save();
+  ctx.translate(m[0] - 26, m[1] + 48 - lerp(18, 0, eo(u / 0.25)));
+  ctx.globalAlpha = eo(u / 0.2);
+  text('CRASH', 0, 0, 44, C.nyk, { weight: 900, align: 'center', track: 2 });
+  ctx.restore();
+}
+
+function unboxedTag(t) {
+  const u = t - B.unboxed;
+  if (u < 0) return;
+  const a = pl.ANUNOBY;
+  const p = court.project([a.x, a.y, 0]);
+  const k = lerp(1.9, 1, back(u / 0.28, 2.6));
+  const x = p[0] - 400, y = p[1] - 30;
+  glowStroke(ctx, [[x + 190, y + 10], [p[0] - 40, p[1]]], C.neg, 2.4, { alpha: cl(u / 0.1), glow: 0.7 });
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(-0.06); ctx.scale(k, k);
+  ctx.globalAlpha = cl(u / 0.05);
+  ctx.shadowColor = C.neg; ctx.shadowBlur = 44;
+  const w = measure('UNBOXED', 88, 900) + 70;
+  plate(-w / 2, -50, w, 100, C.red, 18);
+  ctx.shadowBlur = 0;
+  text('UNBOXED', 0, 30, 88, C.white, { weight: 900, align: 'center' });
+  ctx.restore();
+}
+
+function drawPlayers(t) {
+  const list = DATA.players.slice().sort((a, b) => court.depth(b.x, b.y) - court.depth(a.x, a.y));
+  for (const [i, p] of list.entries()) {
+    const at = B.dots + 0.03 * i;
+    if (t < at) continue;
+    const pop = back((t - at) / 0.3, 2.2);
+    const isA = p.name === 'ANUNOBY', isB = p.name === 'BRUNSON';
+    const ign = isA ? eo((t - B.nobody) / 0.15) : 0;
+    const color = ign > 0.5 ? C.neg : teamColor(p);
+    const hot = isA ? ign * (0.8 + 0.2 * Math.sin(t * 11)) : (isB ? 0.6 * eo((t - B.ball) / 0.2) * (1 - eo((t - B.nobody) / 0.4)) : 0);
+    const pulse = isA && t > B.nobody ? ((t - B.nobody) / 0.75) % 1 : (isB && t > B.ball && t < B.nobody + 0.4 ? ((t - B.ball) / 0.6) % 1 : -1);
+    const ring = ign > 0.5 ? '#FFFFFF' : (p.team === 'NYK' ? C.nykBlue : '#FFFFFF');
+    const ball = isB || p.name === 'FOX' || p.name === 'WEMBANYAMA';
+    court.dot(p.x, p.y, { color, ring, pop, hot, pulse, r: isA ? lerp(1.0, 1.2, ign) : (ball ? 0.85 : 1.0) });
+  }
+}
+
+function labelState(t, p) {
+  const ball = ['BRUNSON', 'FOX', 'WEMBANYAMA'].includes(p.name);
+  const phaseB = eo((t - B.nobody) / 0.35);
+  if (p.name === 'ANUNOBY') return { alpha: lerp(0.7, 1, phaseB), hi: phaseB };
+  if (p.name === 'CASTLE') return { alpha: lerp(0.55, 1, eo((t - B.circle) / 0.3)), hi: 0 };
+  if (ball) return { alpha: lerp(1, 0.55, phaseB), hi: 0 };
+  return { alpha: 0.55, hi: 0 };
+}
+
+function drawLabels(t) {
+  const list = DATA.players.slice().sort((a, b) => court.depth(b.x, b.y) - court.depth(a.x, a.y));
+  for (const [i, p] of list.entries()) {
+    const at = B.dots + 0.1 + 0.03 * i;
+    if (t < at) continue;
+    const st = labelState(t, p);
+    const lay = LAYOUT[p.name] || {};
+    court.label(p.x, p.y, p.name, {
+      color: p.name === 'ANUNOBY' && st.hi > 0.5 ? C.neg : teamColor(p), textColor: st.hi > 0.5 ? '#FFFFFF' : null,
+      alpha: eo((t - at) / 0.25) * st.alpha, pop: lerp(0.6, 1, back((t - at) / 0.3, 2)), hi: st.hi,
+      scale: p.name === 'ANUNOBY' ? lerp(1, 1.2, st.hi) : 1, stem: lay.stem || 6.5, dx: lay.dx || 0, dy: lay.dy || 0,
+    });
+  }
+}
+
+window.renderFrame = async (t) => {
+  ctx.clearRect(0, 0, W, H);
+  backdrop(ctx, t);
+  const [sx, sy] = [B.ball, B.circle_land, B.unboxed].map((a) => shakeAt(t, a, 9)).reduce((p, q) => [p[0] + q[0], p[1] + q[1]]);
+  ctx.save(); ctx.translate(sx, sy);
+  const drift = camLerp(cfg.camA, { ...cfg.camA, fov: cfg.camA.fov - 1.2 }, eo(t / B.pull));
+  const cam = camLerp(drift, cfg.camB, eio((t - B.pull) / (B.pull_end - B.pull)));
+  court.setCamera(t > B.pull_end ? camLerp(cfg.camB, { ...cfg.camB, fov: cfg.camB.fov - 1 }, eo((t - B.pull_end) / (window.DURATION - B.pull_end))) : cam);
+  court.drawFloor(t, { alpha: eo((t - B.court) / 0.3), draw: eio((t - B.court) / 0.6) });
+  drawCircle(t);
+  pressureLine(t, 'FOX', B.fox, B.fox_land);
+  pressureLine(t, 'WEMBANYAMA', B.wemby, B.wemby_land);
+  drawCrash(t);
+  drawPlayers(t);
+  court.drawHoop({ alpha: eo((t - B.court - 0.15) / 0.3) });
+  drawLabels(t);
+  distTag(t, 'FOX', B.fox, B.fox_land, DATA.fox_brunson_ft, [-100, -40]);
+  distTag(t, 'WEMBANYAMA', B.wemby, B.wemby_land, DATA.wemby_brunson_ft, [10, 62]);
+  ballTag(t);
+  circleTag(t);
+  crashTag(t);
+  unboxedTag(t);
+  drawHeader(t);
+  ctx.restore();
+  vignette(ctx);
+  for (const k of ['fox_land', 'wemby_land', 'circle_land']) flash(t, B[k], 0.1, 0.22);
+  for (const k of ['ball', 'unboxed']) flash(t, B[k], 0.14, 0.38);
+};
+
+window.FPS = 30;
+window.ready = (async () => {
+  cfg = await (await fetch('c7_lastplay.json')).json();
+  B = cfg.beats; DATA = cfg.data;
+  for (const p of DATA.players) pl[p.name] = p;
+  const q = new URLSearchParams(location.search);
+  window.DURATION = parseFloat(q.get('dur') || cfg.dur);
+  await loadFonts();
+  court = new Court(ctx, cfg.camA);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+ "_note": "e325 Harper #2 3PT (Fox ast), Q2 3:47. Track 9001 = SAM2 video follow (seed f167). f194-196 and f210 dropped: his legs are hidden behind #3 and the box bottom is not his feet. DHg = same player, green style for the made-shot ring.",
+ "players": [
+  {"key": "DH", "name": "Harper", "num": "2", "team": "SAS", "ids": [[9001, 160, 193], [9001, 197, 209]], "air": [[161, 174]]},
+  {"key": "DHg", "name": "Harper", "num": "2", "team": "SAS", "ids": [[9001, 160, 193], [9001, 197, 209]], "air": [[161, 174]]}
+ ]
+}

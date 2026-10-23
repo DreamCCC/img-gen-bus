@@ -1,0 +1,93 @@
+{
+ "_note": "PBP 593 Q4 9:38 Wembanyama 1ft driving floater MISS (tip 595 / putback 597 follow). Src = Q4 reel 34.0-40.0 s (clip f0 = reel 34.0 s). Release ~f90, ball off the right side of the rim f99-107 (camera flash f83). NGSS defensiveInfo.jointBallDistance 20.29 in = 1.7 ft, defender Brunson #11, but Brunson is not identifiable in frame, so no hand line here (the raised arm next to the ball is a Spurs arm).",
+ "src": "work/q4miss/s09_e593.mp4",
+ "out": "out/s09/s09_593.mp4",
+ "audio_db": -14,
+ "segs": [
+  {
+   "kind": "play",
+   "from": 66,
+   "to": 90,
+   "speed": 1
+  },
+  {
+   "kind": "freeze",
+   "at": 90,
+   "dur": 0.55,
+   "spot": [
+    [
+     795,
+     470,
+     65,
+     145
+    ]
+   ]
+  },
+  {
+   "kind": "play",
+   "from": 90,
+   "to": 108,
+   "speed": 1
+  }
+ ],
+ "flash": [
+  [
+   0.8,
+   0.35,
+   3
+  ]
+ ],
+ "callouts": [
+  {
+   "t": [
+    0,
+    2.25
+   ],
+   "kind": "stat",
+   "x": 1600,
+   "y": 250,
+   "label": "Q4 FG",
+   "value": "4/19",
+   "color": "white"
+  },
+  {
+   "t": [
+    0.8300000000000001,
+    1.35
+   ],
+   "kind": "tag",
+   "x": 1080,
+   "y": 340,
+   "text": "#1 WEMBANYAMA",
+   "color": "silver",
+   "to": [
+    815,
+    420
+   ]
+  },
+  {
+   "t": [
+    0.9,
+    1.35
+   ],
+   "kind": "label",
+   "x": 805,
+   "y": 290,
+   "text": "HAND 1.7 FT",
+   "color": "gold",
+   "size": 58
+  },
+  {
+   "t": [
+    1.68,
+    2.25
+   ],
+   "kind": "label",
+   "x": 740,
+   "y": 200,
+   "text": "MISS",
+   "color": "red",
+   "size": 84
+  }
+ ]
+}

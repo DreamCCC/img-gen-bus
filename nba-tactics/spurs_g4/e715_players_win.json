@@ -1,0 +1,7 @@
+{
+ "_note": "e715 on the Windows/CUDA re-track (work/e715/tracks.json from track.py --end 8.6; IDs differ from the Mac run in e715_players.json). FX = Fox #4, OG = Anunoby #8. ids: [track ID, first frame, last frame]; air: takeoff-to-landing frames.",
+ "players": [
+  {"key": "FX", "name": "Fox", "num": "4", "team": "SAS", "ids": [[5, 82, 200], [1126, 209, 258]], "air": [[189, 206]]},
+  {"key": "OG", "name": "Anunoby", "num": "8", "team": "NYK", "ids": [[2, 140, 199]], "manual": [[214, 519, 658]], "air": [[192, 213]]}
+ ]
+}

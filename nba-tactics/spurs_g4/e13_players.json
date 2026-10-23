@@ -1,0 +1,7 @@
+{
+ "_note": "e13 Vassell #24 3PT (Castle ast), Q1 11:09. Track 9001 = SAM2 video follow (film/out/s04/_tools/sam_follow.py, seed f138) injected into work/e13/tracks.json. VSg = same player, green style for the made-shot ring.",
+ "players": [
+  {"key": "VS", "name": "Vassell", "num": "24", "team": "SAS", "ids": [[9001, 130, 194]], "air": [[138, 156]]},
+  {"key": "VSg", "name": "Vassell", "num": "24", "team": "SAS", "ids": [[9001, 130, 194]], "air": [[138, 156]]}
+ ]
+}

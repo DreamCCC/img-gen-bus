@@ -1,0 +1,26 @@
+{
+ "model": "gemini-3.8-flash-tts",
+ "voice": "Charon",
+ "bases": {
+  "drive": "You are a high-energy NBA play-by-play voice cutting a hype breakdown video for social media. Confident American male, big chest voice, crisp consonants. Speak fast, about 25 percent quicker than normal conversation, driving momentum into every key word. Big, vivid emotion: rising intensity, real excitement on the payoffs, never flat. Not a movie-trailer voice, not a news anchor.",
+  "call": "You are an NBA broadcast analyst narrating a fast, cinematic breakdown video. Confident American male, chest voice, crisp consonants, punchy rhythm. Not a movie-trailer voice, not a news anchor."
+ },
+ "lines": [
+  ["s02", "Up twenty-nine in the NBA Finals. And the Spurs lost — by one.", "Cold open hook. Big on 'twenty-nine', beat at the dash, land 'by one' low and heavy.", 1.08, "drive"],
+  ["s03", "Every shot gets graded. Distance, defender, angle — that's expected field goal percentage.", "Explainer energy. Tick off the three factors one by one, then deliver the term cleanly.", 1.1, "drive"],
+  ["s04", "First half, the Spurs kept beating those odds. From the field: expected forty-nine, scored seventy.", "Rising excitement. Short pause after 'From the field', then hit 'forty-nine' and slam 'seventy'.", 1.1, "drive"],
+  ["s05", "Then the bill came. After the break: nineteen points on shots worth thirty-nine.", "Turn dark on 'the bill came'. Measured, let 'thirty-nine' hang.", 1.08, "drive"],
+  ["s06", "Mike Brown's answer: go small. Towns at center, four guys spaced around him.", "Confident, tactical. Snap 'go small'.", 1.1, "drive"],
+  ["s07", "That pulls Wembanyama away from the rim. One screen, one switch —", "Build tension, speed up through 'one screen, one switch', cut off at the dash.", 1.1, "drive"],
+  ["s08", "and the league's best rim protector is guarding Brunson twenty-seven feet out. Bang.", "Continue straight from a cut-off sentence. Disbelief on 'twenty-seven feet out', then an explosive 'Bang.'", 1.08, "drive"],
+  ["s09", "At the other end: four of nineteen in the fourth, with a defender's hand two and a half feet from the ball.", "Grim, steady. Stress 'four of nineteen'.", 1.1, "drive"],
+  ["a1", "Spurs up one. Thirteen seconds left.", "Low and tense, two short sentences, a beat between them.", 1.08, "drive"],
+  ["a2", "The shot clock is longer than the game, and the Knicks are in the penalty. Hold the ball, and they have to foul you.", "Explaining the trick with urgency. Stress 'longer than the game', then 'in the penalty'. Short pause at the comma before 'and they have to foul you', land it.", 1.1, "drive"],
+  ["a3", "Instead, Fox goes. A coin-flip layup nobody needed.", "Disbelief. Snap 'Fox goes', then lean hard into 'coin-flip' and 'nobody needed'.", 1.08, "drive"],
+  ["a4", "Denied.", "One explosive word, like a play-by-play call.", 1.0, "call"],
+  ["s14", "Five point seven left. The Spurs use their foul to give. Brown answers with five shooters.", "Chess-match tone. Quick and precise, punch 'five shooters'.", 1.1, "drive"],
+  ["s15", "Fox and Wemby both jump Brunson. Nobody touches Anunoby.", "Tense whisper-to-alarm. Slow down on 'Nobody touches Anunoby'.", 1.05, "drive"],
+  ["s16", "Tip. In.", "Two shouted words with a beat between them, crowd-eruption energy.", 1.0, "call"],
+  ["s18", "The Knicks led this game for fifty-three point eight seconds. It was enough.", "Closing line. Measured and quiet on the number, final three words flat and cold.", 1.05, "drive"]
+ ]
+}

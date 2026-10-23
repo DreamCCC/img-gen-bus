@@ -1,0 +1,7 @@
+{
+ "_note": "e70 Castle #5 3PT (Vassell ast), Q1 6:59. Track 9001 = SAM2 video follow (seed f243). SCg = same player, green style for the made-shot ring.",
+ "players": [
+  {"key": "SC", "name": "Castle", "num": "5", "team": "SAS", "ids": [[9001, 236, 294]], "air": [[244, 258]]},
+  {"key": "SCg", "name": "Castle", "num": "5", "team": "SAS", "ids": [[9001, 236, 294]], "air": [[244, 258]]}
+ ]
+}

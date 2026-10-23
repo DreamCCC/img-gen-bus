@@ -1,0 +1,360 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// C6 foul to give: 0:05.7, SAS 106-105, Fox's foul is SAS Q4 team foul 2 = the one free foul of the last 2:00, then Brown's five.
+// Beat times and on-screen facts live in c6_foul.json (sources in its _sources).
+const W = 1920, H = 1080;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const C = {
+  navy: '#0A1428', red: '#C8102E', blue: '#1D428A', blueHi: '#3D7BFF', silver: '#C4CED4', white: '#F4F6F8',
+  green: '#2BD67B', neg: '#FF3B3B', nyk: '#F58426', nykBlue: '#006BB6',
+};
+const cl = (x) => Math.min(1, Math.max(0, x));
+const eo = (x) => 1 - Math.pow(1 - cl(x), 3);
+const eio = (x) => { x = cl(x); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const back = (x, k = 1.8) => { x = cl(x) - 1; return 1 + x * x * ((k + 1) * x + k); };
+const lerp = (a, b, t) => a + (b - a) * t;
+let B = {}, F = {}, bg = null;
+
+function text(s, x, y, size, color, { weight = 800, italic = true, align = 'left', alpha = 1, track = 0, fam = 'BC' } = {}) {
+  ctx.save();
+  ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px ${fam}`;
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'alphabetic';
+  if (track) ctx.letterSpacing = track + 'px';
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function plate(x, y, w, h, fill, skew = 16, alpha = 1) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(x + skew, y); ctx.lineTo(x + w + skew, y); ctx.lineTo(x + w - skew, y + h); ctx.lineTo(x - skew, y + h);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function panel(x, y, w, h, alpha = 1, edge = C.red) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  const g = ctx.createLinearGradient(0, y, 0, y + h);
+  g.addColorStop(0, 'rgba(22,38,70,0.92)'); g.addColorStop(1, 'rgba(8,16,32,0.92)');
+  ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(x, y, w, 3);
+  ctx.fillStyle = edge; ctx.fillRect(x, y + 3, 8, h - 3);
+  ctx.restore();
+}
+function flash(t, at, d = 0.22, peak = 0.55) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return;
+  ctx.save(); ctx.globalAlpha = peak * Math.pow(1 - a, 2); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+function shakeAt(t, at, amp = 10, d = 0.25) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return [0, 0];
+  const k = amp * (1 - a);
+  return [k * Math.sin(t * 173), k * Math.cos(t * 131)];
+}
+function stamp(t, at, x, y, rot, draw, { from = 1.7, k = 2.4, d = 0.3 } = {}) {
+  const s = t - at;
+  if (s <= 0) return;
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(rot);
+  const sc = lerp(from, 1, back(s / d, k));
+  ctx.scale(sc, sc);
+  ctx.globalAlpha *= cl(s / 0.07);
+  draw(s);
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------- layers
+
+function drawBg(t) {
+  if (bg) {
+    const q = eo(t / 0.4);
+    ctx.save();
+    ctx.filter = `blur(${lerp(0, 14, q)}px) saturate(${lerp(1, 0, q)})`;
+    ctx.drawImage(bg, -30, -17, W + 60, H + 34);
+    ctx.restore();
+    ctx.fillStyle = `rgba(10,20,40,${lerp(0.15, 0.84, q)})`;
+    ctx.fillRect(0, 0, W, H);
+  } else {
+    const r = ctx.createRadialGradient(W / 2, 430, 0, W / 2, 430, 1250);
+    r.addColorStop(0, '#16294F'); r.addColorStop(0.42, C.navy); r.addColorStop(1, '#000');
+    ctx.fillStyle = r; ctx.fillRect(0, 0, W, H);
+    const off = (t * 14) % 60;
+    ctx.fillStyle = 'rgba(120,160,230,0.045)';
+    for (let x = -60 + off; x < W; x += 60) ctx.fillRect(Math.round(x), 0, 1, H);
+    for (let y = -60 + off * 0.5; y < H; y += 60) ctx.fillRect(0, Math.round(y), W, 1);
+    ctx.fillStyle = 'rgba(120,160,230,0.07)';
+    for (let x = -240 + off * 4 % 240; x < W; x += 240) ctx.fillRect(Math.round(x), 0, 2, H);
+    for (let y = -240 + (off * 2) % 240; y < H; y += 240) ctx.fillRect(0, Math.round(y), W, 2);
+  }
+  const sx = ((t * 260) % (W + 900)) - 600;
+  const g = ctx.createLinearGradient(sx, 0, sx + 500, H);
+  g.addColorStop(0, 'rgba(61,123,255,0)'); g.addColorStop(0.5, 'rgba(61,123,255,0.07)'); g.addColorStop(1, 'rgba(61,123,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,255,255,0.025)';
+  for (let y = 0; y < H; y += 6) ctx.fillRect(0, y, W, 1);
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.55)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+}
+
+function drawHeader(t) {
+  const q = eo((t - B.header) / 0.3);
+  if (q <= 0) return;
+  const x = lerp(-520, 70, q);
+  plate(x, 56, 410, 74, C.red);
+  text('FOUL TO GIVE', x + 24, 116, 64, C.white, { weight: 900 });
+  plate(x + 6, 136, 420, 40, 'rgba(29,66,138,0.95)', 12);
+  text(F.header.replace(/ · /g, '  ·  '), x + 24, 166, 28, C.white, { weight: 600, italic: false, track: 1 });
+}
+
+function drawClock(t) {
+  const a = t - B.clock;
+  if (a <= 0) return;
+  const sq = eio((t - B.squeeze) / 0.42);
+  const s = lerp(1.55, 1, back(a / 0.32, 2.2));
+  ctx.save();
+  ctx.translate(lerp(960, 1690, sq), lerp(520, 150, sq));
+  ctx.scale(lerp(1, 0.36, sq) * s, lerp(1, 0.36, sq) * s);
+  ctx.globalAlpha = cl(a / 0.06);
+  panel(-420, -290, 840, 370, 1, C.red);
+  text('GAME CLOCK', -380, -232, 34, C.silver, { weight: 700, italic: false, track: 4 });
+  const live = 0.5 + 0.5 * Math.cos((t - B.clock) * 7);
+  ctx.save();
+  ctx.fillStyle = C.red; ctx.globalAlpha *= lerp(0.55, 1, live);
+  ctx.beginPath(); ctx.arc(352, -244, 11, 0, 7); ctx.fill();
+  ctx.restore();
+  text('4TH', 330, -232, 34, C.white, { weight: 800, align: 'right', track: 2 });
+  ctx.save();
+  ctx.shadowColor = 'rgba(200,16,46,0.7)'; ctx.shadowBlur = 40;
+  text('0:05.7', 0, 40, 300, C.white, { weight: 900, align: 'center' });
+  ctx.restore();
+  ctx.restore();
+
+  const uq = eo((t - B.clock - 0.28) / 0.25) * (1 - eo((t - B.squeeze) / 0.2));
+  if (uq > 0) {
+    ctx.save();
+    ctx.translate(960, lerp(690, 660, uq) + lerp(0, -40, sq));
+    ctx.globalAlpha = uq;
+    plate(-190, -36, 380, 72, C.silver, 14);
+    text('SPURS UP 1', 0, 22, 60, C.navy, { weight: 900, align: 'center' });
+    ctx.restore();
+  }
+}
+
+const PX = 930, PS = 120;
+function drawFouls(t) {
+  const q = eo((t - B.fouls - 0.1) / 0.32);
+  if (q <= 0) return;
+  const y0 = 232, cy = y0 + 92;
+  const dim = lerp(1, 0.78, eo((t - B.lineup) / 0.3));
+  ctx.save();
+  ctx.translate(lerp(-90, 0, q), 0);
+  ctx.globalAlpha = q * dim;
+  panel(130, y0, 1660, 210, 1, C.silver);
+  text('SAS  4TH-QTR TEAM FOULS', 175, y0 + 50, 32, C.silver, { weight: 700, italic: false, track: 3 });
+
+  const rq = eo((t - B.rule) / 0.3);
+  const slide = eio((t - B.rule - 0.05) / 0.4);
+  text('PENALTY ON FOUL 5', 175 - 40 * rq, y0 + 120, 56, C.white, { weight: 900, alpha: 1 - rq });
+  text('EVERY QUARTER: 4 FOULS FREE, THE 5TH = 2 FREE THROWS', 177 - 40 * rq, y0 + 166, 21, C.silver, { fam: 'IN', weight: 600, italic: false, alpha: 0.9 * (1 - rq), track: 0.5 });
+  ctx.save();
+  ctx.globalAlpha *= rq;
+  ctx.translate(lerp(40, 0, rq), 0);
+  plate(186, y0 + 74, 172, 52, C.red, 10);
+  text('LAST 2:00', 272, y0 + 114, 44, C.white, { weight: 900, align: 'center' });
+  text('ONE FOUL TO GIVE', 380, y0 + 118, 56, C.white, { weight: 900 });
+  text('SAS HAD 1 AT THE 2:00 MARK: ONLY ONE MORE IS FREE', 177, y0 + 166, 21, C.silver, { fam: 'IN', weight: 600, italic: false, alpha: 0.9, track: 0.5 });
+  ctx.restore();
+
+  const mk = lerp(4, 2, slide);
+  const lit = [B.pip1, B.pip2];
+  for (let i = 0; i < 5; i++) {
+    const cx = PX + i * PS;
+    const z = cl((i - (mk - 0.5)) * 3);
+    ctx.beginPath(); ctx.arc(cx, cy, 34, 0, 7);
+    ctx.fillStyle = 'rgba(255,255,255,0.10)'; ctx.fill();
+    if (z > 0) {
+      ctx.save(); ctx.globalAlpha *= z;
+      ctx.beginPath(); ctx.arc(cx, cy, 34, 0, 7);
+      ctx.fillStyle = 'rgba(255,59,59,0.16)'; ctx.fill();
+      ctx.strokeStyle = C.neg; ctx.lineWidth = 3; ctx.setLineDash([7, 6]); ctx.stroke();
+      ctx.restore();
+    }
+    text(String(i + 1), cx, cy + 9, 26, C.white, { fam: 'IN', weight: 600, italic: false, align: 'center', alpha: 0.35 });
+    const on = i < 2 ? cl((t - lit[i]) / 0.1) : 0;
+    if (on > 0) {
+      ctx.save(); ctx.globalAlpha *= on; ctx.shadowColor = C.silver; ctx.shadowBlur = 26;
+      ctx.beginPath(); ctx.arc(cx, cy, 34 * lerp(1.6, 1, back(on, 2)), 0, 7); ctx.fillStyle = C.silver; ctx.fill(); ctx.restore();
+      text(String(i + 1), cx, cy + 9, 26, C.navy, { fam: 'IN', weight: 700, italic: false, align: 'center', alpha: on });
+      const r = (t - lit[i]) / 0.45;
+      if (r > 0 && r < 1) {
+        ctx.save(); ctx.globalAlpha *= (1 - r) * 0.9; ctx.strokeStyle = C.white; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(cx, cy, lerp(34, 90, eo(r)), 0, 7); ctx.stroke(); ctx.restore();
+      }
+      const f = F.sas_fouls[i];
+      const lq = eo((t - lit[i] - 0.06) / 0.2);
+      text(f.who, cx, cy + 68, 28, C.white, { weight: 900, align: 'center', alpha: lq });
+      text(f.clock, cx, cy + 96, 24, C.silver, { weight: 700, italic: false, align: 'center', alpha: lq, track: 1 });
+    }
+  }
+  const nq = eo((t - B.pip2 - 0.18) / 0.25);
+  text('NEXT ONE', PX + 2 * PS, cy + 68, 26, C.neg, { weight: 900, align: 'center', alpha: nq });
+  text('= 2 FTs', PX + 2 * PS, cy + 96, 24, C.neg, { weight: 800, align: 'center', alpha: nq });
+
+  const mx = PX + (mk - 0.5) * PS;
+  const moving = slide > 0 && slide < 1;
+  if (moving) for (let k = 1; k <= 4; k++) {
+    const gx = PX + (lerp(4, 2, eio((t - B.rule - 0.05 - k * 0.02) / 0.4)) - 0.5) * PS;
+    ctx.fillStyle = `rgba(255,255,255,${0.12 / k})`; ctx.fillRect(gx - 2, cy - 52, 4, 104);
+  }
+  ctx.save();
+  ctx.shadowColor = rq > 0 ? C.neg : 'transparent'; ctx.shadowBlur = 18 * rq;
+  ctx.fillStyle = C.white; ctx.fillRect(mx - 2, cy - 52, 4, 104);
+  ctx.restore();
+  text('PENALTY', mx, cy - 62, 22, C.white, { weight: 700, italic: false, align: 'center', track: 2 });
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = dim;
+  stamp(t, B.nofts, 1630, cy - 2, -0.05, () => {
+    ctx.shadowColor = 'rgba(200,16,46,0.8)'; ctx.shadowBlur = 34;
+    plate(-150, -50, 300, 100, C.red, 14);
+    ctx.shadowBlur = 0;
+    text('NO FREE THROWS', 0, 0, 46, C.white, { weight: 900, align: 'center' });
+    text('KNICKS INBOUND · 0:05.7', 0, 34, 22, C.white, { weight: 700, italic: false, align: 'center', track: 1.5 });
+  });
+  ctx.restore();
+}
+
+const CX = 130, CW = 312, CG = 25, CY = 556, CH = 200;
+function drawLineup(t) {
+  const q = eo((t - B.lineup) / 0.3);
+  if (q <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = q;
+  const x = lerp(-460, 130, q);
+  plate(x, 476, 400, 64, C.nykBlue, 14);
+  ctx.fillStyle = C.nyk; ctx.fillRect(x - 14, 540, 400, 5);
+  text("BROWN'S ANSWER", x + 20, 528, 52, C.white, { weight: 900 });
+  text('KNICKS ON THE FLOOR AFTER THE TIMEOUT · INBOUND AT 0:05.7', 580, 520, 26, C.silver, { weight: 700, italic: false, track: 3, alpha: eo((t - B.lineup - 0.1) / 0.25) });
+  ctx.restore();
+
+  F.lineup.forEach((p, i) => {
+    const s = t - B.chips[i];
+    if (s <= 0) return;
+    const x = CX + i * (CW + CG);
+    const e = back(s / 0.3, 2.2);
+    const sc = lerp(1.3, 1, e);
+    ctx.save();
+    ctx.translate(x + CW / 2, CY + CH / 2 + lerp(-70, 0, e));
+    ctx.scale(sc, sc);
+    ctx.translate(-CW / 2, -CH / 2);
+    ctx.globalAlpha = cl(s / 0.07);
+    const g = ctx.createLinearGradient(0, 0, 0, CH);
+    g.addColorStop(0, 'rgba(0,92,160,0.96)'); g.addColorStop(1, 'rgba(4,22,48,0.96)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, CW, CH);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, CW, CH); ctx.clip();
+    text(p.num, CW - 10, 146, 186, C.white, { weight: 900, align: 'right', alpha: 0.11 });
+    ctx.restore();
+    ctx.fillStyle = C.nyk; ctx.fillRect(0, 0, CW, 6);
+    ctx.strokeStyle = 'rgba(245,132,38,0.55)'; ctx.lineWidth = 2; ctx.strokeRect(1, 1, CW - 2, CH - 2);
+    text(p.first, 24, 46, 22, C.silver, { fam: 'IN', weight: 600, italic: false, track: 2 });
+    text(p.last, 22, 104, 62, C.white, { weight: 900 });
+    ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.fillRect(24, 126, CW - 48, 2);
+    text('G4  3PT', 24, 172, 26, C.silver, { weight: 700, italic: false, track: 2 });
+    text(p.fg3, CW - 24, 176, 58, C.nyk, { weight: 900, align: 'right' });
+    if (p.sub) {
+      const tq = eo((s - 0.2) / 0.2);
+      ctx.save(); ctx.globalAlpha *= tq;
+      ctx.font = '700 16px IN'; ctx.letterSpacing = '1.5px';
+      const tw = ctx.measureText(p.sub).width + 22;
+      ctx.restore();
+      plate(CW - tw - 6, 16, tw, 28, C.nyk, 6, tq);
+      text(p.sub, CW - tw / 2 - 6, 36, 16, C.navy, { fam: 'IN', weight: 700, italic: false, align: 'center', track: 1.5, alpha: tq });
+    }
+    const hi = 1 - cl(s / 0.3);
+    if (hi > 0) { ctx.save(); ctx.globalAlpha *= hi * 0.85; ctx.strokeStyle = C.white; ctx.lineWidth = 6; ctx.strokeRect(0, 0, CW, CH); ctx.restore(); }
+    ctx.restore();
+  });
+
+  stamp(t, B.five, 960, 806, -0.03, () => {
+    ctx.shadowColor = 'rgba(245,132,38,0.85)'; ctx.shadowBlur = 44;
+    plate(-300, -42, 600, 84, C.nyk, 18);
+    ctx.shadowBlur = 0;
+    text('FIVE SHOOTERS', 0, 27, 78, C.navy, { weight: 900, align: 'center' });
+  }, { from: 1.9, k: 2.6, d: 0.26 });
+  const cq = eo((t - B.five - 0.18) / 0.25);
+  if (cq > 0) {
+    ctx.save(); ctx.globalAlpha = cq; ctx.translate(lerp(40, 0, cq), 0);
+    plate(1310, 778, 470, 56, 'rgba(8,16,32,0.92)', 12);
+    text('COMBINED IN G4:', 1334, 816, 26, C.silver, { weight: 700, italic: false, track: 2 });
+    text(`${F.lineup_fg3} FROM THREE`, 1756, 818, 34, C.white, { weight: 900, align: 'right' });
+    ctx.restore();
+  }
+}
+
+function drawOut(t) {
+  const a = (t - B.out) / (window.DURATION - B.out);
+  if (a <= 0) return;
+  const x = lerp(-W * 0.3, W * 1.1, eo(a));
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.moveTo(x - 240, 0); ctx.lineTo(x + 60, 0); ctx.lineTo(x - 140, H); ctx.lineTo(x - 440, H); ctx.fill();
+  ctx.restore();
+  const up = cl((t - (window.DURATION - 0.13)) / 0.1);
+  ctx.save(); ctx.globalAlpha = 0.85 * up * up; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+
+window.renderFrame = async (t) => {
+  ctx.clearRect(0, 0, W, H);
+  drawBg(t);
+  const hits = [[B.clock, 12], [B.pip2, 6], [B.nofts, 10], [B.five, 11], ...B.chips.map((c) => [c, 3])];
+  const [sx, sy] = hits.map(([a, k]) => shakeAt(t, a, k)).reduce((p, q) => [p[0] + q[0], p[1] + q[1]]);
+  ctx.save(); ctx.translate(sx, sy);
+  drawHeader(t);
+  drawFouls(t);
+  drawLineup(t);
+  drawClock(t);
+  ctx.restore();
+  flash(t, 0, 0.18, 0.5);
+  flash(t, B.clock, 0.2, 0.3);
+  flash(t, B.nofts, 0.2, 0.35);
+  flash(t, B.five, 0.22, 0.4);
+  drawOut(t);
+};
+
+window.FPS = 30;
+window.ready = (async () => {
+  const cfg = await (await fetch('c6_foul.json')).json();
+  B = cfg.beats; F = cfg.facts;
+  const q = new URLSearchParams(location.search);
+  window.DURATION = parseFloat(q.get('dur') || cfg.dur);
+  for (const [file, w, st] of [['Medium', 500, 'normal'], ['SemiBold', 600, 'normal'], ['Bold', 700, 'normal'], ['ExtraBold', 800, 'normal'],
+    ['Black', 900, 'normal'], ['BoldItalic', 700, 'italic'], ['ExtraBoldItalic', 800, 'italic'], ['ExtraBoldItalic', 900, 'italic']]) {
+    const f = new FontFace('BC', `url(../assets/fonts/BarlowCondensed-${file}.ttf)`, { weight: String(w), style: st });
+    document.fonts.add(await f.load());
+  }
+  for (const [file, w] of [['Medium', 500], ['SemiBold', 600], ['Bold', 700]]) {
+    const f = new FontFace('IN', `url(../assets/fonts/Inter-${file}.ttf)`, { weight: String(w), style: 'normal' });
+    document.fonts.add(await f.load());
+  }
+  const src = q.get('bg') || cfg.bg;
+  if (src) { bg = new Image(); bg.src = src; await bg.decode(); }
+})();
+</script>
+</body>
+</html>

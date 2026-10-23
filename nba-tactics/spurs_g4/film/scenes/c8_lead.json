@@ -1,0 +1,45 @@
+{
+ "_note": "C8 time with the lead (final scene). Times are seconds from scene start; VO s18 starts at vo_offset (scene times: Knicks 0.50, led 0.72, game 1.08, for 1.32, 53 1.54, .8 1.98, seconds 2.68, It 3.36, was 3.80, enough 3.90, ends 4.08). Last 0.4 s fades to black.",
+ "dur": 6.0,
+ "vo_line": "s18",
+ "vo_offset": 0.4,
+ "beats": {
+  "draw0": 0.12,
+  "draw1": 0.85,
+  "ping": 0.9,
+  "zoom0": 1.0,
+  "zoom1": 1.5,
+  "n53": 1.54,
+  "n8": 1.98,
+  "segs": 2.2,
+  "secs": 2.68,
+  "enough": 3.88,
+  "fade": 5.6
+ },
+ "sfx": [[0.1, "whoosh"], [0.9, "tick"], [1.0, "whoosh"], [1.54, "thud"], [1.98, "hit"], [2.2, "tick"], [2.68, "tick"], [3.88, "thud"]],
+ "data": {
+  "game_s": 2880.0,
+  "game_s_label": "2,880",
+  "segments": [[0.0, 18.0, "TIE"], [18.0, 39.0, "SAS"], [39.0, 51.0, "TIE"], [51.0, 2798.0, "SAS"], [2798.0, 2849.7, "NYK"], [2849.7, 2877.9, "SAS"], [2877.9, 2880.0, "NYK"]],
+  "nyk_total": 53.8,
+  "nyk_total_int": "53",
+  "nyk_total_frac": ".8",
+  "nyk_segments": [
+   {"t0": 2798.0, "t1": 2849.7, "dur": "51.7", "range": "1:22 → 0:30.3"},
+   {"t0": 2877.9, "t1": 2880.0, "dur": "2.1", "range": "0:02.1 → 0:00"}
+  ],
+  "zoom_t0": 2790.0,
+  "zoom_label": "4TH QTR · LAST 1:30",
+  "final_nyk": 107,
+  "final_sas": 106
+ },
+ "_sources": {
+  "all numbers": "spurs_g4/data/pbp.json (game_id 0042500404, 610 events), computed by film/work/c8_data.py",
+  "sides": "SAS = score_away (extend_info.location \"v\"), NYK = score_home (\"h\")",
+  "method": "events sorted by order_number; elapsed = (period-1)*720 + (720 - clock); leader state changes at the clock of each scoring event and holds until the next score change; regulation only (periods 1-4, no OT)",
+  "NYK led": "53.8 s total = 1:22 (NYK 105-104, Brunson 6' Driving Floating Jump Shot (36 PTS)) until 0:30.3 = 51.7 s; 0:02.1 (NYK 107-106, Anunoby Tip Layup Shot (33 PTS)) until the final horn = 2.1 s",
+  "totals": "SAS led 2796.2 s, tied 30.0 s, NYK led 53.8 s; sum 2880.0 = 4 x 720",
+  "final": "NYK 107 - SAS 106",
+  "render note": "segments narrower than 3 px in the full-game view are drawn at 3 px so the 2.1-s sliver is visible"
+ }
+}

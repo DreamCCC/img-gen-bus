@@ -1,0 +1,198 @@
+{
+ "_note": "C4 FIVE-OUT (e676). Times are seconds from scene start; VO s07 starts at vo_offset (words: That 0.00, pulls 0.12, Wembanyama 0.50, away 0.82, from 1.06, the 1.20, rim 1.34, One 1.60, screen 1.98, one 2.48, switch 2.96). data/_sources are written by film/work/c4_data.py.",
+ "dur": 4.4,
+ "vo_offset": 0.4,
+ "show_switch": true,
+ "header_clock": "2:23",
+ "rim_zone_r": 8,
+ "cam0": {
+  "eye": [9, -76, 46],
+  "target": [31, -1, 0],
+  "fov": 30.5,
+  "center": [960, 455]
+ },
+ "cam1": {
+  "eye": [13, -71, 42],
+  "target": [31, -1.5, 0],
+  "fov": 26,
+  "center": [960, 450]
+ },
+ "beats": {
+  "court": 0.0,
+  "header": 0.12,
+  "dots": 0.28,
+  "zone": 0.52,
+  "wemby": 0.9,
+  "away": 1.22,
+  "away_land": 1.72,
+  "rim": 1.74,
+  "screen": 2.38,
+  "switch": 3.36
+ },
+ "sfx": [
+  [0.04, "whoosh"],
+  [0.12, "thud"],
+  [0.28, "tick"],
+  [0.52, "whoosh"],
+  [0.9, "tick"],
+  [1.22, "whoosh"],
+  [1.72, "thud"],
+  [1.74, "hit"],
+  [2.38, "tick"],
+  [3.36, "hit"]
+ ],
+ "data": {
+  "event_id": 676,
+  "period": 4,
+  "clock_tracking": "2:23",
+  "clock_pbp": "PT02M21.00S",
+  "shot_clock": 4.8,
+  "shot_distance": 27.02,
+  "score_before": {
+   "sas": 104,
+   "nyk": 100
+  },
+  "score_after": {
+   "sas": 104,
+   "nyk": 103
+  },
+  "pbp_desc": "Brunson 27' 3PT Pullup Jump Shot (34 PTS) (Alvarado 3 AST)",
+  "hoop": [41.75, 0.0],
+  "rim_zone_r": 8.0,
+  "players": [
+   {
+    "id": 1630631,
+    "name": "ALVARADO",
+    "full": "Jose Alvarado",
+    "team": "NYK",
+    "x": 14.83,
+    "y": -0.12,
+    "d_rim": 26.92
+   },
+   {
+    "id": 1628384,
+    "name": "ANUNOBY",
+    "full": "OG Anunoby",
+    "team": "NYK",
+    "x": 20.04,
+    "y": 16.6,
+    "d_rim": 27.33
+   },
+   {
+    "id": 1628973,
+    "name": "BRUNSON",
+    "full": "Jalen Brunson",
+    "team": "NYK",
+    "x": 23.82,
+    "y": -20.19,
+    "d_rim": 27.01
+   },
+   {
+    "id": 1628404,
+    "name": "HART",
+    "full": "Josh Hart",
+    "team": "NYK",
+    "x": 34.36,
+    "y": 22.47,
+    "d_rim": 23.65
+   },
+   {
+    "id": 1626157,
+    "name": "TOWNS",
+    "full": "Karl-Anthony Towns",
+    "team": "NYK",
+    "x": 41.15,
+    "y": 9.1,
+    "d_rim": 9.11
+   },
+   {
+    "id": 1642264,
+    "name": "CASTLE",
+    "full": "Stephon Castle",
+    "team": "SAS",
+    "x": 40.83,
+    "y": 6.73,
+    "d_rim": 6.79
+   },
+   {
+    "id": 1642844,
+    "name": "HARPER",
+    "full": "Dylan Harper",
+    "team": "SAS",
+    "x": 35.28,
+    "y": 11.84,
+    "d_rim": 13.49
+   },
+   {
+    "id": 1641705,
+    "name": "WEMBANYAMA",
+    "full": "Victor Wembanyama",
+    "team": "SAS",
+    "x": 26.05,
+    "y": -15.27,
+    "d_rim": 21.9
+   }
+  ],
+  "missing": [
+   {
+    "id": 1628368,
+    "name": "FOX",
+    "team": "SAS"
+   },
+   {
+    "id": 1630170,
+    "name": "VASSELL",
+    "team": "SAS"
+   }
+  ],
+  "wemby_rim_ft": 21.9,
+  "wemby_brunson_ft": 5.4,
+  "closest_def_joint": "WEMBANYAMA",
+  "closest_def_com": "WEMBANYAMA",
+  "in_rim_zone": [
+   {
+    "name": "CASTLE",
+    "team": "SAS",
+    "d": 6.79
+   }
+  ],
+  "spur_in_rim_zone": true,
+  "towns_rim_ft": 9.1,
+  "nearest_spur": {
+   "BRUNSON": [
+    "WEMBANYAMA",
+    5.4
+   ],
+   "ALVARADO": [
+    "WEMBANYAMA",
+    18.86
+   ],
+   "HART": [
+    "HARPER",
+    10.67
+   ],
+   "TOWNS": [
+    "CASTLE",
+    2.39
+   ],
+   "ANUNOBY": [
+    "HARPER",
+    15.97
+   ]
+  }
+ },
+ "_sources": {
+  "positions": "data/shot_detail.json row event_id=676 (game 0042500404), ext.playersOnCourt[].centroid (inches, center-court origin) / 12 -> ft",
+  "hoop": "rim center (41.75, 0) ft by NBA geometry; check |Brunson - hoop| = 27.01 vs ext.features.shotDistance 27.02",
+  "wemby_rim_ft": "hypot(Wembanyama(1641705) - hoop) = 21.90 ft",
+  "wemby_brunson_ft": "hypot(Wembanyama - Brunson(1628973)) = 5.402 ft; ext.defensiveInfo.jointDefenderId = comDefenderId = 1641705",
+  "rim_zone": "8 ft radius around hoop; tracked players inside: [{'name': 'CASTLE', 'team': 'SAS', 'd': 6.79}]",
+  "clock": "tracking ext.gameClockTime 2:23 (shot release); pbp action 676 clock PT02M21.00S",
+  "score": "pbp 675 -> 676: SAS 104 NYK 100 -> SAS 104 NYK 103 (score_away = SAS, score_home = NYK)",
+  "lineup": "pbs.json starters + every pbp substitution row before action 676 (by person_id); tracked players all in that lineup",
+  "missing": [
+   "De'Aaron Fox",
+   "Devin Vassell"
+  ]
+ }
+}

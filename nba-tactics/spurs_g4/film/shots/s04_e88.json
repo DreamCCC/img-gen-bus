@@ -1,0 +1,62 @@
+{
+ "_note": "Wembanyama 25ft 3PT (Harper ast), Q1 5:51, SAS 25-12. Release f203, ball through rim f240. xFG = shot_detail.expected_fg 0.342.",
+ "src": "raw/2606110908252902.mp4",
+ "out": "out/s04/s04_e88.mp4",
+ "audio_db": -14,
+ "segs": [
+  {
+   "kind": "play",
+   "from": 199,
+   "to": 247,
+   "speed": 1
+  }
+ ],
+ "flash": [
+  [
+   1.367,
+   0.5,
+   5
+  ]
+ ],
+ "callouts": [
+  {
+   "t": [
+    0.103,
+    0.753
+   ],
+   "kind": "tag",
+   "x": 480,
+   "y": 760,
+   "text": "#1 WEMBANYAMA",
+   "color": "silver",
+   "to": [
+    325,
+    640
+   ]
+  },
+  {
+   "t": [
+    0.133,
+    2.0
+   ],
+   "kind": "stat",
+   "x": 70,
+   "y": 845,
+   "label": "xFG",
+   "value": "34%",
+   "color": "white"
+  },
+  {
+   "t": [
+    1.297,
+    2.0
+   ],
+   "kind": "label",
+   "x": 1124,
+   "y": 252,
+   "text": "+3",
+   "color": "green",
+   "size": 110
+  }
+ ]
+}

@@ -1,0 +1,38 @@
+{
+ "_note": "Shot 4 montage clip 1/4. e13 Vassell #24 26' 3PT (Castle ast), Q1 11:09 PBP (scorebug 11:11), SAS 2-2 -> 5-2. NGSS expFieldGoalPct 0.3469 -> 'xFG 35%', made. Release f141, ball through rim f185. Speed 1 only; arena audio is replaced afterwards by the source window at -14 dB (film/out/s04/_tools/build_s04.py), render_play's own mix is not used.",
+ "work": "work/e13",
+ "fps": 30,
+ "size": [1920, 1080],
+ "orig": "work/e13/fr/orig",
+ "audio_src": "work/e13/2606110853187102.wav",
+ "vo": {"lines": "film/audio/vo_en/lines.json", "dir": "film/audio/vo_en"},
+ "out": "film/out/s04/clips/e13_s04.mp4",
+ "bed": false,
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "lang": "en",
+ "fonts": {
+  "zh": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "zhr": ["../assets/fonts/BarlowCondensed-Medium.ttf", null],
+  "num": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "numw": ["../assets/fonts/BarlowCondensed-Black.ttf", null]
+ },
+ "colors": {"gold": [232, 236, 240], "green": [40, 205, 110], "orange": [245, 132, 38], "navy": [35, 31, 32], "red": [200, 16, 46], "blue": [29, 66, 138]},
+ "teams": {"SAS": [196, 206, 212], "NYK": [0, 107, 182]},
+ "style": {"VS": "gold", "VSg": "green"},
+ "names": {"VS": "VASSELL", "VSg": "VASSELL"},
+ "anchors": {"rim": [185, 1284, 255]},
+ "segments": [
+  {"id": "live", "kind": "play", "from": 138, "to": 191, "speed": 1, "audio_db": -14}
+ ],
+ "layers": [
+  {"type": "ring", "keys": ["VS"], "pulse": true, "on": "live", "off": "live+0.45"},
+  {"type": "ring", "keys": ["VS"], "on": "live", "off": "live+1.717"},
+  {"type": "tag", "keys": ["VS"], "on": "live", "off": "live.end+1"},
+  {"type": "note", "key": "VS", "text": "xFG 35%", "color": "gold", "on": "live+0.10", "off": "live+1.667"},
+  {"type": "ring", "keys": ["VSg"], "on": "live+1.467", "off": "live.end+1"},
+  {"type": "ring", "keys": ["VSg"], "pulse": true, "on": "live+1.567", "off": "live.end+1"},
+  {"type": "note", "key": "VSg", "text": "xFG 35%", "color": "green", "on": "live+1.567", "off": "live.end+1"}
+ ]
+}

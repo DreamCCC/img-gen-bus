@@ -1,0 +1,38 @@
+{
+ "_note": "Shot 4 montage clip 3/4. e88 Wembanyama #1 25' 3PT (Harper ast), Q1 5:51 PBP (scorebug 5:53), SAS 22-12 -> 25-12. NGSS expFieldGoalPct 0.3420 -> 'xFG 34%', made. Release f203, ball through rim f240 (he leaves frame left ~f244). Speed 1 only; arena audio is replaced afterwards by the source window at -14 dB (film/out/s04/_tools/build_s04.py), render_play's own mix is not used.",
+ "work": "work/e88",
+ "fps": 30,
+ "size": [1920, 1080],
+ "orig": "work/e88/fr/orig",
+ "audio_src": "work/e88/2606110908252902.wav",
+ "vo": {"lines": "film/audio/vo_en/lines.json", "dir": "film/audio/vo_en"},
+ "out": "film/out/s04/clips/e88_s04.mp4",
+ "bed": false,
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "lang": "en",
+ "fonts": {
+  "zh": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "zhr": ["../assets/fonts/BarlowCondensed-Medium.ttf", null],
+  "num": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "numw": ["../assets/fonts/BarlowCondensed-Black.ttf", null]
+ },
+ "colors": {"gold": [232, 236, 240], "green": [40, 205, 110], "orange": [245, 132, 38], "navy": [35, 31, 32], "red": [200, 16, 46], "blue": [29, 66, 138]},
+ "teams": {"SAS": [196, 206, 212], "NYK": [0, 107, 182]},
+ "style": {"VW": "gold", "VWg": "green"},
+ "names": {"VW": "WEMBANYAMA", "VWg": "WEMBANYAMA"},
+ "anchors": {"rim": [240, 1294, 246]},
+ "segments": [
+  {"id": "live", "kind": "play", "from": 199, "to": 244, "speed": 1, "audio_db": -14}
+ ],
+ "layers": [
+  {"type": "ring", "keys": ["VW"], "pulse": true, "on": "live", "off": "live+0.45"},
+  {"type": "ring", "keys": ["VW"], "on": "live", "off": "live+1.517"},
+  {"type": "tag", "keys": ["VW"], "on": "live", "off": "live.end+1"},
+  {"type": "note", "key": "VW", "text": "xFG 34%", "color": "gold", "on": "live+0.133", "off": "live+1.467"},
+  {"type": "ring", "keys": ["VWg"], "on": "live+1.267", "off": "live.end+1"},
+  {"type": "ring", "keys": ["VWg"], "pulse": true, "on": "live+1.367", "off": "live.end+1"},
+  {"type": "note", "key": "VWg", "text": "xFG 34%", "color": "green", "on": "live+1.367", "off": "live.end+1"}
+ ]
+}

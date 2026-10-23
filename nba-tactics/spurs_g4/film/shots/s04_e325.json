@@ -1,0 +1,62 @@
+{
+ "_note": "Harper 26ft 3PT (Fox ast), Q2 3:47, SAS 69-42. Release f171, ball through rim f201. xFG = shot_detail.expected_fg 0.3733.",
+ "src": "raw/2606110959171102.mp4",
+ "out": "out/s04/s04_e325.mp4",
+ "audio_db": -14,
+ "segs": [
+  {
+   "kind": "play",
+   "from": 167,
+   "to": 208,
+   "speed": 1
+  }
+ ],
+ "flash": [
+  [
+   1.133,
+   0.5,
+   5
+  ]
+ ],
+ "callouts": [
+  {
+   "t": [
+    0.103,
+    0.753
+   ],
+   "kind": "tag",
+   "x": 380,
+   "y": 640,
+   "text": "#2 HARPER",
+   "color": "silver",
+   "to": [
+    590,
+    690
+   ]
+  },
+  {
+   "t": [
+    0.133,
+    1.767
+   ],
+   "kind": "stat",
+   "x": 70,
+   "y": 845,
+   "label": "xFG",
+   "value": "37%",
+   "color": "white"
+  },
+  {
+   "t": [
+    1.063,
+    1.767
+   ],
+   "kind": "label",
+   "x": 1077,
+   "y": 230,
+   "text": "+3",
+   "color": "green",
+   "size": 110
+  }
+ ]
+}

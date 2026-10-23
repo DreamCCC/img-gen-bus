@@ -1,0 +1,282 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="court3d.js"></script>
+<script>
+// C4 FIVE-OUT: e676 tracking snapshot (Brunson pull-up 3, Q4). Wemby dragged 21.9 ft from the rim, on Brunson at 5.4 ft.
+// Positions/numbers come from c4_fiveout.json `data` (written by film/work/c4_data.py); beats/sfx live there too.
+const W = 1920, H = 1080;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const { Court, C, D, camLerp, backdrop, vignette, loadFonts, glowStroke, ease: { cl, eo, eio, back, lerp } } = Court3D;
+let cfg, B, DATA, court;
+const P = (t, k, d = 0.25) => eo((t - B[k]) / d);
+const pl = {};
+const LAYOUT = {
+  ANUNOBY: { stem: 3, dx: 120 }, CASTLE: { stem: 3, dx: 84 }, TOWNS: { stem: 8.5, dx: 10 }, HARPER: { stem: 4.5, dx: 70 }, HART: { stem: 3 },
+  BRUNSON: { stem: 1.2, dx: -150 },
+};
+
+function text(s, x, y, size, color, { weight = 800, italic = true, align = 'left', alpha = 1, track = 0, fam = 'BC' } = {}) {
+  ctx.save();
+  ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px ${fam}`;
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'alphabetic';
+  if (track) ctx.letterSpacing = track + 'px';
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function measure(s, size, weight = 800, italic = true, track = 0, fam = 'BC') {
+  ctx.save(); ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px ${fam}`; if (track) ctx.letterSpacing = track + 'px';
+  const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+function plate(x, y, w, h, fill, skew = 16, alpha = 1) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(x + skew, y); ctx.lineTo(x + w + skew, y); ctx.lineTo(x + w - skew, y + h); ctx.lineTo(x - skew, y + h);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function flash(t, at, d = 0.22, peak = 0.55) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return;
+  ctx.save(); ctx.globalAlpha = peak * Math.pow(1 - a, 2); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+function shakeAt(t, at, amp = 10, d = 0.25) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return [0, 0];
+  const k = amp * (1 - a);
+  return [k * Math.sin(t * 173), k * Math.cos(t * 131)];
+}
+
+// ---------------------------------------------------------------- layers
+
+function drawHeader(t) {
+  const q = eo((t - B.header) / 0.3);
+  if (q <= 0) return;
+  const x = lerp(-640, 70, back((t - B.header) / 0.36, 1.2));
+  const title = 'FIVE-OUT', clock = `Q4 ${cfg.header_clock}`;
+  const tw = measure(title, 72, 900), cw = measure(clock, 52, 800);
+  const w = 24 + tw + 30 + cw + 34;
+  plate(x, 52, w, 80, C.red);
+  text(title, x + 24, 117, 72, C.white, { weight: 900 });
+  ctx.save(); ctx.globalAlpha = 0.55; ctx.fillStyle = '#fff'; ctx.fillRect(x + 24 + tw + 12, 70, 4, 46); ctx.restore();
+  text(clock, x + 24 + tw + 30, 113, 52, C.white, { weight: 800 });
+  const s = DATA.score_before;
+  const q2 = eo((t - B.header - 0.1) / 0.3);
+  const x2 = lerp(-640, 76, q2);
+  plate(x2, 138, 560, 40, 'rgba(29,66,138,0.95)', 12);
+  text(`SAS ${s.sas}  ·  NYK ${s.nyk}  ·  BRUNSON ${Math.round(DATA.shot_distance)}-FT PULL-UP 3`, x2 + 22, 167, 27, C.white, { weight: 600, italic: false, track: 1 });
+  footnote(t, ['NBA TRACKING · POSITIONS AT RELEASE', DATA.missing.map((m) => m.name).join(', ') + ' NOT CAPTURED']);
+}
+
+function footnote(t, lines) {
+  const q = eo((t - B.header - 0.2) / 0.3);
+  if (q <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = q;
+  ctx.fillStyle = C.red; ctx.fillRect(1846, 58, 4, 44);
+  lines.forEach((s, i) => text(s, 1834, 76 + i * 22, 15, i ? 'rgba(196,206,212,0.6)' : 'rgba(196,206,212,0.85)', { weight: 600, italic: false, track: 2, fam: 'IN', align: 'right' }));
+  ctx.restore();
+}
+
+function teamColor(p) { return p.team === 'NYK' ? C.nyk : C.sas; }
+
+function drawZone(t) {
+  const [hx, hy] = DATA.hoop;
+  const g = back((t - B.zone) / 0.4, 1.6);
+  if (t < B.zone) return;
+  const red = eo((t - B.rim) / 0.12);
+  const fl = t > B.rim ? (0.65 + 0.35 * Math.abs(Math.sin((t - B.rim) * 31)) * (Math.sin((t - B.rim) * 7.3) > -0.2 ? 1 : 0.35)) : 1;
+  const col = red > 0.5 ? C.neg : '#3D9BFF';
+  const pulse = ((t - B.zone) * 0.9) % 1;
+  court.zone(hx, hy, cfg.rim_zone_r, { color: col, alpha: (red > 0 ? fl : 1) * cl((t - B.zone) / 0.15), grow: g, pulse });
+}
+
+function zoneTag(t) {
+  if (t < B.zone + 0.15) return;
+  const [hx, hy] = DATA.hoop;
+  const a = court.project([hx + cfg.rim_zone_r * 0.7, hy - cfg.rim_zone_r * 0.7, 0]);
+  const red = t >= B.rim;
+  if (!red) {
+    const q = eo((t - B.zone - 0.15) / 0.25);
+    ctx.save(); ctx.globalAlpha = q; ctx.fillStyle = '#9CC8FF'; ctx.fillRect(a[0] + 34, a[1] + 6, 4, 46); ctx.restore();
+    text('RIM ZONE', a[0] + 48, a[1] + 26, 30, C.white, { weight: 800, alpha: q });
+    text(`${cfg.rim_zone_r} FT RADIUS`, a[0] + 48, a[1] + 50, 16, '#9CC8FF', { weight: 700, italic: false, fam: 'IN', track: 3, alpha: q });
+    return;
+  }
+  const u = t - B.rim;
+  const k = lerp(1.7, 1, back(u / 0.3, 2.4));
+  const rim = court.project([hx, hy, D.RIM_Z]);
+  const tx = rim[0] + 270, ty = rim[1] + 70;
+  glowStroke(ctx, [[rim[0] + 40, rim[1] + 30], [tx - 150, ty - 30]], C.neg, 2.2, { alpha: cl(u / 0.1), glow: 0.6 });
+  ctx.save();
+  ctx.translate(tx, ty); ctx.rotate(-0.035); ctx.scale(k, k);
+  ctx.globalAlpha = cl(u / 0.06) * (u < 0.5 ? (Math.sin(u * 60) > -0.3 ? 1 : 0.4) : 1);
+  ctx.shadowColor = C.neg; ctx.shadowBlur = 34;
+  const w = measure('RIM: NO WEMBY', 58, 900) + 60;
+  plate(-w / 2, -64, w, 72, C.red, 14);
+  ctx.shadowBlur = 0;
+  text('RIM: NO WEMBY', 0, -10, 58, C.white, { weight: 900, align: 'center' });
+  ctx.restore();
+}
+
+function drawGravity(t) {
+  if (t < B.away) return;
+  const [hx, hy] = DATA.hoop, w = pl.WEMBANYAMA;
+  const f = eio((t - B.away) / (B.away_land - B.away));
+  const tip = court.path([[hx, hy], [w.x, w.y]], { color: '#FFFFFF', width: 3.2, dash: [14, 10], dashOffset: -t * 60, frac: f, glow: 0.9 });
+  return tip;
+}
+
+function gravityLabel(t) {
+  if (t < B.away) return;
+  const w = pl.WEMBANYAMA;
+  const f = eio((t - B.away) / (B.away_land - B.away));
+  const val = (DATA.wemby_rim_ft * f).toFixed(1);
+  const [hx, hy] = DATA.hoop;
+  const mid = court.project([lerp(hx, w.x, 0.5), lerp(hy, w.y, 0.5), 0]);
+  const land = t - B.away_land;
+  const k = land > 0 ? lerp(1.3, 1, back(land / 0.3, 2.2)) : 1;
+  const q = eo((t - B.away) / 0.2);
+  ctx.save();
+  ctx.translate(mid[0] + 70, mid[1] + 70);
+  ctx.globalAlpha = q;
+  ctx.scale(k, k);
+  const nw = measure(val, 92, 900);
+  ctx.save(); ctx.fillStyle = 'rgba(6,12,26,0.82)'; ctx.beginPath();
+  ctx.moveTo(-14, -84); ctx.lineTo(nw + 120, -84); ctx.lineTo(nw + 104, 34); ctx.lineTo(-30, 34); ctx.closePath(); ctx.fill(); ctx.restore();
+  ctx.fillStyle = C.white; ctx.fillRect(-14, -84, nw + 134, 3);
+  text(val, 0, 0, 92, C.white, { weight: 900 });
+  text('FT', nw + 10, 0, 44, C.silver, { weight: 800 });
+  text('FROM THE RIM', 0, 26, 19, '#9CC8FF', { weight: 700, italic: false, fam: 'IN', track: 3 });
+  ctx.restore();
+}
+
+function drawSwitch(t) {
+  if (t < B.switch - 0.12) return;
+  const w = pl.WEMBANYAMA, b = pl.BRUNSON;
+  const f = eo((t - B.switch + 0.12) / 0.2);
+  const dx = b.x - w.x, dy = b.y - w.y, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L;
+  const k = 1.5;
+  const a0 = [w.x, w.y], b0 = [b.x, b.y];
+  court.path([a0, b0], { color: C.white, width: 5, frac: f, glow: 1.4 });
+  for (const p of [a0, b0]) court.path([[p[0] - nx * k, p[1] - ny * k], [p[0] + nx * k, p[1] + ny * k]], { color: C.white, width: 4, frac: f, glow: 1 });
+}
+
+function switchLabel(t) {
+  const u = t - B.switch;
+  if (u < 0) return;
+  const w = pl.WEMBANYAMA, b = pl.BRUNSON;
+  const m = court.project([(w.x + b.x) / 2, (w.y + b.y) / 2, 0]);
+  const s = cfg.show_switch ? 'SWITCH' : 'CLOSEST DEFENDER';
+  const n = `${DATA.wemby_brunson_ft.toFixed(1)} FT`;
+  const k = lerp(1.6, 1, back(u / 0.3, 2.4));
+  const x = m[0] + 150, y = m[1] + 26;
+  ctx.save();
+  glowStroke(ctx, [[m[0] + 16, m[1] + 4], [x - 10, y]], C.white, 2, { alpha: cl(u / 0.1), glow: 0.5 });
+  ctx.translate(x, y); ctx.rotate(-0.03); ctx.scale(k, k);
+  ctx.globalAlpha = cl(u / 0.06);
+  const sw = measure(s, 60, 900), nw = measure(n, 60, 900);
+  const tw = sw + 40 + nw;
+  ctx.shadowColor = C.red; ctx.shadowBlur = 30;
+  plate(0, -38, tw + 56, 76, C.red, 14);
+  ctx.shadowBlur = 0;
+  text(s, 24, 22, 60, C.white, { weight: 900 });
+  ctx.save(); ctx.globalAlpha *= 0.6; ctx.fillStyle = '#fff'; ctx.fillRect(24 + sw + 16, -22, 4, 44); ctx.restore();
+  text(n, 24 + sw + 40, 22, 60, C.white, { weight: 900 });
+  ctx.restore();
+}
+
+function callouts(t) {
+  // VO echo, right column
+  const rows = [['ONE SCREEN', B.screen, true], ['ONE SWITCH', B.switch, cfg.show_switch]];
+  rows.forEach(([s, at, on], i) => {
+    if (!on) return;
+    const u = t - at;
+    if (u < 0) return;
+    const k = lerp(1.5, 1, back(u / 0.28, 2.2));
+    ctx.save();
+    ctx.translate(1850, 520 + i * 92); ctx.scale(k, k);
+    ctx.globalAlpha = cl(u / 0.06);
+    text(s, 0, 0, 84, i ? C.white : 'rgba(244,246,248,0.92)', { weight: 900, align: 'right' });
+    ctx.restore();
+  });
+}
+
+function drawPlayers(t) {
+  const list = DATA.players.slice().sort((a, b) => court.depth(b.x, b.y) - court.depth(a.x, a.y));
+  for (const [i, p] of list.entries()) {
+    const at = B.dots + 0.035 * i;
+    const pop = back((t - at) / 0.3, 2.2);
+    if (t < at) continue;
+    const isW = p.name === 'WEMBANYAMA', isB = p.name === 'BRUNSON';
+    const hot = isW ? eo((t - B.wemby) / 0.2) * (0.75 + 0.25 * Math.sin(t * 9)) : 0;
+    const pulse = isW && t > B.wemby ? ((t - B.wemby) / 0.9) % 1 : -1;
+    court.dot(p.x, p.y, { color: teamColor(p), ring: p.team === 'NYK' ? C.nykBlue : '#FFFFFF', pop, hot, pulse, r: isW ? 1.15 : 1.0 });
+  }
+}
+
+function drawLabels(t) {
+  const list = DATA.players.slice().sort((a, b) => court.depth(b.x, b.y) - court.depth(a.x, a.y));
+  for (const [i, p] of list.entries()) {
+    const at = B.dots + 0.1 + 0.035 * i;
+    if (t < at) continue;
+    const isW = p.name === 'WEMBANYAMA', isB = p.name === 'BRUNSON';
+    const q = eo((t - at) / 0.25);
+    const hi = isW ? eo((t - B.wemby) / 0.2) : 0;
+    const dim = t > B.wemby && !isW && !isB && p.name !== 'TOWNS' && p.name !== 'CASTLE' ? 0.6 : 1;
+    const lay = LAYOUT[p.name] || {};
+    court.label(p.x, p.y, p.name, {
+      color: teamColor(p), alpha: q * dim, pop: lerp(0.6, 1, back((t - at) / 0.3, 2)), hi, scale: isW ? lerp(1, 1.25, hi) : 1,
+      sub: p.name === 'TOWNS' ? 'CENTER' : null, stem: lay.stem || (isW ? 8 : 6.5), dx: lay.dx || 0, dy: lay.dy || 0,
+    });
+  }
+}
+
+window.renderFrame = async (t) => {
+  ctx.clearRect(0, 0, W, H);
+  backdrop(ctx, t);
+  const [sx, sy] = [B.away_land, B.rim, B.switch].map((a) => shakeAt(t, a, 8)).reduce((p, q) => [p[0] + q[0], p[1] + q[1]]);
+  ctx.save(); ctx.translate(sx, sy);
+  court.setCamera(camLerp(cfg.cam0, cfg.cam1, eio(t / window.DURATION)));
+  court.drawFloor(t, { alpha: eo((t - B.court) / 0.3), draw: eio((t - B.court) / 0.6) });
+  drawZone(t);
+  drawGravity(t);
+  drawSwitch(t);
+  drawPlayers(t);
+  court.drawHoop({ alpha: eo((t - B.court - 0.15) / 0.3), rimColor: t >= B.rim ? C.neg : C.rim });
+  drawLabels(t);
+  zoneTag(t);
+  gravityLabel(t);
+  switchLabel(t);
+  callouts(t);
+  drawHeader(t);
+  ctx.restore();
+  vignette(ctx);
+  flash(t, B.away_land, 0.12, 0.32);
+  flash(t, B.switch, 0.12, 0.35);
+};
+
+window.FPS = 30;
+window.ready = (async () => {
+  cfg = await (await fetch('c4_fiveout.json')).json();
+  B = cfg.beats; DATA = cfg.data;
+  for (const p of DATA.players) pl[p.name] = p;
+  const q = new URLSearchParams(location.search);
+  window.DURATION = parseFloat(q.get('dur') || cfg.dur);
+  if (q.get('show_switch')) cfg.show_switch = q.get('show_switch') === '1';
+  await loadFonts();
+  court = new Court(ctx, cfg.cam0);
+})();
+</script>
+</body>
+</html>

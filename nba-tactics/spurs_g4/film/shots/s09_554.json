@@ -1,0 +1,115 @@
+{
+ "_note": "PBP 554 Q4 11:48 Wembanyama 4ft driving layup MISS. Src = Q4 reel 2606111151336101.mp4 0.0-6.0 s (clip f = reel f). Release ~f96, ball on rim f98-104 (camera flash f100), Robinson #23 rebounds. NGSS defensiveInfo.jointBallDistance 23.959 in = 2.0 ft, defender Mitchell Robinson #23 (lPinky). Line = Robinson raised hand -> ball as read on f96.",
+ "src": "work/q4miss/s09_e554.mp4",
+ "out": "out/s09/s09_554.mp4",
+ "audio_db": -14,
+ "segs": [
+  {
+   "kind": "play",
+   "from": 74,
+   "to": 96,
+   "speed": 1
+  },
+  {
+   "kind": "freeze",
+   "at": 96,
+   "dur": 0.55,
+   "spot": [
+    [
+     850,
+     430,
+     62,
+     155
+    ],
+    [
+     895,
+     500,
+     70,
+     130
+    ]
+   ]
+  },
+  {
+   "kind": "play",
+   "from": 96,
+   "to": 114,
+   "speed": 1
+  }
+ ],
+ "flash": [
+  [
+   0.733,
+   0.35,
+   3
+  ]
+ ],
+ "callouts": [
+  {
+   "t": [
+    0,
+    2.183333333333333
+   ],
+   "kind": "stat",
+   "x": 1600,
+   "y": 250,
+   "label": "Q4 FG",
+   "value": "4/19",
+   "color": "white"
+  },
+  {
+   "t": [
+    0.7633333333333333,
+    1.2833333333333332
+   ],
+   "kind": "tag",
+   "x": 560,
+   "y": 250,
+   "text": "#1 WEMBANYAMA",
+   "color": "silver",
+   "to": [
+    845,
+    350
+   ]
+  },
+  {
+   "t": [
+    0.8133333333333332,
+    1.2833333333333332
+   ],
+   "kind": "line",
+   "a": [
+    900,
+    385
+   ],
+   "b": [
+    876,
+    313
+   ],
+   "color": "gold"
+  },
+  {
+   "t": [
+    0.8333333333333333,
+    1.2833333333333332
+   ],
+   "kind": "label",
+   "x": 880,
+   "y": 235,
+   "text": "HAND 2.0 FT",
+   "color": "gold",
+   "size": 58
+  },
+  {
+   "t": [
+    1.42,
+    2.183333333333333
+   ],
+   "kind": "label",
+   "x": 690,
+   "y": 215,
+   "text": "MISS",
+   "color": "red",
+   "size": 84
+  }
+ ]
+}

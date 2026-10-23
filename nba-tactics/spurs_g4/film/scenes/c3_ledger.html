@@ -1,0 +1,379 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// C3 BORROWED / PAID BACK: SAS field-goal points, actual vs expected (sum of xFG x shot value), per half; the two balances cancel to NET.
+// Hard cut in mid-VO: row 1 is already on screen at t=0. Beats + ledger numbers live in c3_ledger.json (ledger block written by film/work/c3_compute.py).
+const W = 1920, H = 1080;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const C = {
+  navy: '#0A1428', red: '#C8102E', blue: '#1D428A', blueHi: '#3D7BFF', silver: '#C4CED4', white: '#F4F6F8',
+  green: '#2BD67B', neg: '#FF3B3B',
+};
+const cl = (x) => Math.min(1, Math.max(0, x));
+const eo = (x) => 1 - Math.pow(1 - cl(x), 3);
+const eio = (x) => { x = cl(x); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const back = (x, k = 1.8) => { x = cl(x) - 1; return 1 + x * x * ((k + 1) * x + k); };
+const lerp = (a, b, t) => a + (b - a) * t;
+let B = {}, L = null;
+
+function text(s, x, y, size, color, { weight = 800, italic = true, align = 'left', alpha = 1, track = 0, fam = 'BC' } = {}) {
+  ctx.save();
+  ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px ${fam}`;
+  ctx.globalAlpha *= alpha;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'alphabetic';
+  if (track) ctx.letterSpacing = track + 'px';
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function measure(s, size, weight = 800, italic = true, fam = 'BC') {
+  ctx.save(); ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px ${fam}`; const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+function platePath(x, y, w, h, skew) {
+  ctx.beginPath();
+  ctx.moveTo(x + skew, y); ctx.lineTo(x + w + skew, y); ctx.lineTo(x + w - skew, y + h); ctx.lineTo(x - skew, y + h);
+  ctx.closePath();
+}
+function plate(x, y, w, h, fill, skew = 16, alpha = 1) {
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.fillStyle = fill; platePath(x, y, w, h, skew); ctx.fill(); ctx.restore();
+}
+function flash(t, at, d = 0.2, peak = 0.4) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return;
+  ctx.save(); ctx.globalAlpha = peak * Math.pow(1 - a, 2); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+function shakeAt(t, at, amp = 10, d = 0.25) {
+  const a = (t - at) / d;
+  if (a < 0 || a > 1) return [0, 0];
+  const k = amp * (1 - a);
+  return [k * Math.sin(t * 173), k * Math.cos(t * 131)];
+}
+function rnd(i) { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+const fmt = (v) => (v > 0 ? '+' : v < 0 ? '\u2212' : '') + Math.abs(v);
+
+// ---------------------------------------------------------------- background
+
+function drawBg(t) {
+  const g = ctx.createRadialGradient(W * 0.5, H * 0.45, 0, W * 0.5, H * 0.45, W * 0.72);
+  g.addColorStop(0, '#13244A'); g.addColorStop(0.45, '#0A1428'); g.addColorStop(1, '#010205');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(120,160,255,0.045)';
+  const off = (t * 6) % 48;
+  for (let x = -off; x < W; x += 48) ctx.fillRect(x, 0, 1, H);
+  for (let y = -off; y < H; y += 48) ctx.fillRect(0, y, W, 1);
+  ctx.save();
+  ctx.strokeStyle = 'rgba(200,220,255,0.05)'; ctx.lineWidth = 3;
+  const cx = W / 2 + t * 8;
+  ctx.beginPath(); ctx.arc(cx, H / 2, 300, 0, 7); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, H / 2, 100, 0, 7); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, -10); ctx.lineTo(cx, H + 10); ctx.stroke();
+  ctx.strokeRect(cx - 1700, H / 2 - 400, 1000, 800);
+  ctx.strokeRect(cx + 700, H / 2 - 400, 1000, 800);
+  ctx.restore();
+  ctx.save();
+  for (let i = 0; i < 70; i++) {
+    const sp = 8 + rnd(i) * 22;
+    const x = (rnd(i + 100) * (W + 200) + t * sp) % (W + 200) - 100;
+    const y = (rnd(i + 200) * (H + 100) - t * sp * 0.6 + H + 100) % (H + 100) - 50;
+    const r = 1 + rnd(i + 300) * 2.2;
+    ctx.globalAlpha = 0.12 + 0.22 * rnd(i + 400) * (0.6 + 0.4 * Math.sin(t * 2 + i));
+    ctx.fillStyle = rnd(i + 500) > 0.7 ? C.blueHi : '#fff';
+    ctx.fillRect(x, y, r, r);
+  }
+  ctx.restore();
+  const s = ((t * 240 + 500) % (W + 1200)) - 700;
+  const sg = ctx.createLinearGradient(s, 0, s + 600, H);
+  sg.addColorStop(0, 'rgba(61,123,255,0)'); sg.addColorStop(0.5, 'rgba(61,123,255,0.05)'); sg.addColorStop(1, 'rgba(61,123,255,0)');
+  ctx.fillStyle = sg; ctx.fillRect(0, 0, W, H);
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.4, W / 2, H / 2, H);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.5)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+}
+
+// ---------------------------------------------------------------- layout
+
+const X0 = 150, X1 = 1770;
+const CE = 860, CA = 1110;
+const TAGX = 1290, TAGW = 430, TAGH = 104;
+const R1 = 268, R2 = 434, RH = 150, RN = 640;
+const BAR = { x: X0 + 4, w: 470, max: 75 };
+
+function drawHeader(t) {
+  const q = eo(t / 0.25);
+  const x = lerp(40, 70, q);
+  plate(x, 56, 380, 74, C.red);
+  text('THE LEDGER', x + 24, 116, 64, C.white, { weight: 900 });
+  plate(x + 6, 136, 640, 40, 'rgba(29,66,138,0.95)', 12);
+  text('SAS FIELD-GOAL POINTS · ACTUAL VS EXPECTED', x + 24, 165, 24, C.white, { fam: 'IN', weight: 700, italic: false, track: 1.2 });
+}
+
+function drawColumns(t) {
+  const q = eo(t / 0.2);
+  ctx.save(); ctx.translate(0, lerp(8, 0, q));
+  for (const [s, x] of [['EXPECTED', CE], ['ACTUAL', CA], ['BALANCE', TAGX + TAGW / 2]]) text(s, x, 236, 22, C.silver, { fam: 'IN', weight: 700, italic: false, align: 'center', track: 4 });
+  ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(X0 - 20, 252, X1 - X0 + 40, 2);
+  ctx.restore();
+}
+
+function rowBand(y, q, edge) {
+  ctx.save(); ctx.globalAlpha *= q;
+  const g = ctx.createLinearGradient(X0 - 20, 0, X1 + 20, 0);
+  g.addColorStop(0, 'rgba(22,38,70,0.85)'); g.addColorStop(1, 'rgba(10,20,40,0.55)');
+  ctx.fillStyle = g; ctx.fillRect(X0 - 20, y, (X1 - X0 + 40), RH);
+  ctx.fillStyle = edge; ctx.fillRect(X0 - 20, y, 8, RH);
+  ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(X0 - 20, y + RH - 1, X1 - X0 + 40, 1);
+  ctx.restore();
+}
+function chevron(x, y, a) {
+  ctx.save(); ctx.globalAlpha *= a; ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x - 8, y - 14); ctx.lineTo(x + 6, y); ctx.lineTo(x - 8, y + 14); ctx.stroke(); ctx.restore();
+}
+function bigNum(v, x, y, color, k = 1, alpha = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(k, k);
+  text(String(v), 0, 0, 128, color, { weight: 900, align: 'center', alpha });
+  ctx.restore();
+}
+function bar(y, exp, act, expShown, actShown, color, a) {
+  if (a <= 0) return;
+  const px = BAR.w / BAR.max;
+  ctx.save(); ctx.globalAlpha *= a;
+  ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(BAR.x, y, BAR.w, 12);
+  const excess = color === C.green;
+  ctx.fillStyle = 'rgba(244,246,248,0.9)'; ctx.fillRect(BAR.x, y, (excess ? Math.min(actShown, expShown) : actShown) * px, 12);
+  if (excess && actShown > expShown && expShown > 0) {
+    ctx.save(); ctx.shadowColor = color; ctx.shadowBlur = 14; ctx.fillStyle = color;
+    ctx.fillRect(BAR.x + expShown * px, y, (actShown - expShown) * px, 12); ctx.restore();
+  }
+  if (expShown > actShown && actShown > 0) {
+    const x0 = BAR.x + actShown * px, w = (expShown - actShown) * px;
+    ctx.save(); ctx.beginPath(); ctx.rect(x0, y, w, 12); ctx.clip();
+    ctx.fillStyle = 'rgba(255,59,59,0.25)'; ctx.fillRect(x0, y, w, 12);
+    ctx.strokeStyle = color; ctx.lineWidth = 3;
+    for (let x = x0 - 20; x < x0 + w + 20; x += 9) { ctx.beginPath(); ctx.moveTo(x, y + 14); ctx.lineTo(x + 12, y - 2); ctx.stroke(); }
+    ctx.restore();
+  }
+  if (expShown > 0) {
+    const ex = BAR.x + expShown * px;
+    ctx.fillStyle = C.silver; ctx.fillRect(ex - 2, y - 8, 4, 28);
+  }
+  ctx.restore();
+}
+function labelCell(y, title, sub, q) {
+  ctx.save(); ctx.globalAlpha *= q; ctx.translate(lerp(-40, 0, q), 0);
+  text(title, X0 + 4, y + 70, 58, C.white, { weight: 900 });
+  text(sub, X0 + 6, y + 102, 20, C.silver, { fam: 'IN', weight: 600, italic: false, track: 2 });
+  ctx.restore();
+}
+function tag(x, y, v, word, fill, ink, k = 1, rot = 0, alpha = 1, glow = 1) {
+  ctx.save();
+  ctx.translate(x + TAGW / 2, y + TAGH / 2); ctx.rotate(rot); ctx.scale(k, k);
+  ctx.globalAlpha *= alpha;
+  ctx.shadowColor = fill; ctx.shadowBlur = 30 * glow;
+  plate(-TAGW / 2, -TAGH / 2, TAGW, TAGH, fill, 16);
+  ctx.shadowBlur = 0;
+  const vs = fmt(v);
+  const vw = measure(vs, 92, 900);
+  const ww = measure(word, 50, 900);
+  const gap = 18, x0 = -(vw + gap + ww) / 2;
+  text(vs, x0, 33, 92, ink, { weight: 900 });
+  text(word, x0 + vw + gap, 22, 50, ink, { weight: 900 });
+  ctx.restore();
+}
+function ghostTag(x, y, v, word, color, a) {
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a;
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.setLineDash([8, 7]);
+  platePath(x, y, TAGW, TAGH, 16); ctx.stroke();
+  ctx.setLineDash([]);
+  text(`${fmt(v)}  ${word}`, x + TAGW / 2, y + 68, 46, color, { weight: 900, align: 'center', alpha: 0.7 });
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------- rows
+
+function drawRow1(t) {
+  const q = eo(t / 0.22);
+  const y = R1 + lerp(14, 0, q);
+  rowBand(y, 1, C.green);
+  labelCell(y, 'FIRST HALF', 'Q1–Q2', 1);
+  bigNum(L.h1.expected, CE, y + 112, C.silver, lerp(1.06, 1, q));
+  chevron((CE + CA) / 2, y + 70, 1);
+  bigNum(L.h1.actual, CA, y + 112, C.white, lerp(1.06, 1, q));
+  bar(y + 122, L.h1.expected, L.h1.actual, L.h1.expected, L.h1.actual, C.green, 1);
+  const s = t - B.slide;
+  if (s < 0) tag(TAGX, y + (RH - TAGH) / 2, L.h1.diff, 'BORROWED', C.green, C.navy, lerp(1.05, 1, q), -0.02 * (1 - q));
+}
+
+function drawRow2(t) {
+  const a = t - B.row2;
+  if (a < 0) return;
+  const q = eo(a / 0.3);
+  const y = R2;
+  ctx.save(); ctx.translate(lerp(-120, 0, q), 0); ctx.globalAlpha = q;
+  rowBand(y, 1, C.neg);
+  ctx.restore();
+  labelCell(y, 'AFTER THE BREAK', 'Q3–Q4', eo((a - 0.08) / 0.28));
+  const ph = eo((a - 0.15) / 0.3);
+  const aA = t - B.actual2, aE = t - B.expected2;
+  const actShown = L.h2.actual * eo((t - (B.actual2 - 0.3)) / 0.3);
+  const expShown = L.h2.expected * eio((t - B.count2) / (B.expected2 - B.count2));
+  if (aA < -0.3) text('—', CA, y + 100, 80, 'rgba(255,255,255,0.25)', { weight: 900, align: 'center', alpha: ph });
+  else bigNum(Math.round(actShown), CA, y + 112, C.white, aA > 0 ? lerp(1.35, 1, back(aA / 0.28, 2.4)) : 1);
+  if (t < B.count2) text('—', CE, y + 100, 80, 'rgba(255,255,255,0.25)', { weight: 900, align: 'center', alpha: ph });
+  else bigNum(Math.round(expShown), CE, y + 112, aE > 0 ? C.silver : 'rgba(196,206,212,0.8)', aE > 0 ? lerp(1.35, 1, back(aE / 0.28, 2.4)) : 1);
+  chevron((CE + CA) / 2, y + 70, ph);
+  bar(y + 122, L.h2.expected, L.h2.actual, expShown, actShown, C.neg, ph);
+  if (aA >= 0 && aA < 0.067) { ctx.save(); ctx.globalAlpha = 0.6 * Math.pow(1 - aA / 0.067, 2); ctx.fillStyle = '#fff'; ctx.fillRect(CA - 110, y + 8, 220, RH - 16); ctx.restore(); }
+  if (aE >= 0 && aE < 0.067) { ctx.save(); ctx.globalAlpha = 0.6 * Math.pow(1 - aE / 0.067, 2); ctx.fillStyle = '#fff'; ctx.fillRect(CE - 110, y + 8, 220, RH - 16); ctx.restore(); }
+  const p = t - B.paid;
+  if (p > 0 && t < B.slide) {
+    tag(TAGX, y + (RH - TAGH) / 2, L.h2.diff, 'PAID BACK', C.neg, C.white, lerp(1.7, 1, back(p / 0.3, 2.4)), lerp(-0.12, 0, eo(p / 0.3)), cl(p / 0.06));
+  }
+}
+
+const MEET = (R1 + R2 + RH) / 2 - TAGH / 2;
+function drawCancel(t) {
+  const s = t - B.slide;
+  if (s < 0) return;
+  const hit = B.net - 0.2;
+  const ty1 = R1 + (RH - TAGH) / 2, ty2 = R2 + (RH - TAGH) / 2;
+  ghostTag(TAGX, ty1, L.h1.diff, 'BORROWED', C.green, eo(s / 0.3) * 0.55);
+  ghostTag(TAGX, ty2, L.h2.diff, 'PAID BACK', C.neg, eo(s / 0.3) * 0.55);
+  const m = eio(s / (hit - B.slide));
+  if (t < hit) {
+    tag(TAGX + 30 * Math.sin(m * Math.PI), lerp(ty1, MEET - 40, m), L.h1.diff, 'BORROWED', C.green, C.navy, lerp(1, 0.92, m));
+    tag(TAGX - 30 * Math.sin(m * Math.PI), lerp(ty2, MEET + 40, m), L.h2.diff, 'PAID BACK', C.neg, C.white, lerp(1, 0.92, m));
+  }
+  const h = t - hit;
+  if (h > 0 && t < B.net) {
+    const f = eio(h / (B.net - hit));
+    const y0 = MEET + TAGH / 2, y1 = RN + RH / 2, yy = lerp(y0, y1, f);
+    ctx.save();
+    const g = ctx.createLinearGradient(0, y0, 0, yy);
+    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(255,255,255,0.8)');
+    ctx.fillStyle = g; ctx.fillRect(TAGX + TAGW / 2 - 70, y0, 140, yy - y0);
+    ctx.shadowColor = '#fff'; ctx.shadowBlur = 30;
+    plate(TAGX + TAGW / 2 - 110, yy - 26, 220, 52, '#fff', 10);
+    ctx.restore();
+  }
+  if (h > 0 && h < 0.35) {
+    const e = eo(h / 0.35);
+    ctx.save(); ctx.globalAlpha = 1 - e;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.ellipse(TAGX + TAGW / 2, MEET + TAGH / 2, lerp(60, 420, e), lerp(30, 160, e), 0, 0, 7); ctx.stroke();
+    for (let i = 0; i < 14; i++) {
+      const an = i / 14 * Math.PI * 2 + 0.3;
+      const r0 = lerp(30, 240, e), r1 = r0 + 60 * (1 - e);
+      ctx.beginPath();
+      ctx.moveTo(TAGX + TAGW / 2 + Math.cos(an) * r0 * 1.4, MEET + TAGH / 2 + Math.sin(an) * r0 * 0.6);
+      ctx.lineTo(TAGX + TAGW / 2 + Math.cos(an) * r1 * 1.4, MEET + TAGH / 2 + Math.sin(an) * r1 * 0.6);
+      ctx.lineWidth = 3; ctx.strokeStyle = i % 2 ? C.green : C.neg; ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+function drawNet(t) {
+  const s = t - B.slide;
+  if (s < 0) return;
+  const q = eo(s / 0.3);
+  const y = RN;
+  ctx.save(); ctx.globalAlpha = q;
+  ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(X0 - 20, y - 22, (X1 - X0 + 40) * q, 3); ctx.fillRect(X0 - 20, y - 14, (X1 - X0 + 40) * q, 3);
+  ctx.restore();
+  const lq = eo((s - 0.05) / 0.3);
+  ctx.save(); ctx.globalAlpha = lq; ctx.translate(lerp(-40, 0, lq), 0);
+  text('FULL GAME', X0 + 4, y + 70, 58, C.white, { weight: 900 });
+  text('ALL 4 QUARTERS', X0 + 6, y + 102, 20, C.silver, { fam: 'IN', weight: 600, italic: false, track: 2 });
+  ctx.restore();
+  const cp = eo((t - (B.net - 0.3)) / 0.3);
+  if (cp > 0) {
+    bigNum(Math.round(L.game_expected * cp), CE, y + 112, C.silver, 1, cl(cp * 3));
+    bigNum(Math.round(L.game_actual * cp), CA, y + 112, C.white, 1, cl(cp * 3));
+    chevron((CE + CA) / 2, y + 70, cp);
+  }
+  const n = t - B.net;
+  if (n > 0) {
+    const k = lerp(1.7, 1, back(n / 0.32, 2.6));
+    const ty = y + (RH - TAGH) / 2;
+    ctx.save();
+    ctx.translate(TAGX + TAGW / 2, ty + TAGH / 2); ctx.scale(k, k); ctx.rotate(lerp(-0.08, 0, eo(n / 0.3)));
+    ctx.globalAlpha = cl(n / 0.05);
+    ctx.shadowColor = '#fff'; ctx.shadowBlur = 40;
+    plate(-TAGW / 2, -TAGH / 2, TAGW, TAGH, C.white, 16);
+    ctx.shadowBlur = 0;
+    const vs = fmt(L.net);
+    const ww = measure('NET', 50, 900), vw = measure(vs, 96, 900), gap = 22, x0 = -(ww + gap + vw) / 2;
+    text('NET', x0, 22, 50, C.navy, { weight: 900 });
+    text(vs, x0 + ww + gap, 34, 96, C.navy, { weight: 900 });
+    ctx.restore();
+    const e = eo((n - 0.25) / 0.3);
+    text('THE LUCK EVENED OUT', TAGX + TAGW / 2, ty + TAGH + 44, 34, C.white, { weight: 800, align: 'center', alpha: e, track: 2 });
+  }
+}
+
+function drawFoot(t) {
+  text('2PT + 3PT FIELD GOALS ONLY, NO FREE THROWS · EXPECTED = Σ xFG × SHOT VALUE · SOURCE: NBA TRACKING · SHOT_DETAIL', X1 + 20, 846, 16, C.silver,
+    { fam: 'IN', weight: 500, italic: false, align: 'right', track: 1, alpha: 0.6 });
+}
+
+function drawOut(t) {
+  const a = (t - B.out) / (window.DURATION - B.out);
+  if (a <= 0) return;
+  const x = lerp(-W * 0.3, W * 1.1, eo(a));
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.moveTo(x - 240, 0); ctx.lineTo(x + 60, 0); ctx.lineTo(x - 140, H); ctx.lineTo(x - 440, H); ctx.fill();
+  ctx.restore();
+  const up = cl((t - (window.DURATION - 0.13)) / 0.1);
+  ctx.save(); ctx.globalAlpha = 0.85 * up * up; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+
+window.renderFrame = async (t) => {
+  ctx.clearRect(0, 0, W, H);
+  drawBg(t);
+  const [sx, sy] = [[B.actual2, 6], [B.expected2, 6], [B.paid, 10], [B.net - 0.2, 6], [B.net, 13]].map(([a, k]) => shakeAt(t, a, k)).reduce((p, q) => [p[0] + q[0], p[1] + q[1]]);
+  ctx.save(); ctx.translate(sx, sy);
+  drawHeader(t);
+  drawColumns(t);
+  drawRow1(t);
+  drawRow2(t);
+  drawNet(t);
+  drawCancel(t);
+  drawFoot(t);
+  ctx.restore();
+  flash(t, B.actual2, 0.12, 0.18);
+  flash(t, B.expected2, 0.12, 0.18);
+  flash(t, B.net - 0.001, 0.034, 0.85);
+  flash(t, B.net + 0.033, 0.25, 0.28);
+  drawOut(t);
+};
+
+window.FPS = 30;
+window.ready = (async () => {
+  const cfg = await (await fetch('c3_ledger.json')).json();
+  B = cfg.beats;
+  L = cfg.ledger;
+  const q = new URLSearchParams(location.search);
+  window.DURATION = parseFloat(q.get('dur') || cfg.dur);
+  for (const [file, w, st] of [['Medium', 500, 'normal'], ['SemiBold', 600, 'normal'], ['Bold', 700, 'normal'], ['ExtraBold', 800, 'normal'],
+    ['Black', 900, 'normal'], ['BoldItalic', 700, 'italic'], ['ExtraBoldItalic', 800, 'italic'], ['ExtraBoldItalic', 900, 'italic']]) {
+    const f = new FontFace('BC', `url(../assets/fonts/BarlowCondensed-${file}.ttf)`, { weight: String(w), style: st });
+    document.fonts.add(await f.load());
+  }
+  for (const [file, w] of [['Medium', 500], ['SemiBold', 600], ['Bold', 700]]) {
+    const f = new FontFace('IN', `url(../assets/fonts/Inter-${file}.ttf)`, { weight: String(w), style: 'normal' });
+    document.fonts.add(await f.load());
+  }
+})();
+</script>
+</body>
+</html>
