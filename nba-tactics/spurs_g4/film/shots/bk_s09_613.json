@@ -1,0 +1,19 @@
+{
+ "_note": "Backup re-paced s09 clip 1 (fxclip). PBP 613 Wembanyama 21ft pullup MISS, release f123, off rim f146-150. Lead 1.17 s, freeze 1.4 s, off rim ~3.4 s.",
+ "src": "work/q4miss/s09_e613.mp4",
+ "out": "out/bk/s09_613.mp4",
+ "audio_db": -14,
+ "segs": [
+  {"kind": "play", "from": 88, "to": 123, "speed": 1},
+  {"kind": "freeze", "at": 123, "dur": 1.4, "spot": [[445, 600, 78, 250], [495, 600, 66, 190]]},
+  {"kind": "play", "from": 123, "to": 160, "speed": 1}
+ ],
+ "flash": [[1.167, 0.35, 3]],
+ "callouts": [
+  {"t": [0, 3.8], "kind": "stat", "x": 1600, "y": 250, "label": "Q4 FG", "value": "4/19", "color": "white"},
+  {"t": [1.2, 2.567], "kind": "tag", "x": 230, "y": 330, "text": "#1 WEMBANYAMA", "color": "silver", "to": [425, 505]},
+  {"t": [1.3, 2.567], "kind": "line", "a": [461, 429], "b": [450, 372], "color": "gold"},
+  {"t": [1.35, 2.567], "kind": "label", "x": 640, "y": 395, "text": "HAND 1.7 FT", "color": "gold", "size": 58},
+  {"t": [3.35, 3.8], "kind": "label", "x": 705, "y": 170, "text": "MISS", "color": "red", "size": 84}
+ ]
+}

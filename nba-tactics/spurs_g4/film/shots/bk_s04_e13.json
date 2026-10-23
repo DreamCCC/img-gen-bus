@@ -1,0 +1,17 @@
+{
+ "_note": "Backup re-paced s04 clip 1 (fxclip). Vassell 26ft 3PT, release f141, net f185. Lead 1.37 s, freeze 1.2 s, net at 4.03 s.",
+ "src": "raw/2606110853187102.mp4",
+ "out": "out/bk/s04_e13.mp4",
+ "audio_db": -14,
+ "segs": [
+  {"kind": "play", "from": 100, "to": 141, "speed": 1},
+  {"kind": "freeze", "at": 141, "dur": 1.2},
+  {"kind": "play", "from": 141, "to": 200, "speed": 1}
+ ],
+ "flash": [[4.033, 0.5, 5]],
+ "callouts": [
+  {"t": [1.40, 2.567], "kind": "tag", "x": 640, "y": 760, "text": "#24 VASSELL", "color": "silver", "to": [860, 740]},
+  {"t": [1.50, 4.533], "kind": "stat", "x": 70, "y": 845, "label": "xFG", "value": "35%", "color": "white"},
+  {"t": [4.0, 4.533], "kind": "label", "x": 1120, "y": 258, "text": "+3", "color": "green", "size": 110}
+ ]
+}

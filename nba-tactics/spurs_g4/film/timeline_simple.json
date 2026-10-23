@@ -27,6 +27,14 @@
   {"id": "s17", "src": "raw/presser/2606111429332601.mp4", "type": "foot", "trim": [606.65, 614.2], "audio_db": 3.5,
    "subs": [{"at": [0.3, 3.95], "text": "\"Castle has it — *lost it.* That's it. It's over.\"", "who": "LIVE CALL"},
             {"at": [4.05, 7.5], "text": "\"The greatest comeback in *NBA playoff history.*\"", "who": "LIVE CALL"}]},
-  {"id": "c8", "src": "out/c8/c8.mp4", "type": "code", "vo": [["s18", 0.4]]}
+  {"id": "c8", "src": "out/c8/c8.mp4", "type": "code", "vo": [["s18", 0.4]],
+   "hud": [{"at": [4.4, 6.0], "x": 960, "y": 1050, "an": 2, "text": "MUSIC: KEVIN MACLEOD (INCOMPETECH.COM) · CC BY 4.0", "size": 24, "color": "silver", "fad": [200, 0]}]}
+ ],
+ "music": [
+  {"src": "assets/music/Montauk_Point.mp3", "s0": 30.0, "start": ["c1", 0.0], "end": ["sampleA", 0.0], "lufs": -31, "fade_in": 0.2, "fade_out": 0.6},
+  {"src": "assets/music/The_Escalation.mp3", "s0": 200.0, "start": ["sampleA", 0.0], "end": ["fox", 0.0], "lufs": -30, "fade_in": 0.4},
+  {"src": "assets/music/The_Escalation.mp3", "s0": 218.2, "start": ["fox", 0.0], "end": ["c6", 0.0], "lufs": -40},
+  {"src": "assets/music/The_Escalation.mp3", "s0": 221.367, "start": ["c6", 0.0], "end": ["s16", 4.13], "lufs": -30, "fade_out": 0.08},
+  {"src": "assets/music/Calmant.mp3", "s0": 2.0, "start": ["c8", 0.0], "end": ["c8", 6.0], "lufs": -30, "fade_in": 0.6, "fade_out": 1.0}
  ]
 }

@@ -1,0 +1,48 @@
+{
+ "_note": "Film shot s06 AR (tracked) version of film/shots/s06.json, re-paced: f0-30 x1 (30 fr), freeze f30 4.5 s (135 fr), f30-80 x1 (50 fr) = 215 frames / 7.167 s. Knicks five-out at f30 (Q4 2:28): Towns #32 (track 4), Anunoby #8 (track 10), Hart #3 (no detection; hand box injected as track 9103 at f29-31), Alvarado #5 (track 16), Brunson #11 (track 6). Tags/rings pop at freeze +0.9/+1.9/+2.3/+2.7/+3.1 s (output 1.9/2.9/3.3/3.7/4.1 s) and clear at the end of the freeze (5.5 s). No VO here: the film assembler places audio/VO.",
+ "work": "work/e676w",
+ "fps": 30,
+ "size": [1920, 1080],
+ "orig": "work/e676w/fr/orig",
+ "audio_src": "film/raw/2606111127202702.wav",
+ "vo": {"lines": "film/audio/vo_en/lines.json", "dir": "film/audio/vo_en"},
+ "out": "film/out/s06_ar/s06_ar.mp4",
+ "bed": false,
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "lang": "en",
+ "badge_xy": [130, 52],
+ "fonts": {
+  "zh": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "zhr": ["../assets/fonts/BarlowCondensed-Medium.ttf", null],
+  "num": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "numw": ["../assets/fonts/BarlowCondensed-Black.ttf", null]
+ },
+ "colors": {"gold": [232, 236, 240], "orange": [245, 132, 38], "navy": [35, 31, 32], "red": [200, 16, 46], "blue": [29, 66, 138]},
+ "teams": {"SAS": [196, 206, 212], "NYK": [0, 107, 182]},
+ "style": {"TW": "orange", "OG": "nyk", "JH": "nyk", "MA": "nyk", "B6": "nyk"},
+ "names": {"TW": "TOWNS", "OG": "ANUNOBY", "JH": "HART", "MA": "ALVARADO", "B6": "BRUNSON"},
+ "anchors": {"rim": [30, 1395, 300]},
+ "keep": [[465, 945, 1465, 1060]],
+ "mask_box": {"30": {"JH": [1095, 255, 1168, 392]}},
+ "segments": [
+  {"id": "a", "kind": "play", "from": 0, "to": 30, "speed": 1, "audio_db": -14},
+  {"id": "F", "kind": "freeze", "at": 30, "dur": 4.5, "stop": true, "spot": ["TW", "OG", "JH", "MA", "B6"], "focus": "TW",
+   "badge": "FIVE-OUT · Q4 2:28", "sfx": "stop", "glow": true},
+  {"id": "b", "kind": "play", "from": 30, "to": 80, "speed": 1, "audio_db": -14}
+ ],
+ "layers": [
+  {"type": "ring", "keys": ["TW"], "on": "F+0.9", "off": "F.end"},
+  {"type": "tag", "keys": ["TW"], "on": "F+0.9", "off": "F.end"},
+  {"type": "note", "key": "TW", "text": "THE CENTER · ON THE WING", "color": "orange", "on": "F+1.0", "off": "F.end"},
+  {"type": "ring", "keys": ["OG"], "on": "F+1.9", "off": "F.end"},
+  {"type": "tag", "keys": ["OG"], "on": "F+1.9", "off": "F.end"},
+  {"type": "ring", "keys": ["JH"], "on": "F+2.3", "off": "F.end"},
+  {"type": "tag", "keys": ["JH"], "on": "F+2.3", "off": "F.end"},
+  {"type": "ring", "keys": ["MA"], "on": "F+2.7", "off": "F.end"},
+  {"type": "tag", "keys": ["MA"], "on": "F+2.7", "off": "F.end"},
+  {"type": "ring", "keys": ["B6"], "on": "F+3.1", "off": "F.end"},
+  {"type": "tag", "keys": ["B6"], "on": "F+3.1", "off": "F.end"}
+ ]
+}

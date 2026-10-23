@@ -1,0 +1,15 @@
+{
+ "_note": "e725/e727 Brunson 31-ft miss -> Anunoby tip-in, Windows re-track (work/e727w/tracks.json; IDs match the old Mac run in e727_players.json). ids: [track ID, first frame, last frame]; manual: [frame, foot px x, y]. Anunoby (ID 1) shares a box with the Spur below him f144-158 (manual points there) and is lost after f163 under the rim; ID 519 (f179-187) is the Harper #2 box with Anunoby right behind it at the tip (f186); after that he drifts behind Bridges #25 (ID 604 box) toward the baseline. Manual points f166-f210 are read by eye from fr/orig (+-2 ft, he is airborne f182-f192). Fox and Wembanyama share ID 4 around f133-169 (Fox manual f158). Castle is lost after f166.",
+ "players": [
+  {"key": "OG", "name": "Anunoby", "num": "8", "team": "NYK", "ids": [[1, 0, 143], [1, 159, 163], [519, 179, 187]],
+   "manual": [[146, 690, 495], [150, 750, 528], [154, 865, 518], [158, 902, 532], [166, 1075, 538], [170, 1130, 541], [175, 1195, 540], [192, 1345, 545], [197, 1405, 572], [201, 1437, 590], [204, 1475, 615], [210, 1490, 625]]},
+  {"key": "BR", "name": "Brunson", "num": "11", "team": "NYK", "ids": [[236, 64, 109], [340, 114, 278]]},
+  {"key": "WB", "name": "Wembanyama", "num": "1", "team": "SAS", "ids": [[4, 0, 215]]},
+  {"key": "FX", "name": "Fox", "num": "4", "team": "SAS", "ids": [[205, 57, 92], [292, 93, 110], [205, 111, 132], [483, 170, 220]], "manual": [[158, 770, 668]]},
+  {"key": "CA", "name": "Castle", "num": "5", "team": "SAS", "ids": [[202, 56, 98], [305, 99, 143], [402, 144, 166]]},
+  {"key": "HP", "name": "Harper", "num": "2", "team": "SAS", "ids": [[11, 0, 174]]},
+  {"key": "VS", "name": "Vassell", "num": "24", "team": "SAS", "ids": [[179, 51, 180]]},
+  {"key": "BG", "name": "Bridges", "num": "25", "team": "NYK", "ids": [[3, 0, 196], [604, 197, 360]]},
+  {"key": "SH", "name": "Shamet", "num": "44", "team": "NYK", "ids": [[401, 144, 194]]}
+ ]
+}

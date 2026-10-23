@@ -1,0 +1,48 @@
+{
+ "_note": "Shot 1 cold open AR, re-paced cut (161 frames / 5.367 s): f172-201 x0.25 (116 frames, starts pushed in on the rim via zoom0), freeze f201 1.5 s = 'back' 0.4 s colour hold pulling back to the full view + 'scan' 1.1 s glow with rings/tags popping 0.15 s apart (Anunoby, Brunson, Wembanyama, Fox). Ball through the net ~f200 = 3.73 s (goal burst). Castle, Harper, Vassell, Towns and Shamet are in an untracked pile under the rim at f201 and are not tagged (Castle's track ends f166). Anunoby at f201 is a manual point behind Bridges. Tracks/calibration/slow frames as in e727w_s16_edl.json. No VO; the master mix supplies the arena sound.",
+ "work": "work/e727w",
+ "fps": 30,
+ "size": [1920, 1080],
+ "orig": "work/e727w/fr/orig",
+ "slow": {"dir": "work/e727w/fr/slow145", "from": 146, "mul": 4},
+ "audio_src": "film/raw/2606111142181002.wav",
+ "vo": {"lines": "film/audio/vo_en/lines.json", "dir": "film/audio/vo_en"},
+ "vo_gap": 0.3,
+ "out": "film/out/s01_ar/s01_ar.mp4",
+ "bed": false,
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "lang": "en",
+ "badge_xy": [130, 52],
+ "fonts": {
+  "zh": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "zhr": ["../assets/fonts/BarlowCondensed-Medium.ttf", null],
+  "num": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "numw": ["../assets/fonts/BarlowCondensed-Black.ttf", null]
+ },
+ "colors": {"gold": [232, 236, 240], "orange": [245, 132, 38], "navy": [35, 31, 32], "red": [200, 16, 46], "blue": [29, 66, 138]},
+ "teams": {"SAS": [196, 206, 212], "NYK": [0, 107, 182]},
+ "style": {"OG": "orange", "WB": "team", "FX": "team", "BR": "team", "CA": "team", "HP": "team", "VS": "team", "BG": "team", "SH": "team"},
+ "names": {"OG": "ANUNOBY", "WB": "WEMBANYAMA", "FX": "FOX", "BR": "BRUNSON", "CA": "CASTLE", "HP": "HARPER", "VS": "VASSELL", "BG": "BRIDGES", "SH": "SHAMET"},
+ "anchors": {"rim": [163, 1349, 273]},
+ "keep": [[465, 945, 1465, 1060]],
+ "mask_box": {"201": {"OG": [1418, 400, 1492, 605]}},
+ "zoom0": [1.5, [1340, 390]],
+ "segments": [
+  {"id": "slow", "kind": "play", "from": 172, "to": 201, "speed": 0.25, "badge": "NBA FINALS · GAME 4", "zoom": [1.6, [1360, 370]]},
+  {"id": "back", "kind": "freeze", "at": 201, "dur": 0.4, "zoom": [1.0, [960, 540]]},
+  {"id": "scan", "kind": "freeze", "at": 201, "dur": 1.1, "stop": true, "hold": true, "spot": ["OG", "BR", "WB", "FX"], "focus": "OG", "glow": true}
+ ],
+ "layers": [
+  {"type": "goal", "src_on": 200, "on": "slow", "off": "scan"},
+  {"type": "ring", "keys": ["OG"], "pulse": true, "on": "scan+0.1", "off": "scan.end+1"},
+  {"type": "tag", "keys": ["OG"], "on": "scan+0.1", "off": "scan.end+1"},
+  {"type": "ring", "keys": ["BR"], "on": "scan+0.25", "off": "scan.end+1"},
+  {"type": "tag", "keys": ["BR"], "on": "scan+0.25", "off": "scan.end+1"},
+  {"type": "ring", "keys": ["WB"], "on": "scan+0.4", "off": "scan.end+1"},
+  {"type": "tag", "keys": ["WB"], "on": "scan+0.4", "off": "scan.end+1"},
+  {"type": "ring", "keys": ["FX"], "on": "scan+0.55", "off": "scan.end+1"},
+  {"type": "tag", "keys": ["FX"], "on": "scan+0.55", "off": "scan.end+1"}
+ ]
+}

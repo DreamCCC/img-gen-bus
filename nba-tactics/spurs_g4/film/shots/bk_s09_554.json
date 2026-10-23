@@ -1,0 +1,19 @@
+{
+ "_note": "Backup re-paced s09 clip 2 (fxclip). PBP 554 Wembanyama 4ft layup MISS, release ~f96, on rim f98-104. Lead 1.53 s, freeze 1.4 s, rim ~3.1 s.",
+ "src": "work/q4miss/s09_e554.mp4",
+ "out": "out/bk/s09_554.mp4",
+ "audio_db": -14,
+ "segs": [
+  {"kind": "play", "from": 50, "to": 96, "speed": 1},
+  {"kind": "freeze", "at": 96, "dur": 1.4, "spot": [[850, 430, 62, 155], [895, 500, 70, 130]]},
+  {"kind": "play", "from": 96, "to": 120, "speed": 1}
+ ],
+ "flash": [[1.533, 0.35, 3]],
+ "callouts": [
+  {"t": [0, 3.733], "kind": "stat", "x": 1600, "y": 250, "label": "Q4 FG", "value": "4/19", "color": "white"},
+  {"t": [1.567, 2.933], "kind": "tag", "x": 560, "y": 250, "text": "#1 WEMBANYAMA", "color": "silver", "to": [845, 350]},
+  {"t": [1.62, 2.933], "kind": "line", "a": [900, 385], "b": [876, 313], "color": "gold"},
+  {"t": [1.65, 2.933], "kind": "label", "x": 880, "y": 235, "text": "HAND 2.0 FT", "color": "gold", "size": 58},
+  {"t": [3.15, 3.733], "kind": "label", "x": 690, "y": 215, "text": "MISS", "color": "red", "size": 84}
+ ]
+}

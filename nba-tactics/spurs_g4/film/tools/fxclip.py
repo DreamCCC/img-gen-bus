@@ -82,7 +82,10 @@ class Src:
             vf = (f"trim=start_frame={f0}:end_frame={f1 + 1},setpts=PTS-STARTPTS,"
                   f"minterpolate=fps={FPS * mul}:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1")
             subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(self.video), "-vf", vf, "-q:v", "2",
-                            "-start_number", "0", str(d / "%04d.jpg")], check=True)
+                            "-fps_mode", "passthrough", "-start_number", "0", str(d / "%04d.jpg")], check=True)
+            want, got = (f1 - f0) * mul, len(list(d.glob("*.jpg")))
+            if got < want - 2 * mul:
+                raise SystemExit(f"slow-mo {d.name}: {got} frames, need {want}")
         return d
 
     def frame(self, ref) -> np.ndarray:

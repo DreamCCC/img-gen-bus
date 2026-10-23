@@ -17,6 +17,8 @@ Each item is one finished clip (fxclip footage, render.mjs code scene, sampleA, 
    "hud": [{"at", "x", "y", "text", "size"?, "color"?, "an"?, "fad"?} | {"at", "box": [x0, y0, x1, y1]}]?
                                  broadcast-style text / panels burned with the captions (counters = consecutive entries)
   }
+Top-level "music": [{"src", "s0", "start": [item id, s], "end": [item id, s], "lufs", "fade_in"?, "fade_out"?}]
+  each cue is cut from s0, gained to a fixed loudness (no ducking) and laid between the two item-relative times.
 Picture: concat of all clips, a short white flash on every footage <-> code cut, captions burned in.
 Sound: clip sound + VO + code-scene sfx + hits, fixed gain to -16 LUFS then a true-peak-ish limiter (no ducking).
 """
@@ -122,7 +124,13 @@ def split_vo(vid: str, marks: list[float]) -> list[tuple[float, np.ndarray]]:
     starts = [s for k, s in enumerate(starts) if k == 0 or s - starts[k - 1] > 0.12 * SR]
     if len(starts) < len(marks):
         raise SystemExit(f"{vid}: found {len(starts)} words, need {len(marks)}")
-    starts = starts[:len(marks)]
+    def pause(s):
+        k = s - 1
+        while k > 0 and not on[k]:
+            k -= 1
+        return s - k
+    keep = sorted(sorted(starts[1:], key=pause, reverse=True)[:len(marks) - 1])
+    starts = [starts[0]] + keep
     pieces = []
     for k, s in enumerate(starts):
         a = max(0, s - int(0.03 * SR))
@@ -208,6 +216,24 @@ def main() -> None:
                     add(t0 + ft, sfx("hit"), -9)
         for s in it.get("subs", []):
             cap_defs.append({**s, "at": [t0 + s["at"][0], t0 + s["at"][1]]})
+
+    at_item = {it["id"]: it["t0"] for it in items}
+    for mu in tl.get("music", []):
+        a = at_item[mu["start"][0]] + mu["start"][1]
+        b = at_item[mu["end"][0]] + mu["end"][1]
+        y = read_audio(ROOT / mu["src"], mu["s0"], b - a)
+        tmp = cache / "_music_seg.wav"
+        sf.write(tmp, y.astype(np.float32), SR)
+        gain = mu["lufs"] - lufs(tmp)
+        for key, ramp in (("fade_in", lambda n: np.linspace(0, 1, n) ** 2), ("fade_out", lambda n: np.linspace(1, 0, n) ** 2)):
+            n = int(mu.get(key, 0) * SR)
+            if n:
+                if key == "fade_in":
+                    y[:n] *= ramp(n)
+                else:
+                    y[-n:] *= ramp(n)
+        add(a, y, gain)
+        print(f"  music {Path(mu['src']).stem} {a:.2f}-{b:.2f}s from {mu['s0']}s, {gain:+.1f} dB")
 
     vo_spans.sort()
     for (a0, a1, va), (b0, b1, vb) in zip(vo_spans, vo_spans[1:]):

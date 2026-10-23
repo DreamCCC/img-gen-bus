@@ -1,0 +1,17 @@
+{
+ "_note": "Backup re-paced s04 clip 2 (fxclip). Wembanyama 25ft 3PT, release f203, net f240. Lead 1.43 s, freeze 1.2 s, net at 3.87 s.",
+ "src": "raw/2606110908252902.mp4",
+ "out": "out/bk/s04_e88.mp4",
+ "audio_db": -14,
+ "segs": [
+  {"kind": "play", "from": 160, "to": 203, "speed": 1},
+  {"kind": "freeze", "at": 203, "dur": 1.2},
+  {"kind": "play", "from": 203, "to": 255, "speed": 1}
+ ],
+ "flash": [[3.867, 0.5, 5]],
+ "callouts": [
+  {"t": [1.47, 2.633], "kind": "tag", "x": 480, "y": 760, "text": "#1 WEMBANYAMA", "color": "silver", "to": [325, 640]},
+  {"t": [1.57, 4.367], "kind": "stat", "x": 70, "y": 845, "label": "xFG", "value": "34%", "color": "white"},
+  {"t": [3.833, 4.367], "kind": "label", "x": 1124, "y": 252, "text": "+3", "color": "green", "size": 110}
+ ]
+}
