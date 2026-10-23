@@ -14,6 +14,8 @@ Each item is one finished clip (fxclip footage, render.mjs code scene, sampleA, 
    "vo_baked": "manifest.json"? clip audio already carries VO (sampleA); manifest gives captions
    "spec": "shots/x.json"?      fxclip spec: its flashes get a synthetic hit
    "subs": [{"at": [t0, t1], "text", "who"?}]?   captions relative to the clip
+   "hud": [{"at", "x", "y", "text", "size"?, "color"?, "an"?, "fad"?} | {"at", "box": [x0, y0, x1, y1]}]?
+                                 broadcast-style text / panels burned with the captions (counters = consecutive entries)
   }
 Picture: concat of all clips, a short white flash on every footage <-> code cut, captions burned in.
 Sound: clip sound + VO + code-scene sfx + hits, fixed gain to -16 LUFS then a true-peak-ish limiter (no ducking).
@@ -77,6 +79,28 @@ def prep(it: dict, cache: Path) -> Path:
     return out
 
 
+HUD_COL = {"white": "&H00F6F4F2&", "gold": "&H0045C8FF&", "green": "&H007BD62B&", "red": "&H003B3BFF&",
+           "orange": "&H002684F5&", "silver": "&H00D4CEC4&"}
+
+
+def hud_events(t0: float, hud: list) -> list[str]:
+    ev = []
+    for h in hud:
+        a, b = subs.ts(t0 + h["at"][0]), subs.ts(t0 + h["at"][1])
+        fad = "\\fad({},{})".format(*h.get("fad", [0, 0]))
+        if "box" in h:
+            x0, y0, x1, y1 = h["box"]
+            ev.append(f"Dialogue: 2,{a},{b},Box,,0,0,0,,{{\\an7\\pos(0,0){fad}\\1c&H0028140A&\\1a&H22&\\p1}}"
+                      f"m {x0} {y0} l {x1} {y0} {x1} {y1} {x0} {y1}{{\\p0}}")
+            ev.append(f"Dialogue: 2,{a},{b},Box,,0,0,0,,{{\\an7\\pos(0,0){fad}\\1c&H002E10C8&\\p1}}"
+                      f"m {x0} {y0} l {x0 + 7} {y0} {x0 + 7} {y1} {x0} {y1}{{\\p0}}")
+        else:
+            ev.append(f"Dialogue: 3,{a},{b},Cap,,0,0,0,,{{\\an{h.get('an', 7)}\\pos({h['x']},{h['y']}){fad}"
+                      f"\\fnBarlow Condensed ExtraBold\\fs{h.get('size', 40)}\\c{HUD_COL[h.get('color', 'white')]}"
+                      f"\\fsp1}}{h['text']}")
+    return ev
+
+
 def scene_json(cid: str) -> dict | None:
     hits = glob.glob(str(ROOT / f"scenes/{cid}_*.json"))
     return json.loads(Path(hits[0]).read_text(encoding="utf-8")) if hits else None
@@ -120,6 +144,9 @@ def main() -> None:
 
     items, t = [], 0.0
     for it in tl["items"]:
+        if not (ROOT / it["src"]).exists() and "fallback" in it:
+            print(f"  {it['id']}: {it['src']} missing, using {it['fallback']}")
+            it = {**it, "src": it["fallback"]}
         src = prep(it, cache)
         n = probe_frames(src)
         pad = round(it.get("pad", 0) * FPS)
@@ -196,6 +223,9 @@ def main() -> None:
     used = [d for d in all_defs if d["vo"] in vo_at]
     ass = out.with_suffix(".ass")
     subs.build(used + cap_defs, vo_at, subs.load_words(VO), ass)
+    hud = [e for it in items for e in hud_events(it["t0"], it.get("hud", []))]
+    if hud:
+        ass.write_text(ass.read_text(encoding="utf-8") + "\n".join(hud) + "\n", encoding="utf-8")
 
     # picture
     fc, labels = [], []
