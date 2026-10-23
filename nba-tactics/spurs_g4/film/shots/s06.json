@@ -1,0 +1,27 @@
+{
+ "_note": "Shot 6: e676 opening frames, Knicks set (Q4 2:28). f30: Towns (#32) spotted up on the left wing, Anunoby (#8) top, Hart (#3) far baseline, Alvarado (#5) right corner, Brunson (#11) with the ball. Lineup matches pbp substitutions (C4 data). VO s06 starts at 0.2 s: 'Towns' 2.12, 'four guys' 2.96-3.44.",
+ "src": "raw/2606111127202702.mp4",
+ "out": "out/s06/s06.mp4",
+ "audio_db": -14,
+ "segs": [
+  {"kind": "play", "from": 0, "to": 30, "speed": 1},
+  {"kind": "freeze", "at": 30, "dur": 3.7, "grade": 0.9,
+   "spot": [[362, 545, 70, 120], [668, 385, 55, 95], [1130, 330, 45, 80], [656, 730, 70, 115], [1598, 745, 60, 95]]},
+  {"kind": "play", "from": 30, "to": 54, "speed": 1}
+ ],
+ "zoom": [[0, 1, 960, 540], [1.0, 1, 960, 540], [4.7, 1.06, 960, 520], [5.5, 1, 960, 540]],
+ "flash": [[1.0, 0.35, 5]],
+ "callouts": [
+  {"t": [1.05, 4.7], "kind": "badge", "text": "FIVE-OUT · Q4 2:28"},
+  {"t": [2.05, 4.7], "kind": "ring", "x": 368, "y": 626, "rx": 62, "ry": 18, "color": "orange"},
+  {"t": [2.05, 4.7], "kind": "tag", "x": 318, "y": 448, "text": "#32 TOWNS", "sub": "THE CENTER · ON THE WING", "color": "orange"},
+  {"t": [2.95, 4.7], "kind": "ring", "x": 672, "y": 450, "rx": 46, "ry": 13, "color": "nyk"},
+  {"t": [2.95, 4.7], "kind": "tag", "x": 672, "y": 300, "text": "#8 ANUNOBY", "color": "nyk"},
+  {"t": [3.07, 4.7], "kind": "ring", "x": 1134, "y": 368, "rx": 40, "ry": 11, "color": "nyk"},
+  {"t": [3.07, 4.7], "kind": "tag", "x": 1132, "y": 268, "text": "#3 HART", "color": "nyk"},
+  {"t": [3.19, 4.7], "kind": "ring", "x": 1603, "y": 786, "rx": 52, "ry": 15, "color": "nyk"},
+  {"t": [3.19, 4.7], "kind": "tag", "x": 1600, "y": 676, "text": "#5 ALVARADO", "color": "nyk"},
+  {"t": [3.31, 4.7], "kind": "ring", "x": 656, "y": 806, "rx": 58, "ry": 16, "color": "nyk"},
+  {"t": [3.31, 4.7], "kind": "tag", "x": 430, "y": 790, "text": "#11 BRUNSON", "color": "nyk", "to": [628, 712]}
+ ]
+}

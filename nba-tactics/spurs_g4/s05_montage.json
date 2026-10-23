@@ -1,0 +1,12 @@
+{
+ "_note": "Shot 5a: Knicks Q3 run, 3 made threes in game order, 18 frames (0.6 s) each, ball through rim at window frame 11. e432 Brunson 25' pullup (Bridges ast) Q3 8:23 xFG 0.289, through rim f356; e448 Anunoby 24' (Towns ast) Q3 6:50 xFG 0.425, f169; e470 Hart 25' (Brunson ast) Q3 5:31 xFG 0.386, f116. No AR (wide shots, shooter ~150 px tall and only 0.6 s on screen). Audio = source arena window at -14 dB.",
+ "out": "film/out/s05/s05a.mp4",
+ "fps": 30,
+ "audio_db": -14,
+ "flash": {"peak": 0.7, "n": 2},
+ "clips": [
+  {"video": "work/e432/fr/orig/%04d.jpg", "vstart": 345, "frames": 18, "wav": "work/e432/2606111033176002.wav", "from": 345},
+  {"video": "work/e448/fr/orig/%04d.jpg", "vstart": 158, "frames": 18, "wav": "work/e448/2606111038291302.wav", "from": 158},
+  {"video": "work/e470/fr/orig/%04d.jpg", "vstart": 105, "frames": 18, "wav": "work/e470/2606111043178802.wav", "from": 105}
+ ]
+}

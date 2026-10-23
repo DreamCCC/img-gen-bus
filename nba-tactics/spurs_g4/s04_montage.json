@@ -1,0 +1,13 @@
+{
+ "_note": "Shot 4 montage: SAS first-half made threes in game order (= cumulative EXPECTED/ACTUAL counter order). Video = render_play clips (AR), audio = source arena window at -14 dB.",
+ "out": "film/out/s04/s04.mp4",
+ "fps": 30,
+ "audio_db": -14,
+ "flash": {"peak": 0.7, "n": 2},
+ "clips": [
+  {"video": "film/out/s04/clips/e13_s04.mp4", "frames": 53, "wav": "work/e13/2606110853187102.wav", "from": 138},
+  {"video": "film/out/s04/clips/e70_s04.mp4", "frames": 50, "wav": "work/e70/2606110908507902.wav", "from": 243},
+  {"video": "film/out/s04/clips/e88_s04.mp4", "frames": 48, "wav": "work/e88/2606110908252902.wav", "from": 199},
+  {"video": "film/out/s04/clips/e325_s04.mp4", "frames": 41, "wav": "work/e325/2606110959171102.wav", "from": 167}
+ ]
+}

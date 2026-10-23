@@ -1,0 +1,221 @@
+{
+ "_note": "Shot 9 clip B: PBP 554, Q4 11:48 (scorebug 11:49/13 -> 11:48/12), Wembanyama 4' driving layup MISS. NGSS shot_detail event 554: defensiveInfo.jointBallDistance 23.959 in = 2.00 ft (closest joint lPinky, defender Mitchell Robinson #23). Release ~f92-94 behind Robinson, ball off the rim ~f100-102. f100 broadcast flash replaced by the f99/f101 average. Rings shrink around the shooter in steps (ring layers; their radius is graphic, not a measurement); the only number on screen is the NGSS value. No VO; the s09 concat lays the reel's original audio at -14 dB.",
+ "work": "work/q4miss/e554",
+ "fps": 30,
+ "size": [
+  1920,
+  1080
+ ],
+ "orig": "work/q4miss/e554/fr/orig",
+ "slow": {
+  "dir": "work/q4miss/e554/fr/slow",
+  "from": 84,
+  "mul": 4
+ },
+ "audio_src": "work/q4miss/e554.wav",
+ "vo": {
+  "lines": "work/q4miss/vo/lines.json",
+  "dir": "work/q4miss/vo"
+ },
+ "out": "film/out/s09/s09_554.mp4",
+ "bed": false,
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "lang": "en",
+ "badge_xy": [
+  130,
+  52
+ ],
+ "fonts": {
+  "zh": [
+   "../assets/fonts/BarlowCondensed-ExtraBold.ttf",
+   null
+  ],
+  "zhr": [
+   "../assets/fonts/BarlowCondensed-Medium.ttf",
+   null
+  ],
+  "num": [
+   "../assets/fonts/BarlowCondensed-ExtraBold.ttf",
+   null
+  ],
+  "numw": [
+   "../assets/fonts/BarlowCondensed-Black.ttf",
+   null
+  ]
+ },
+ "colors": {
+  "gold": [
+   232,
+   236,
+   240
+  ],
+  "orange": [
+   245,
+   132,
+   38
+  ],
+  "navy": [
+   35,
+   31,
+   32
+  ],
+  "red": [
+   200,
+   16,
+   46
+  ],
+  "blue": [
+   29,
+   66,
+   138
+  ],
+  "ar": [
+   255,
+   206,
+   40
+  ]
+ },
+ "teams": {
+  "SAS": [
+   196,
+   206,
+   212
+  ],
+  "NYK": [
+   0,
+   107,
+   182
+  ]
+ },
+ "style": {
+  "WB": "gold",
+  "WBA": "ar",
+  "WBR": "red",
+  "MR": "def"
+ },
+ "names": {
+  "WB": "WEMBANYAMA",
+  "WBA": "WEMBANYAMA",
+  "WBR": "WEMBANYAMA",
+  "MR": "ROBINSON"
+ },
+ "anchors": {
+  "rim": [
+   84,
+   632,
+   334
+  ]
+ },
+ "keep": [
+  [
+   465,
+   945,
+   1465,
+   1060
+  ]
+ ],
+ "segments": [
+  {
+   "id": "a",
+   "kind": "play",
+   "from": 64,
+   "to": 88,
+   "speed": 1,
+   "audio_db": -14
+  },
+  {
+   "id": "b",
+   "kind": "play",
+   "from": 88,
+   "to": 96,
+   "speed": 0.5
+  },
+  {
+   "id": "c",
+   "kind": "play",
+   "from": 96,
+   "to": 112,
+   "speed": 1,
+   "audio_db": -14
+  }
+ ],
+ "layers": [
+  {
+   "type": "tag",
+   "keys": [
+    "WB"
+   ],
+   "on": "a"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "MR"
+   ],
+   "r": 2.0,
+   "on": "a+0.05"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WBA"
+   ],
+   "r": 6.0,
+   "on": "a+0.25",
+   "off": "a+0.6"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WBA"
+   ],
+   "r": 4.6,
+   "on": "a+0.45",
+   "off": "a+0.8"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WBA"
+   ],
+   "r": 3.4,
+   "on": "a+0.65",
+   "off": "b+0.2"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WBA"
+   ],
+   "r": 2.4,
+   "on": "b+0.05",
+   "off": "c+0.25"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WBR"
+   ],
+   "r": 2.4,
+   "pulse": true,
+   "on": "c+0.15"
+  },
+  {
+   "type": "note",
+   "key": "WB",
+   "text": "HAND 2.0 FT",
+   "color": "ar",
+   "on": "a+0.6",
+   "off": "c+0.25"
+  },
+  {
+   "type": "note",
+   "key": "WB",
+   "text": "HAND 2.0 FT",
+   "color": "red",
+   "on": "c+0.15"
+  }
+ ]
+}

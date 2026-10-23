@@ -1,5 +1,5 @@
 {
- "_note": "Shot 9 clip A: PBP 613, Q4 8:21 (scorebug 8:23 / shot clock 4.1 at f120), Wembanyama 21' pullup MISS. NGSS shot_detail event 613: defensiveInfo.jointBallDistance 20.751 in = 1.73 ft (closest joint lPinky, defender Towns #32). Rings shrink around the shooter in steps (ring layers, radius in ft is graphic only, not a measurement); the only number on screen is the NGSS value. Release ~f123, ball off the rim f146-150. No VO; audio replaced in the s09 concat with the reel's original audio at -14 dB.",
+ "_note": "Shot 9 clip A: PBP 613, Q4 8:21 (scorebug 8:23 / shot clock 4.1 at f120), Wembanyama 21' pullup MISS. NGSS shot_detail event 613: defensiveInfo.jointBallDistance 20.751 in = 1.73 ft (closest joint lPinky, defender Towns #32). Rings shrink around the shooter in steps (ring layers, radius in ft is graphic only, not a measurement); the only number on screen is the NGSS value. Release ~f123, ball off the rim f146-150. No VO; audio replaced in the s09 concat with the reel's original audio at -14 dB. Rings shrink around the shooter in steps (ring layers; their radius is graphic, not a measurement); the only number on screen is the NGSS value. No VO; the s09 concat lays the reel's original audio at -14 dB.",
  "work": "work/q4miss/e613",
  "fps": 30,
  "size": [
@@ -17,7 +17,7 @@
   "lines": "work/q4miss/vo/lines.json",
   "dir": "work/q4miss/vo"
  },
- "out": "film/out/s09/s09_a613.mp4",
+ "out": "film/out/s09/s09_613.mp4",
  "bed": false,
  "subs": false,
  "crf": 12,
@@ -91,15 +91,15 @@
  },
  "style": {
   "WB": "gold",
+  "WBA": "ar",
   "WBR": "red",
-  "KT": "def",
-  "WBA": "ar"
+  "KT": "def"
  },
  "names": {
   "WB": "WEMBANYAMA",
+  "WBA": "WEMBANYAMA",
   "WBR": "WEMBANYAMA",
-  "KT": "TOWNS",
-  "WBA": "WEMBANYAMA"
+  "KT": "TOWNS"
  },
  "anchors": {
   "rim": [
@@ -120,7 +120,7 @@
   {
    "id": "a",
    "kind": "play",
-   "from": 110,
+   "from": 104,
    "to": 118,
    "speed": 1,
    "audio_db": -14
@@ -163,8 +163,8 @@
     "WBA"
    ],
    "r": 6.0,
-   "on": "a",
-   "off": "a+0.36"
+   "on": "a+0.2",
+   "off": "a+0.56"
   },
   {
    "type": "ring",
@@ -172,8 +172,8 @@
     "WBA"
    ],
    "r": 4.6,
-   "on": "a+0.18",
-   "off": "a+0.54"
+   "on": "a+0.38",
+   "off": "a+0.74"
   },
   {
    "type": "ring",
@@ -181,8 +181,8 @@
     "WBA"
    ],
    "r": 3.4,
-   "on": "a+0.36",
-   "off": "a+0.72"
+   "on": "a+0.56",
+   "off": "a+0.92"
   },
   {
    "type": "ring",
@@ -190,7 +190,7 @@
     "WBA"
    ],
    "r": 2.4,
-   "on": "a+0.54",
+   "on": "a+0.74",
    "off": "c+0.62"
   },
   {

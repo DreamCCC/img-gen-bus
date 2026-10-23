@@ -1,12 +1,176 @@
 {
  "_note": "Shot 9 clip B = PBP 554 (Q4 11:48, Wembanyama 4' driving layup MISS, NGSS defender Mitchell Robinson #23, 23.959 in = 2.00 ft). Video work/q4miss/e554.mp4 = Q4 reel 2606111151336101.mp4 from 0.0 s. Scorebug 11:49/13 -> 11:48/12. Wembanyama #1 drives f62-86 (track 191 f72-76), goes up f86-f96 behind Robinson (feet hidden, interpolated via air), ball off the rim ~f100-102, NYK rebound. Robinson = track 7 f62-98, track 3 f100-114 (read from boxes). Broadcast flash on f100 (frame replaced by the f99/f101 average in fr/orig). WBA/WBR = same feet as WB for the yellow/red rings.",
  "players": [
-  {"key": "WB", "name": "Wembanyama", "num": "1", "team": "SAS", "ids": [[191, 72, 76]],
-   "manual": [[66, 1150, 640], [80, 1000, 655], [86, 925, 630], [104, 771, 590], [110, 735, 555]], "air": [[86, 104]]},
-  {"key": "WBA", "name": "Wembanyama", "num": "1", "team": "SAS", "ids": [[191, 72, 76]],
-   "manual": [[66, 1150, 640], [80, 1000, 655], [86, 925, 630], [104, 771, 590], [110, 735, 555]], "air": [[86, 104]]},
-  {"key": "WBR", "name": "Wembanyama", "num": "1", "team": "SAS", "ids": [[191, 72, 76]],
-   "manual": [[66, 1150, 640], [80, 1000, 655], [86, 925, 630], [104, 771, 590], [110, 735, 555]], "air": [[86, 104]]},
-  {"key": "MR", "name": "Robinson", "num": "23", "team": "NYK", "ids": [[7, 62, 98], [3, 100, 114]]}
+  {
+   "key": "WB",
+   "name": "Wembanyama",
+   "num": "1",
+   "team": "SAS",
+   "ids": [
+    [
+     191,
+     72,
+     76
+    ]
+   ],
+   "manual": [
+    [
+     66,
+     1150,
+     640
+    ],
+    [
+     80,
+     1000,
+     655
+    ],
+    [
+     86,
+     925,
+     630
+    ],
+    [
+     104,
+     771,
+     590
+    ],
+    [
+     110,
+     735,
+     555
+    ],
+    [
+     112,
+     728,
+     550
+    ]
+   ],
+   "air": [
+    [
+     86,
+     104
+    ]
+   ]
+  },
+  {
+   "key": "WBA",
+   "name": "Wembanyama",
+   "num": "1",
+   "team": "SAS",
+   "ids": [
+    [
+     191,
+     72,
+     76
+    ]
+   ],
+   "manual": [
+    [
+     66,
+     1150,
+     640
+    ],
+    [
+     80,
+     1000,
+     655
+    ],
+    [
+     86,
+     925,
+     630
+    ],
+    [
+     104,
+     771,
+     590
+    ],
+    [
+     110,
+     735,
+     555
+    ],
+    [
+     112,
+     728,
+     550
+    ]
+   ],
+   "air": [
+    [
+     86,
+     104
+    ]
+   ]
+  },
+  {
+   "key": "WBR",
+   "name": "Wembanyama",
+   "num": "1",
+   "team": "SAS",
+   "ids": [
+    [
+     191,
+     72,
+     76
+    ]
+   ],
+   "manual": [
+    [
+     66,
+     1150,
+     640
+    ],
+    [
+     80,
+     1000,
+     655
+    ],
+    [
+     86,
+     925,
+     630
+    ],
+    [
+     104,
+     771,
+     590
+    ],
+    [
+     110,
+     735,
+     555
+    ],
+    [
+     112,
+     728,
+     550
+    ]
+   ],
+   "air": [
+    [
+     86,
+     104
+    ]
+   ]
+  },
+  {
+   "key": "MR",
+   "name": "Robinson",
+   "num": "23",
+   "team": "NYK",
+   "ids": [
+    [
+     7,
+     62,
+     98
+    ],
+    [
+     3,
+     100,
+     114
+    ]
+   ]
+  }
  ]
 }

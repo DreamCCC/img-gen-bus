@@ -25,7 +25,8 @@ Callout coordinates are OUTPUT px unless "src": true (then source px mapped thro
   line  {a: [x, y], b: [x, y], text?, color?}           dashed measuring line with optional label at the middle
   label {x, y, text, color?, size?}                     plain bold text
 Colours: red blue nyk orange silver green white gold.
-Audio: original sound only on speed-1 segments at audio_db (no ducking), silence elsewhere.
+Audio: original sound only on speed-1 segments at audio_db (a play segment may set its own "audio_db"; no ducking),
+silence elsewhere.
 Writes <out>.json manifest: segment output times, so the master mix can place sfx.
 """
 from __future__ import annotations
@@ -269,7 +270,7 @@ def build_audio(spec, src_video: Path, table, n_out: int, out_wav: Path):
         if s["kind"] == "play" and s.get("speed", 1) >= 1:
             i0, i1 = int(s["from"] / FPS * sr), int(s["to"] / FPS * sr)
             o0 = int(s["t0"] * sr)
-            seg = a[i0:i1] * s.get("db_gain", g)
+            seg = a[i0:i1] * (10 ** (s["audio_db"] / 20) if "audio_db" in s else g)
             n = min(len(seg), len(mix) - o0)
             ramp = min(480, n // 2)
             seg = seg[:n].copy()

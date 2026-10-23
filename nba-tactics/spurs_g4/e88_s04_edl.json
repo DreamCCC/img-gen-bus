@@ -24,7 +24,7 @@
  "names": {"VW": "WEMBANYAMA", "VWg": "WEMBANYAMA"},
  "anchors": {"rim": [240, 1294, 246]},
  "segments": [
-  {"id": "live", "kind": "play", "from": 199, "to": 244, "speed": 1, "audio_db": -14}
+  {"id": "live", "kind": "play", "from": 199, "to": 247, "speed": 1, "audio_db": -14}
  ],
  "layers": [
   {"type": "ring", "keys": ["VW"], "pulse": true, "on": "live", "off": "live+0.45"},
