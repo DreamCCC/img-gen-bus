@@ -24,6 +24,7 @@
  "names": {"VW": "WEMBANYAMA", "VWg": "WEMBANYAMA"},
  "anchors": {"rim": [240, 1294, 246]},
  "keep": [[465, 945, 1465, 1060]],
+ "mask_box": {"203": {"VW": [255, 295, 375, 702]}},
  "segments": [
   {"id": "a", "kind": "play", "from": 158, "to": 203, "speed": 1, "audio_db": -14},
   {"id": "F", "kind": "freeze", "at": 203, "dur": 1.2, "stop": true, "glow": true, "spot": ["VW"], "focus": "VW"},

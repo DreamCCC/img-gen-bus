@@ -159,8 +159,8 @@ class Timeline:
 
     def zoom_state(self, i: int):
         """虚拟推镜：每段的 zoom = [段末倍率, 焦点]，焦点是球员 key、像素 [x, y] 或 null（沿用上一段）。
-        段内从上一段末状态缓动过去。返回 (起点状态, 终点状态, 进度)。"""
-        prev = (1.0, None)
+        段内从上一段末状态缓动过去，第一段从 EDL 的 zoom0（默认 [1.0, null]）出发。返回 (起点状态, 终点状态, 进度)。"""
+        prev = tuple(self.edl.get("zoom0", (1.0, None)))
         for sg in self.segs:
             want = prev
             if "zoom" in sg:
@@ -256,6 +256,11 @@ class Masks:
         if feather:
             m = cv2.GaussianBlur(m, (0, 0), feather)
         return m
+
+    def top(self, k, s, shape):
+        """Highest mask pixel row of player k at frame s, or None without a mask."""
+        rows = np.flatnonzero((self.of([k], s, shape, feather=0) > 0.5).any(1))
+        return float(rows[0]) if len(rows) else None
 
     def everyone(self, s, shape):
         f = int(round(s))
@@ -853,6 +858,10 @@ class Renderer:
             self._panels.append(dict(name="logoman", a=1.0, rect=[lx, ly0, lx + self.logo.width, ly0 + self.logo.height]))
         self._layout = {"pills": [], "subs": [], "panels": self._panels, "bodies": bodies}
 
+        def crown(key, h):
+            mt = self.M.top(key, s, (H, W))
+            return h if mt is None or mt - 16 >= h[1] else np.array([h[0], mt - 16])
+
         def want(anchor, text, col, a, f=None, dark=False, prio=5, lift=34, owner=None):
             f = f or font(30)
             x1, y1, x2, y2 = dr.textbbox((0, 0), text, font=f, anchor="mm")
@@ -872,6 +881,7 @@ class Renderer:
                     h = self.P.head(key, s, self.cam)
                     if h is None:
                         continue
+                    h = crown(key, h)
                     d = self.P.d[key]
                     sty = self.edl["style"][key]
                     b = self.P.box(key, s)
@@ -883,6 +893,7 @@ class Renderer:
             elif ly["type"] == "note":
                 h = self.P.head(ly["key"], s, self.cam)
                 if h is not None:
+                    h = crown(ly["key"], h)
                     sc = 1 + 0.25 * (1 - ease((T - ly["_on"]) / 0.3))
                     want(zt(h), ly["text"], COL[ly.get("color", "gold")], al, f=font(int(40 * sc)), dark=True,
                          prio=0, lift=92)
@@ -1289,7 +1300,7 @@ class Renderer:
         stop = 0.0
         if sg.get("stop"):
             d = sg["n"] / self.tl.fps
-            stop = min(ease(j / 0.3), ease((d - j) / 0.22))
+            stop = ease(j / 0.3) if sg.get("hold") else min(ease(j / 0.3), ease((d - j) / 0.22))
             src = img
             if sg.get("glow"):
                 img = fx.glow_freeze(self, img, sg, s, stop)
