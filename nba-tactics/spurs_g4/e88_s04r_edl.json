@@ -1,0 +1,41 @@
+{
+ "_note": "Shot 4 re-time clip 2/2 (s04r). e88 Wembanyama #1 25' 3PT (Harper ast), Q1 5:51 PBP (scorebug 5:53), SAS 22-12 -> 25-12. NGSS expFieldGoalPct 0.3420 -> 'xFG 34%', made. Release f203, ball through rim f240 (he leaves frame left ~f244). Lead-in f158-203 x1 with no AR (tracking starts f190), glow freeze at f203 1.2 s with tag + gold note, then f203-255 x1 (net + 0.5 s); AR fades out by f251 (tracking ends f250). Arena audio is replaced afterwards by film/out/s04r/_tools/montage_fz.py (source windows at -14 dB), render_play's own mix is not used.",
+ "work": "work/e88",
+ "fps": 30,
+ "size": [1920, 1080],
+ "orig": "work/e88/fr/orig",
+ "audio_src": "work/e88/2606110908252902.wav",
+ "vo": {"lines": "film/audio/vo_en/lines.json", "dir": "film/audio/vo_en"},
+ "out": "film/out/s04r/clips/e88_s04r.mp4",
+ "bed": false,
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "lang": "en",
+ "fonts": {
+  "zh": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "zhr": ["../assets/fonts/BarlowCondensed-Medium.ttf", null],
+  "num": ["../assets/fonts/BarlowCondensed-ExtraBold.ttf", null],
+  "numw": ["../assets/fonts/BarlowCondensed-Black.ttf", null]
+ },
+ "colors": {"gold": [232, 236, 240], "green": [40, 205, 110], "orange": [245, 132, 38], "navy": [35, 31, 32], "red": [200, 16, 46], "blue": [29, 66, 138]},
+ "teams": {"SAS": [196, 206, 212], "NYK": [0, 107, 182]},
+ "style": {"VW": "gold", "VWg": "green"},
+ "names": {"VW": "WEMBANYAMA", "VWg": "WEMBANYAMA"},
+ "anchors": {"rim": [240, 1294, 246]},
+ "keep": [[465, 945, 1465, 1060]],
+ "segments": [
+  {"id": "a", "kind": "play", "from": 158, "to": 203, "speed": 1, "audio_db": -14},
+  {"id": "F", "kind": "freeze", "at": 203, "dur": 1.2, "stop": true, "glow": true, "spot": ["VW"], "focus": "VW"},
+  {"id": "b", "kind": "play", "from": 203, "to": 255, "speed": 1, "audio_db": -14}
+ ],
+ "layers": [
+  {"type": "ring", "keys": ["VW"], "pulse": true, "on": "F", "off": "F+0.6"},
+  {"type": "ring", "keys": ["VW"], "on": "F", "off": "b+1.383"},
+  {"type": "tag", "keys": ["VW"], "on": "F", "off": "b+1.6"},
+  {"type": "note", "key": "VW", "text": "xFG 34%", "color": "gold", "on": "F+0.10", "off": "b+1.333"},
+  {"type": "ring", "keys": ["VWg"], "on": "b+1.133", "off": "b+1.6"},
+  {"type": "ring", "keys": ["VWg"], "pulse": true, "on": "b+1.233", "off": "b+1.6"},
+  {"type": "note", "key": "VWg", "text": "xFG 34%", "color": "green", "on": "b+1.233", "off": "b+1.6"}
+ ]
+}

@@ -1,0 +1,239 @@
+{
+ "_note": "Shot 9 clip A: PBP 613, Q4 8:21 (scorebug 8:23 / shot clock 4.1 at f120), Wembanyama 21' pullup MISS. NGSS shot_detail event 613: defensiveInfo.jointBallDistance 20.751 in = 1.73 ft (closest joint lPinky, defender Towns #32). Rings shrink around the shooter in steps (ring layers, radius in ft is graphic only, not a measurement); the only number on screen is the NGSS value. Release ~f123, ball off the rim f146-150. No VO; audio replaced in the s09 concat with the reel's original audio at -14 dB. Rings shrink around the shooter in steps (ring layers; their radius is graphic, not a measurement); the only number on screen is the NGSS value. No VO; the s09 concat lays the reel's original audio at -14 dB. s09r re-time: lead-in f78-123 at speed 1 (no AR before f104, the first tracked frame used), 1.4s freeze at release f123 with ring shrink + note, f123-133 at 0.5x, miss at 1x to f164.",
+ "work": "work/s09r/e613",
+ "fps": 30,
+ "size": [
+  1920,
+  1080
+ ],
+ "orig": "work/q4miss/e613/fr/orig",
+ "slow": {
+  "dir": "work/q4miss/e613/fr/slow",
+  "from": 114,
+  "mul": 4
+ },
+ "audio_src": "work/q4miss/e613.wav",
+ "vo": {
+  "lines": "work/q4miss/vo/lines.json",
+  "dir": "work/q4miss/vo"
+ },
+ "out": "film/out/s09r/s09r_613.mp4",
+ "bed": false,
+ "subs": false,
+ "crf": 12,
+ "chrome": "nba",
+ "lang": "en",
+ "badge_xy": [
+  130,
+  52
+ ],
+ "fonts": {
+  "zh": [
+   "../assets/fonts/BarlowCondensed-ExtraBold.ttf",
+   null
+  ],
+  "zhr": [
+   "../assets/fonts/BarlowCondensed-Medium.ttf",
+   null
+  ],
+  "num": [
+   "../assets/fonts/BarlowCondensed-ExtraBold.ttf",
+   null
+  ],
+  "numw": [
+   "../assets/fonts/BarlowCondensed-Black.ttf",
+   null
+  ]
+ },
+ "colors": {
+  "gold": [
+   232,
+   236,
+   240
+  ],
+  "orange": [
+   245,
+   132,
+   38
+  ],
+  "navy": [
+   35,
+   31,
+   32
+  ],
+  "red": [
+   200,
+   16,
+   46
+  ],
+  "blue": [
+   29,
+   66,
+   138
+  ],
+  "ar": [
+   255,
+   206,
+   40
+  ]
+ },
+ "teams": {
+  "SAS": [
+   196,
+   206,
+   212
+  ],
+  "NYK": [
+   0,
+   107,
+   182
+  ]
+ },
+ "style": {
+  "WB": "gold",
+  "WBA": "ar",
+  "WBR": "red",
+  "KT": "def"
+ },
+ "names": {
+  "WB": "WEMBANYAMA",
+  "WBA": "WEMBANYAMA",
+  "WBR": "WEMBANYAMA",
+  "KT": "TOWNS"
+ },
+ "anchors": {
+  "rim": [
+   105,
+   516,
+   262
+  ]
+ },
+ "keep": [
+  [
+   465,
+   945,
+   1465,
+   1060
+  ]
+ ],
+ "segments": [
+  {
+   "id": "pre",
+   "kind": "play",
+   "from": 78,
+   "to": 104,
+   "speed": 1,
+   "audio_db": -14
+  },
+  {
+   "id": "a",
+   "kind": "play",
+   "from": 104,
+   "to": 123,
+   "speed": 1,
+   "audio_db": -14
+  },
+  {
+   "id": "fz",
+   "kind": "freeze",
+   "at": 123,
+   "dur": 1.4
+  },
+  {
+   "id": "b",
+   "kind": "play",
+   "from": 123,
+   "to": 133,
+   "speed": 0.5
+  },
+  {
+   "id": "c",
+   "kind": "play",
+   "from": 133,
+   "to": 164,
+   "speed": 1,
+   "audio_db": -14
+  }
+ ],
+ "layers": [
+  {
+   "type": "tag",
+   "keys": [
+    "WB"
+   ],
+   "on": "a",
+   "off": "c+0.8"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "KT"
+   ],
+   "r": 2.0,
+   "on": "a+0.05",
+   "off": "c+0.8"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WBA"
+   ],
+   "r": 6.0,
+   "on": "fz",
+   "off": "fz+0.35"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WBA"
+   ],
+   "r": 4.6,
+   "on": "fz+0.2",
+   "off": "fz+0.55"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WBA"
+   ],
+   "r": 3.4,
+   "on": "fz+0.4",
+   "off": "fz+0.75"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WBA"
+   ],
+   "r": 2.4,
+   "on": "fz+0.6",
+   "off": "c+0.533"
+  },
+  {
+   "type": "ring",
+   "keys": [
+    "WBR"
+   ],
+   "r": 2.4,
+   "pulse": true,
+   "on": "c+0.433",
+   "off": "c+0.8"
+  },
+  {
+   "type": "note",
+   "key": "WB",
+   "text": "HAND 1.7 FT",
+   "color": "ar",
+   "on": "fz+0.7",
+   "off": "c+0.533"
+  },
+  {
+   "type": "note",
+   "key": "WB",
+   "text": "HAND 1.7 FT",
+   "color": "red",
+   "on": "c+0.433",
+   "off": "c+0.8"
+  }
+ ]
+}

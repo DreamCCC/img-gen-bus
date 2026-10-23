@@ -1,0 +1,12 @@
+{
+ "_note": "Shot 4 re-time (s04r): two SAS first-half made threes, e13 Vassell then e88 Wembanyama. Each clip = 1.5 s lead-in, 1.2 s glow freeze at release (tag + gold xFG), play to net + 0.5 s (green xFG). Video = render_play clips from e13_s04r_edl.json / e88_s04r_edl.json; audio = source arena windows at -14 dB that follow the picture; the freeze is filled with the 1.2 s of arena sound just before the lead-in at -20 dB. Built with film/out/s04r/_tools/montage_fz.py.",
+ "out": "film/out/s04r/s04r.mp4",
+ "fps": 30,
+ "flash": {"peak": 0.7, "n": 2},
+ "clips": [
+  {"video": "film/out/s04r/clips/e13_s04r.mp4", "frames": 140, "wav": "work/e13/2606110853187102.wav",
+   "audio": [[96, 45, -14], [60, 36, -20], [141, 59, -14]]},
+  {"video": "film/out/s04r/clips/e88_s04r.mp4", "frames": 133, "wav": "work/e88/2606110908252902.wav",
+   "audio": [[158, 45, -14], [122, 36, -20], [203, 52, -14]]}
+ ]
+}
