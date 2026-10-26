@@ -1,0 +1,696 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// 投篮评分系统介绍片（英文版，scenes/film_en.json 驱动）：底片是 video_detect 输出的 output_annotated_allen.mp4（拆帧在 frames/，2880×1620），
+// 所有图层坐标都在原片 4K 像素空间里，经当前镜头 cam 投到 1920×1080。
+const W = 1920, H = 1080, FPS = 30;
+const SW = 3840, SH = 2160, FRAME_SCALE = 2880 / 3840;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+
+const COL = {
+  ink: '#231f20', blue: '#1d428a', red: '#c8102e', white: '#ffffff', grey: '#c3ced3', light: '#d5d9dd',
+  gold: '#fdb927', green: '#2fd27a', cyan: '#3fd0ff', panel: 'rgba(16,20,32,0.82)',
+};
+const F = {
+  ui: '"PingFang SC", sans-serif',
+  hd: '"NotoSansSC", "PingFang SC", sans-serif',
+  num: '"Action NBA Condensed", "DIN Condensed", sans-serif',
+  numW: '"Action NBA", "Action NBA Condensed", sans-serif',
+};
+const FONT_KO = '"Knockout", "Action NBA Condensed", sans-serif';
+const SKEW = -0.21;
+
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const decay = (t, t0, tau) => (t >= t0 ? Math.exp(-(t - t0) / tau) : 0);
+const pad = (k) => String(k).padStart(5, '0');
+const fmt = (v, d = 0) => (v == null ? '--' : Number(v).toFixed(d));
+
+let D, BEAT = {}, VO = {}, LOGO = null;
+
+// ---------- 帧 ----------
+const imgCache = new Map();
+function loadImg(src) {
+  if (!imgCache.has(src)) {
+    const im = new Image();
+    im.src = src;
+    imgCache.set(src, im.decode().then(() => im).catch(() => null));
+    if (imgCache.size > 40) imgCache.delete(imgCache.keys().next().value);
+  }
+  return imgCache.get(src);
+}
+const frameImg = (f) => loadImg(`frames/${pad(clamp(Math.round(f), 0, D.n - 1))}.jpg`);
+
+// ---------- 文字与色块（与 nba-tactics/spurs_g4/film 同一套 NBA 图文风格） ----------
+function txt(s, x, y, { size = 48, font = F.ui, weight = 'bold', color = COL.white, align = 'center', alpha = 1, base = 'middle', stroke = 0, strokeColor = '#000', shadow = 0, spacing = 0 } = {}) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = clamp(alpha);
+  ctx.font = `${weight} ${size}px ${font}`;
+  ctx.textAlign = align; ctx.textBaseline = base;
+  if (spacing) ctx.letterSpacing = `${spacing}px`;
+  if (shadow) { ctx.shadowColor = 'rgba(0,0,0,0.75)'; ctx.shadowBlur = shadow; ctx.shadowOffsetY = shadow * 0.25; }
+  if (stroke) { ctx.lineJoin = 'round'; ctx.lineWidth = stroke; ctx.strokeStyle = strokeColor; ctx.strokeText(s, x, y); ctx.shadowColor = 'transparent'; }
+  ctx.fillStyle = color; ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function measure(s, { size = 48, font = F.ui, weight = 'bold', spacing = 0 } = {}) {
+  ctx.save(); ctx.font = `${weight} ${size}px ${font}`; if (spacing) ctx.letterSpacing = `${spacing}px`;
+  const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+function slab(x, y, w, h, color, skew = SKEW) {
+  const k = h * skew / 2;
+  ctx.beginPath();
+  ctx.moveTo(x - k, y); ctx.lineTo(x + w - k, y); ctx.lineTo(x + w + k, y + h); ctx.lineTo(x + k, y + h);
+  ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+function tag(s, cx, cy, { size = 34, bg = COL.red, fg = COL.white, font = FONT_KO, weight = 'normal', alpha = 1, align = 'center', padX = 0.55 } = {}) {
+  if (alpha <= 0) return 0;
+  const w = measure(s, { size, font, weight }) + size * padX * 2, h = size * 1.5;
+  const x0 = align === 'center' ? cx - w / 2 : align === 'right' ? cx - w : cx;
+  ctx.save(); ctx.globalAlpha = clamp(alpha); slab(x0, cy - h / 2, w, h, bg); ctx.restore();
+  txt(s, x0 + w / 2, cy + size * 0.04, { size, font, weight, color: fg, alpha });
+  return w;
+}
+// 花字：斜切色块从左擦入，白字跟进；kicker 为英文小标
+function huazi(t, t0, s, x, y, { size = 120, bg = COL.red, fg = COL.white, kicker = '', kc = COL.white, anim = 'wipe', align = 'center', hold = 99, out = 0.22, rot = 0 } = {}) {
+  const u = t - t0;
+  if (u < 0 || u > hold + out) return;
+  ctx.save();
+  ctx.font = `normal ${size}px ${FONT_KO}`;
+  const tw = ctx.measureText(s).width;
+  const padX = size * 0.42, h = size * 1.32, w = tw + padX * 2;
+  const x0 = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  const top = y - h / 2;
+  ctx.translate(x, y); ctx.rotate(rot);
+  if (anim === 'slam') { const sc = lerp(1.35, 1, easeOut(clamp(u / 0.12))); ctx.scale(sc, sc); }
+  ctx.translate(-x, -y);
+  const din = anim === 'slam' ? 1 : easeOut(clamp(u / 0.22));
+  const dout = easeInOut(prog(u, hold, hold + out));
+  const L = x0 - h, R = x0 + w + h;
+  ctx.beginPath(); ctx.rect(lerp(L, R, dout), top - size, (R - L) * (din - dout), h + size * 2); ctx.clip();
+  ctx.globalAlpha = anim === 'slam' ? clamp(u / 0.05) : 1;
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
+  slab(x0, top, w, h, bg); ctx.restore();
+  slab(x0 + w - size * 0.16, top, size * 0.16, h, bg === COL.red ? COL.blue : COL.red);
+  const tx = lerp(-size * 0.5, 0, easeOut(clamp((u - 0.05) / 0.25)));
+  ctx.fillStyle = fg; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  ctx.fillText(s, x0 + padX + tx, y + size * 0.03);
+  if (kicker) {
+    const ks = Math.max(26, size * 0.3);
+    ctx.font = `${ks}px ${F.num}`; ctx.letterSpacing = `${ks * 0.12}px`;
+    ctx.fillStyle = kc; ctx.textBaseline = 'alphabetic';
+    const ky = top - ks * 0.45;
+    ctx.fillText(kicker.toUpperCase(), x0 + 4, ky);
+    const kw = ctx.measureText(kicker.toUpperCase()).width;
+    ctx.fillStyle = COL.red; ctx.fillRect(x0 + kw + 22, ky - ks * 0.38, Math.min(160, w - kw - 30), 4);
+  }
+  ctx.restore();
+}
+function veil(a, color = '#000') { if (a <= 0) return; ctx.save(); ctx.globalAlpha = clamp(a); ctx.fillStyle = color; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+function vignette(a) {
+  const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 1.05);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${a})`);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+
+// ---------- 时间轴 ----------
+function beatAt(t) {
+  let b = D.beats[0];
+  for (const x of D.beats) if (t >= x.t0) b = x;
+  return b;
+}
+const holdAt = (b) => b.t0 + b.pre + b.play;
+function srcFrame(b, t) {
+  const u = t - b.t0 - b.pre;
+  if (u <= 0) return b.a;
+  if (u >= b.play) return b.b;
+  const dir = b.b >= b.a ? 1 : -1;
+  return b.a + dir * u * FPS * Math.abs(b.rate);
+}
+// 旁白里某个词的时刻（按去掉空格标点后的字母位置估算），用于让图层跟着念到的词出现
+const plainEn = (s) => s.replace(/[\s,.;:!?]/g, '').toLowerCase();
+function voAt(id, word) {
+  const v = VO[id];
+  const plain = plainEn(v.chunks.map((c) => c.text).join(' '));
+  const k = plain.indexOf(plainEn(word));
+  return v.t + (k < 0 ? 0 : k / plain.length) * v.dur;
+}
+const voEnd = (id) => VO[id].t + VO[id].dur;
+
+// ---------- 镜头 ----------
+const CAM = { wide: { x: 0, y: 0, w: SW, h: SH }, tight: { x: 0, y: 500, w: 2667, h: 1500 } };
+const FOCUS = { x: 760, y: 1300 };
+// 定格缓推：定格时逐帧累积推近，恢复播放时平滑回落；连续两拍都定格时推近不中断
+let PUSH = [];
+function buildPush() {
+  const n = Math.ceil(D.duration * FPS) + 2, dt = 1 / FPS;
+  let z = 0;
+  for (let i = 0; i < n; i++) {
+    const t = i * dt, b = beatAt(t);
+    const u = t - b.t0 - b.pre;
+    z = u < 0 || u >= b.play ? z + 0.032 * dt * (1 - z / 0.3) : z * Math.exp(-dt / 0.35);
+    PUSH.push(z);
+  }
+  const k = 5;
+  PUSH = PUSH.map((_, i) => { let s = 0, c = 0; for (let j = i - k; j <= i + k; j++) if (PUSH[j] != null) { s += PUSH[j]; c++; } return s / c; });
+}
+function camAt(t) {
+  const i = D.beats.findIndex((x) => x === beatAt(t));
+  const b = D.beats[i], prev = D.beats[i - 1];
+  let c = { ...CAM[b.cam] };
+  if (prev && prev.cam !== b.cam) {
+    const k = easeInOut(prog(t, b.t0, b.t0 + 0.9)), p = CAM[prev.cam];
+    c = { x: lerp(p.x, c.x, k), y: lerp(p.y, c.y, k), w: lerp(p.w, c.w, k), h: lerp(p.h, c.h, k) };
+  }
+  const z = 1 + PUSH[Math.min(PUSH.length - 1, Math.round(t * FPS))];
+  const fx = b.cam === 'wide' ? SW * 0.42 : FOCUS.x, fy = b.cam === 'wide' ? SH * 0.5 : FOCUS.y;
+  return { x: fx - (fx - c.x) / z, y: fy - (fy - c.y) / z, w: c.w / z, h: c.h / z };
+}
+let cam = CAM.wide;
+const P = (p) => [(p[0] - cam.x) / cam.w * W, (p[1] - cam.y) / cam.h * H];
+const PS = (len) => len / cam.w * W;
+
+function drawBase(im, filter = 'none') {
+  if (!im) return;
+  ctx.save(); ctx.filter = filter;
+  const s = FRAME_SCALE;
+  ctx.drawImage(im, cam.x * s, cam.y * s, cam.w * s, cam.h * s, 0, 0, W, H);
+  ctx.restore();
+}
+
+// ---------- 关节角图层 ----------
+function glowLine(pts, color, width, alpha = 1) {
+  ctx.save(); ctx.globalAlpha = clamp(alpha);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.lineWidth = width + 6;
+  ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(...p) : ctx.moveTo(...p))); ctx.stroke();
+  ctx.shadowColor = color; ctx.shadowBlur = 18;
+  ctx.strokeStyle = color; ctx.lineWidth = width;
+  ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(...p) : ctx.moveTo(...p))); ctx.stroke();
+  ctx.restore();
+}
+function dot(p, r, color, alpha = 1) {
+  ctx.save(); ctx.globalAlpha = clamp(alpha);
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(p[0], p[1], r + 3, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowColor = color; ctx.shadowBlur = 14; ctx.fillStyle = color;
+  ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+// A-B-C 关节角：两段肢体高亮、B 处扇形和角度数字；label 放在扇形外侧
+function jointAngle(fr, a, b, c, { color = COL.gold, value, alpha = 1, r = 70, label = true, side = 1, size = 54, sub = '' } = {}) {
+  if (!fr[a] || !fr[b] || !fr[c] || alpha <= 0) return;
+  const A = P(fr[a]), B = P(fr[b]), C = P(fr[c]);
+  glowLine([A, B, C], color, 7, alpha);
+  const a1 = Math.atan2(A[1] - B[1], A[0] - B[0]), a2 = Math.atan2(C[1] - B[1], C[0] - B[0]);
+  let d = a2 - a1; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
+  ctx.save(); ctx.globalAlpha = clamp(alpha) * 0.45; ctx.fillStyle = color;
+  ctx.beginPath(); ctx.moveTo(...B); ctx.arc(B[0], B[1], r, a1, a1 + d, d < 0); ctx.closePath(); ctx.fill();
+  ctx.globalAlpha = clamp(alpha); ctx.strokeStyle = color; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.arc(B[0], B[1], r, a1, a1 + d, d < 0); ctx.stroke();
+  ctx.restore();
+  [A, B, C].forEach((p) => dot(p, 8, COL.white, alpha));
+  if (label && value != null) {
+    const mid = a1 + d / 2 + Math.PI;
+    const lx = B[0] + Math.cos(mid) * (r + 70) * side, ly = B[1] + Math.sin(mid) * (r + 70) * side;
+    const s = `${Math.round(value)}°`;
+    const w = measure(s, { size, font: F.numW, weight: 'normal' }) + 34;
+    ctx.save(); ctx.globalAlpha = clamp(alpha) * 0.92; slab(lx - w / 2, ly - size * 0.62, w, size * 1.24, COL.ink); ctx.restore();
+    txt(s, lx, ly + 3, { size, font: F.numW, weight: 'normal', color, alpha });
+    if (sub) txt(sub, lx, ly + size * 0.95, { size: 24, font: F.hd, weight: 700, color: COL.white, alpha, stroke: 5, strokeColor: 'rgba(0,0,0,0.8)' });
+  }
+  return { A, B, C, a1, d };
+}
+
+// 指向某点的标注：引线 + 两行字的色块卡片
+function callout(t, t0, anchor, x, y, title, value, { color = COL.gold, kicker = '', alpha = 1, w = 420, valueColor } = {}) {
+  const u = t - t0;
+  if (u < 0 || alpha <= 0) return;
+  const k = easeOut(clamp(u / 0.3)) * alpha;
+  if (anchor) {
+    ctx.save(); ctx.globalAlpha = k; ctx.strokeStyle = color; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(...anchor); ctx.lineTo(x, y); ctx.stroke(); ctx.restore();
+    dot(anchor, 7, color, k);
+  }
+  const h = value ? 128 : 74;
+  const x0 = x + lerp(-30, 0, k);
+  ctx.save(); ctx.globalAlpha = k * 0.9; slab(x0, y - h / 2, w, h, COL.panel); ctx.restore();
+  ctx.save(); ctx.globalAlpha = k; slab(x0 - 4, y - h / 2, 10, h, color, 0); ctx.restore();
+  if (kicker) txt(kicker, x0 + 20, y - h / 2 - 18, { size: 24, font: F.num, weight: 'normal', align: 'left', color: COL.white, alpha: k, spacing: 3, stroke: 6, strokeColor: 'rgba(0,0,0,0.85)' });
+  txt(title, x0 + 26, value ? y - 30 : y + 2, { size: 30, font: F.hd, weight: 700, align: 'left', alpha: k });
+  if (value) txt(value, x0 + 26, y + 26, { size: 58, font: F.numW, weight: 'normal', align: 'left', color: valueColor || color, alpha: k });
+}
+
+// ---------- 右侧评分面板 ----------
+const HUD = { x: 1360, y: 40, w: 520 };
+let LOCK = {};
+function lockTimes() {
+  const L = {};
+  L.lower_body = voAt('L05', 'lower-body load');
+  L.extension_speed = voAt('L06', 'extension speed');
+  L.release_form = voAt('L07', 'release form');
+  L.quick_release = voAt('L08', 'quick release');
+  L.follow_through = voAt('L09', 'follow-through scores');
+  L.wrist_loading = voAt('L10', 'wrist loading');
+  L.kinetic_chain = voAt('L10', 'kinetic chain');
+  L.torso_control = voAt('L10', 'torso control');
+  L.forward_sway = voAt('L10', 'forward sway');
+  const mb = BEAT.makeAgain;
+  L.make_result = mb.t0 + mb.pre + (D.keys.make - mb.a) / mb.rate / FPS;
+  return L;
+}
+const lockK = (key, t) => easeOut(clamp((t - LOCK[key]) / 0.55));
+function liveTotal(t) {
+  return D.dims.reduce((s, d) => s + d.w * d.score * lockK(d.key, t), 0);
+}
+function phaseTrack(t, f, x, y, w, alpha) {
+  const nodes = [['DIP', 'PHASE 1', D.keys.dip], ['RELEASE', 'PHASE 2', D.keys.release], ['FOLLOW', 'PHASE 3', D.keys.finish]];
+  const f0 = D.keys.dip - 15, f1 = D.keys.finish + 10;
+  const X = (fr) => x + (fr - f0) / (f1 - f0) * w;
+  const on = (i) => t >= [voAt('L04', 'the dip'), voAt('L04', 'the release'), voAt('L04', 'the follow-through')][i];
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.fillRect(x, y - 3, w, 6);
+  const fx = X(clamp(f, f0, f1));
+  ctx.fillStyle = COL.gold; ctx.fillRect(x, y - 3, Math.max(0, fx - x), 6);
+  ctx.restore();
+  nodes.forEach(([zh, en, fr], i) => {
+    const a = alpha * (on(i) ? 1 : 0.3), px = X(fr), active = f >= fr;
+    dot([px, y], 11, active ? COL.gold : '#556', a);
+    txt(zh, px, y + 36, { size: 30, font: FONT_KO, weight: 'normal', alpha: a });
+    txt(en, px, y - 30, { size: 20, font: F.num, weight: 'normal', color: COL.grey, alpha: a, spacing: 2 });
+  });
+  dot([fx, y], 6, COL.white, alpha);
+}
+function hud(t, f, alpha, slide = 0) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.translate(slide, 0);
+  const { x, y, w } = HUD;
+  const rows0 = y + 300, rh = 60;
+  ctx.save(); ctx.globalAlpha = alpha * 0.86; ctx.fillStyle = COL.panel; ctx.fillRect(x, y, w, rows0 + rh * 10 - y + 16); ctx.restore();
+  ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = COL.blue; ctx.fillRect(x, y, w, 96); ctx.fillStyle = COL.red; ctx.fillRect(x, y, 10, 96); ctx.restore();
+  txt('AI ANALYSIS', x + 32, y + 30, { size: 24, font: F.num, weight: 'normal', align: 'left', color: COL.grey, alpha, spacing: 3 });
+  txt('SHOT SCORE', x + 32, y + 68, { size: 44, font: FONT_KO, weight: 'normal', align: 'left', alpha });
+  const tot = liveTotal(t);
+  txt(tot.toFixed(1), x + w - 28, y + 52, { size: 82, font: F.numW, weight: 'normal', align: 'right', alpha, color: COL.white });
+  txt(`FRAME ${Math.round(f)}`, x + 32, y + 128, { size: 24, font: F.num, weight: 'normal', align: 'left', color: COL.grey, alpha, spacing: 2 });
+  txt(`${(f / D.srcFps).toFixed(2)}s`, x + w - 28, y + 128, { size: 24, font: F.num, weight: 'normal', align: 'right', color: COL.grey, alpha, spacing: 2 });
+  phaseTrack(t, f, x + 60, y + 210, w - 120, alpha);
+  const listIn = voAt('L04', 'ten categories');
+  D.dims.forEach((d, i) => {
+    const ry = rows0 + i * rh;
+    const a = alpha * easeOut(clamp((t - listIn - i * 0.06) / 0.3));
+    if (a <= 0) return;
+    const k = lockK(d.key, t), locked = t >= LOCK[d.key];
+    const flash = decay(t, LOCK[d.key], 0.25);
+    if (flash > 0.01) { ctx.save(); ctx.globalAlpha = a * flash * 0.6; ctx.fillStyle = COL.gold; ctx.fillRect(x, ry - rh / 2 + 4, w, rh - 8); ctx.restore(); }
+    txt(d.en, x + 28, ry + 2, { size: 26, font: FONT_KO, weight: 'normal', align: 'left', alpha: a * (locked ? 1 : 0.55) });
+    txt(`${Math.round(d.w * 100)}%`, x + 250, ry, { size: 26, font: F.num, weight: 'normal', align: 'right', color: COL.grey, alpha: a });
+    const bx = x + 268, bw = 150;
+    ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(bx, ry - 7, bw, 14);
+    const sc = d.score * k;
+    ctx.fillStyle = d.score >= 60 ? COL.green : d.score >= 30 ? COL.gold : COL.red;
+    ctx.fillRect(bx, ry - 7, bw * sc / 100, 14); ctx.restore();
+    txt(locked ? String(Math.round(sc)) : '--', x + w - 28, ry + 2, { size: 40, font: F.numW, weight: 'normal', align: 'right', alpha: a, color: locked ? COL.white : COL.grey });
+  });
+  ctx.restore();
+}
+
+// ---------- 字幕 ----------
+function subtitles(t, cx) {
+  for (const v of D.vo) {
+    for (const c of v.chunks) {
+      const a = v.t + c.a, b = v.t + c.b + (c === v.chunks[v.chunks.length - 1] ? 0.2 : 0);
+      if (t < a || t >= b) continue;
+      txt(c.text, cx, 1012, { size: 46, font: F.ui, stroke: 9, strokeColor: 'rgba(0,0,0,0.85)', shadow: 6 });
+    }
+  }
+}
+
+function infoCard(t, f, alpha) {
+  if (alpha <= 0) return;
+  const X = 120, Y = 44;
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.fillStyle = 'rgba(16,20,32,0.78)'; ctx.fillRect(0, Y, X, 104);
+  ctx.fillStyle = COL.blue; ctx.fillRect(X, Y, 470, 44);
+  ctx.fillStyle = COL.red; ctx.fillRect(X, Y, 10, 104);
+  ctx.fillStyle = 'rgba(16,20,32,0.78)'; ctx.fillRect(X + 10, Y + 44, 460, 60);
+  ctx.restore();
+  txt('AI SHOT SCORING SYSTEM', X + 28, Y + 23, { size: 26, font: F.num, weight: 'normal', align: 'left', alpha, spacing: 3 });
+  txt('ONE REAL SHOT, SCORED', X + 28, Y + 76, { size: 36, font: FONT_KO, weight: 'normal', align: 'left', alpha });
+  txt(`${(f / D.srcFps).toFixed(2)}s`, X + 452, Y + 76, { size: 30, font: F.num, weight: 'normal', align: 'right', alpha, color: COL.grey });
+}
+
+// ---------- 篮球飞行轨迹 ----------
+function ballAt(f) {
+  const { px, py } = D.ballFit;
+  return [px[0] * f + px[1], py[0] * f * f + py[1] * f + py[2]];
+}
+function ballTrail(f, alpha) {
+  const { from, to } = D.ballFit;
+  if (f <= from || alpha <= 0) return;
+  const end = Math.min(f, to), pts = [];
+  for (let k = from; k <= end; k += 1) pts.push(P(ballAt(k)));
+  if (pts.length < 2) return;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.lineCap = 'round';
+  ctx.setLineDash([2, 16]); ctx.strokeStyle = COL.gold; ctx.lineWidth = 7;
+  ctx.shadowColor = COL.gold; ctx.shadowBlur = 16;
+  ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(...p) : ctx.moveTo(...p))); ctx.stroke();
+  ctx.restore();
+}
+
+// ---------- 各段 ----------
+function hoopBox(alpha, pulse = 0) {
+  const [x1, y1, x2, y2] = D.hoop;
+  const A = P([x1, y1]), B = P([x2, y2]);
+  ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = '#ff9a1f'; ctx.lineWidth = 4 + 3 * pulse;
+  ctx.shadowColor = '#ff9a1f'; ctx.shadowBlur = 18;
+  ctx.strokeRect(A[0], A[1], B[0] - A[0], B[1] - A[1]); ctx.restore();
+  return [(A[0] + B[0]) / 2, B[1]];
+}
+
+function scoreSlam(t, t0, x, y, alpha = 1) {
+  const u = t - t0;
+  if (u < 0 || alpha <= 0) return;
+  const sc = lerp(1.4, 1, easeOut(clamp(u / 0.14)));
+  ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc); ctx.translate(-x, -y);
+  ctx.globalAlpha = clamp(u / 0.06) * alpha;
+  ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = 10;
+  slab(x - 250, y - 150, 500, 300, COL.blue);
+  ctx.shadowColor = 'transparent';
+  slab(x + 232, y - 150, 26, 300, COL.red);
+  ctx.restore();
+  ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc); ctx.translate(-x, -y);
+  const a = clamp(u / 0.06) * alpha;
+  txt('AI SHOT SCORE', x - 200, y - 104, { size: 34, font: FONT_KO, weight: 'normal', align: 'left', alpha: a, color: COL.light });
+  txt(String(D.score), x - 20, y + 26, { size: 230, font: F.numW, weight: 'normal', alpha: a });
+  txt('/100', x + 170, y + 92, { size: 40, font: F.num, weight: 'normal', alpha: a, color: COL.light });
+  ctx.restore();
+}
+
+function stopwatch(t, t0, alpha, f) {
+  const u = t - t0;
+  if (u < 0 || alpha <= 0) return;
+  const X = 90, Y = 880, Wd = 1130, tmax = 0.7;
+  const k = easeOut(clamp(u / 0.3)) * alpha;
+  const sx = (s) => X + s / tmax * Wd;
+  ctx.save(); ctx.globalAlpha = k * 0.88; ctx.fillStyle = COL.panel; ctx.fillRect(X - 30, Y - 92, Wd + 60, 150); ctx.restore();
+  txt('DIP → RELEASE', X, Y - 62, { size: 34, font: FONT_KO, weight: 'normal', align: 'left', alpha: k });
+  txt('QUICK RELEASE', X + 230, Y - 62, { size: 22, font: F.num, weight: 'normal', align: 'left', color: COL.grey, alpha: k, spacing: 3 });
+  const tq = D.details.quick_release.time;
+  const run = clamp((f - D.keys.dip) / D.srcFps, 0, tq);
+  ctx.save(); ctx.globalAlpha = k;
+  const g = ctx.createLinearGradient(sx(0.25), 0, sx(0.6), 0); g.addColorStop(0, COL.green); g.addColorStop(1, COL.red);
+  ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(X, Y - 12, Wd, 24);
+  ctx.fillStyle = COL.green; ctx.fillRect(X, Y - 12, Math.min(sx(run), sx(0.25)) - X, 24);
+  if (run > 0.25) { ctx.fillStyle = g; ctx.fillRect(sx(0.25), Y - 12, sx(run) - sx(0.25), 24); }
+  ctx.restore();
+  [[0.25, '0.25s = 100', COL.green], [0.6, '0.60s = 0', COL.red]].forEach(([s, l, c]) => {
+    ctx.save(); ctx.globalAlpha = k; ctx.fillStyle = c; ctx.fillRect(sx(s) - 2, Y - 26, 4, 52); ctx.restore();
+    txt(l, sx(s), Y + 44, { size: 22, font: F.hd, weight: 700, color: c, alpha: k });
+  });
+  txt(`${run.toFixed(2)}s`, sx(run) + 14, Y - 40, { size: 50, font: F.numW, weight: 'normal', align: 'left', color: COL.gold, alpha: k });
+}
+
+function sceneOverlays(t, b, f) {
+  const fr = D.frames[Math.round(f)] || {};
+  const K = D.keys;
+  if (b.id === 'detect') {
+    const tJ = VO.L03.t + 0.2, tB = voAt('L03', 'object detection'), tH = voAt('L03', 'the rim');
+    ['sh', 'el', 'wr', 'ix', 'hip', 'kn', 'an', 'heel', 'toe', 'nose'].forEach((key, i) => {
+      if (fr[key]) dot(P(fr[key]), 6, COL.cyan, easeOut(clamp((t - tJ - i * 0.05) / 0.2)));
+    });
+    if (fr.sh) callout(t, tJ, P(fr.sh), 620, 420, 'Body landmarks', '33', { color: COL.cyan, kicker: 'MEDIAPIPE POSE', w: 330 });
+    if (fr.box) {
+      const [x1, y1, x2, y2] = fr.box, A = P([x1, y1]), B = P([x2, y2]);
+      const k = easeOut(clamp((t - tB) / 0.25));
+      ctx.save(); ctx.globalAlpha = k; ctx.strokeStyle = COL.green; ctx.lineWidth = 4; ctx.shadowColor = COL.green; ctx.shadowBlur = 14;
+      ctx.strokeRect(A[0] - 6, A[1] - 6, B[0] - A[0] + 12, B[1] - A[1] + 12); ctx.restore();
+      callout(t, tB, [B[0] + 6, (A[1] + B[1]) / 2], 640, 700, 'Ball detection', '', { color: COL.green, kicker: 'YOLOV8', w: 300 });
+    }
+    if (t >= tH) {
+      const k = easeOut(clamp((t - tH) / 0.25));
+      const anchor = hoopBox(k, Math.abs(Math.sin((t - tH) * 6)) * decay(t, tH, 0.8));
+      callout(t, tH, anchor, 1250, 470, 'Hoop zone · judges the make', '', { color: '#ff9a1f', kicker: 'HOOP ROI', w: 440 });
+    }
+  }
+  if (b.id === 'dip') {
+    const hold = t >= holdAt(b);
+    jointAngle(fr, 'hip', 'kn', 'an', { color: COL.gold, value: fr.knee, side: -1, sub: 'knee angle' });
+    if (fr.heel) {
+      const g = P([fr.heel[0] - 160, D.groundHeel]), g2 = P([fr.heel[0] + 160, D.groundHeel]);
+      ctx.save(); ctx.globalAlpha = 0.7; ctx.setLineDash([10, 8]); ctx.strokeStyle = COL.white; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(...g); ctx.lineTo(...g2); ctx.stroke(); ctx.restore();
+    }
+    if (hold && fr.kn) callout(t, holdAt(b), null, 860, 560, 'Min knee angle', `${fmt(D.details.lower_body.min_knee_angle)}°`, { kicker: 'LOWER-BODY LOAD · FULL MARKS ≤ 85°', w: 420 });
+  }
+  if (['ext', 'release', 'quick', 'follow'].includes(b.id)) {
+    const red = b.id === 'follow' && fr.elbow < 145;
+    jointAngle(fr, 'sh', 'el', 'wr', { color: red ? COL.red : COL.gold, value: fr.elbow, side: 1, sub: 'elbow angle' });
+  }
+  if (b.id === 'ext') {
+    const seen = D.frames.slice(K.dip, Math.round(f) + 1).map((x) => x.speed || 0);
+    const vmax = Math.max(0, ...seen);
+    callout(t, b.t0 + 0.2, null, 860, 560, 'Peak elbow extension speed', `${Math.round(vmax)}°/s`, { kicker: 'EXTENSION SPEED · FULL MARKS 400°/S', w: 470 });
+  }
+  if (b.id === 'release' && t >= holdAt(b)) {
+    if (fr.sh && fr.el) {
+      const S = P(fr.sh), E = P(fr.el), up = Math.atan2(S[1] - E[1], S[0] - E[0]);
+      const len = Math.hypot(...[0, 1].map((i) => P(fr.wr)[i] - E[i]));
+      const ang = up - (160 * Math.PI) / 180;
+      const k = easeOut(clamp((t - b.t0 - b.play) / 0.4));
+      ctx.save(); ctx.globalAlpha = k; ctx.setLineDash([12, 10]); ctx.strokeStyle = COL.white; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(...E); ctx.lineTo(E[0] + Math.cos(ang) * len * 1.05, E[1] + Math.sin(ang) * len * 1.05); ctx.stroke(); ctx.restore();
+      txt('IDEAL 160°', E[0] + Math.cos(ang) * len * 1.05 - 10, E[1] + Math.sin(ang) * len * 1.05 - 30, { size: 26, font: F.hd, weight: 700, alpha: k, stroke: 5, strokeColor: 'rgba(0,0,0,0.8)', align: 'right' });
+    }
+    callout(t, holdAt(b) + 0.2, null, 860, 560, 'Median elbow angle at release', `${fmt(D.details.release.median_angle)}°`, { kicker: 'RELEASE FORM · RELEASE ± 0.07S', w: 470 });
+  }
+  if (b.id === 'quick') stopwatch(t, b.t0, 1, f);
+  if (b.id === 'follow') {
+    const hold = t >= holdAt(b);
+    if (hold) callout(t, holdAt(b), null, 860, 560, 'Elbow after release', `${fmt(D.details.follow.median_follow_angle)}° · ${fmt(D.details.follow.angle_std)}°`, { kicker: 'FOLLOW-THROUGH · MEDIAN · SPREAD', w: 420, color: COL.red });
+  }
+  if (b.id === 'others') {
+    const T = ['wrist loading', 'kinetic chain', 'torso control', 'forward sway'].map((w) => voAt('L10', w));
+    const det = D.details;
+    // 1 手腕：小窗回看手腕最大加载那一帧
+    if (t < T[1] + 0.2) {
+      const k = easeOut(clamp((t - T[0]) / 0.3)) * (1 - prog(t, T[1], T[1] + 0.2));
+      drawInset(K.wristPeak, k, 'Peak wrist load', `${fmt(det.wrist.peak_wrist_angle)}°`, `frame ${K.wristPeak}`);
+    } else if (t < T[2] + 0.2) {
+      const k = easeOut(clamp((t - T[1]) / 0.3)) * (1 - prog(t, T[2], T[2] + 0.2));
+      callout(t, T[1], null, 860, 560, `Knee frame ${K.kneeExt} → release frame ${K.release}`, `${det.kinetic_chain.sequence_frames} FRAMES EARLY`, { kicker: 'KINETIC CHAIN · IDEAL ≈ 2 FRAMES', w: 470, alpha: k });
+    } else if (t < T[3] + 0.2) {
+      const k = easeOut(clamp((t - T[2]) / 0.3)) * (1 - prog(t, T[3], T[3] + 0.2));
+      if (fr.sh && fr.hip) {
+        const S = P(fr.sh), Hh = P(fr.hip);
+        glowLine([S, Hh], COL.cyan, 7, k);
+        ctx.save(); ctx.globalAlpha = k * 0.8; ctx.setLineDash([10, 8]); ctx.strokeStyle = COL.white; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(Hh[0], Hh[1]); ctx.lineTo(Hh[0], S[1] - 40); ctx.stroke(); ctx.restore();
+      }
+      callout(t, T[2], null, 860, 560, 'Torso drift after release (avg)', `${fmt(det.torso.mean_deviation)}°`, { kicker: 'TORSO CONTROL', w: 500, alpha: k, color: COL.cyan });
+    } else {
+      const k = easeOut(clamp((t - T[3]) / 0.3));
+      const y = D.groundHeel + 30, a = P([det.sway.jump_x, y]), c = P([det.sway.landing_x, y]);
+      ctx.save(); ctx.globalAlpha = k; ctx.strokeStyle = COL.gold; ctx.fillStyle = COL.gold; ctx.lineWidth = 6; ctx.shadowColor = COL.gold; ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(c[0] - 14, c[1]); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.lineTo(c[0] - 22, c[1] - 13); ctx.lineTo(c[0] - 22, c[1] + 13); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      callout(t, T[3], null, 860, 560, 'Takeoff → landing drift', `${fmt(det.sway.sway)}px`, { kicker: 'FORWARD SWAY', w: 470, alpha: k });
+    }
+  }
+}
+
+let INSET_IMG = null;
+function drawInset(fi, k, title, value, sub) {
+  if (k <= 0 || !INSET_IMG) return;
+  const fr = D.frames[fi];
+  const box = { x: 860, y: 330, w: 430, h: 400 };
+  const c = { x: fr.wr[0] - 300, y: fr.wr[1] - 220, w: 600, h: 560 };
+  ctx.save(); ctx.globalAlpha = k;
+  ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 24;
+  ctx.fillStyle = COL.ink; ctx.fillRect(box.x - 6, box.y - 6, box.w + 12, box.h + 12);
+  ctx.shadowColor = 'transparent';
+  const s = FRAME_SCALE;
+  ctx.drawImage(INSET_IMG, c.x * s, c.y * s, c.w * s, c.h * s, box.x, box.y, box.w, box.h);
+  const Pi = (p) => [box.x + (p[0] - c.x) / c.w * box.w, box.y + (p[1] - c.y) / c.h * box.h];
+  const E = Pi(fr.el), Wr = Pi(fr.wr), I = Pi(fr.ix);
+  ctx.restore();
+  glowLine([E, Wr, I], COL.gold, 6, k);
+  [E, Wr, I].forEach((p) => dot(p, 6, COL.white, k));
+  ctx.save(); ctx.globalAlpha = k; ctx.fillStyle = COL.red; ctx.fillRect(box.x - 6, box.y - 6, box.w + 12, 8); ctx.restore();
+  ctx.save(); ctx.globalAlpha = k * 0.9; slab(box.x, box.y + box.h - 120, box.w, 120, COL.panel, 0); ctx.restore();
+  txt(`${title} · ${sub}`, box.x + 22, box.y + box.h - 88, { size: 26, font: F.hd, weight: 700, align: 'left', alpha: k });
+  txt(value, box.x + 22, box.y + box.h - 36, { size: 58, font: F.numW, weight: 'normal', align: 'left', color: COL.gold, alpha: k });
+  txt('WRIST LOADING', box.x + 4, box.y - 26, { size: 22, font: F.num, weight: 'normal', align: 'left', color: COL.grey, alpha: k, spacing: 3 });
+}
+
+// ---------- 收尾评分卡 ----------
+function scoreCard(t, b0, alpha) {
+  if (alpha <= 0) return;
+  const t0 = b0.t0;
+  huazi(t, t0 + 0.1, 'FINAL SCORE', 150, 120, { size: 70, bg: COL.red, kicker: 'Shot breakdown', align: 'left' });
+  const X = 150, Y0 = 272, RH = 60, cols = { w: 660, bar: 700, barW: 420, sc: 1230, con: 1390 };
+  const hk = easeOut(clamp((t - t0 - 0.3) / 0.3)) * alpha;
+  [['CATEGORY', X, 'left'], ['WEIGHT', cols.w, 'right'], ['SCORE', cols.bar, 'left'], ['WEIGHTED', cols.con, 'right']].forEach(([s, x, al]) =>
+    txt(s, x, Y0 - 44, { size: 24, font: F.num, weight: 'normal', spacing: 2, color: COL.grey, align: al, alpha: hk }));
+  let acc = 0;
+  const outro = BEAT.outro, weak = ['follow_through', 'quick_release'];
+  const tw = voAt('L13', 'Most of the points');
+  D.dims.forEach((d, i) => {
+    const y = Y0 + i * RH;
+    const ti = t0 + 0.35 + i * 0.16;
+    const k = easeOut(clamp((t - ti) / 0.3)) * alpha;
+    if (k <= 0) return;
+    const isWeak = weak.includes(d.key) && t >= tw;
+    const wk = isWeak ? easeOut(clamp((t - tw) / 0.3)) : 0;
+    const dim = t >= tw && !weak.includes(d.key) ? 1 - 0.45 * easeOut(clamp((t - tw) / 0.3)) : 1;
+    if (wk > 0) { ctx.save(); ctx.globalAlpha = wk * 0.55 * alpha; slab(X - 30, y - RH / 2 + 5, cols.con - X + 60, RH - 10, COL.red, -0.1); ctx.restore(); }
+    else if (i % 2 === 0) { ctx.save(); ctx.globalAlpha = k * 0.35; ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(X - 30, y - RH / 2 + 5, cols.con - X + 60, RH - 10); ctx.restore(); }
+    txt(d.en, X, y + 2, { size: 36, font: FONT_KO, weight: 'normal', align: 'left', alpha: k * dim });
+    txt(`${Math.round(d.w * 100)}%`, cols.w, y, { size: 34, font: F.num, weight: 'normal', align: 'right', color: COL.light, alpha: k * dim });
+    const fill = easeOut(clamp((t - ti - 0.1) / 0.5));
+    ctx.save(); ctx.globalAlpha = k * dim; ctx.fillStyle = 'rgba(255,255,255,0.14)'; ctx.fillRect(cols.bar, y - 9, cols.barW, 18);
+    ctx.fillStyle = d.score >= 60 ? COL.green : d.score >= 30 ? COL.gold : COL.red;
+    ctx.fillRect(cols.bar, y - 9, cols.barW * d.score / 100 * fill, 18); ctx.restore();
+    txt(String(Math.round(d.score * fill)), cols.sc, y + 2, { size: 44, font: F.numW, weight: 'normal', align: 'right', alpha: k * dim });
+    txt(`+${(d.w * d.score * fill).toFixed(1)}`, cols.con, y + 2, { size: 40, font: F.num, weight: 'normal', align: 'right', color: COL.gold, alpha: k * dim });
+    acc += d.w * d.score * fill * (k > 0 ? 1 : 0);
+  });
+  const tf = t0 + 0.35 + 10 * 0.16 + 0.4;
+  txt('Total = Σ (category score × weight)', X, Y0 + 10 * RH + 8, { size: 26, font: F.hd, weight: 700, align: 'left', color: COL.grey, alpha: hk });
+  const RX = 1700;
+  txt('WEIGHTED TOTAL', RX, 332, { size: 42, font: FONT_KO, weight: 'normal', alpha: hk });
+  txt('FINAL', RX, 286, { size: 24, font: F.num, weight: 'normal', color: COL.grey, alpha: hk, spacing: 4 });
+  const slam = voAt('L12', '54');
+  const big = t >= slam ? D.score : acc;
+  const sc = t >= slam ? lerp(1.3, 1, easeOut(clamp((t - slam) / 0.14))) : 1;
+  ctx.save(); ctx.translate(RX, 540); ctx.scale(sc, sc); ctx.translate(-RX, -540);
+  if (t >= slam) { ctx.save(); ctx.globalAlpha = alpha; slab(RX - 190, 400, 380, 280, COL.blue); slab(RX + 172, 400, 22, 280, COL.red); ctx.restore(); }
+  txt(t >= slam ? String(D.score) : acc.toFixed(1), RX, 548, { size: t >= slam ? 230 : 150, font: F.numW, weight: 'normal', alpha: hk });
+  ctx.restore();
+  txt('/ 100', RX, 730, { size: 40, font: F.num, weight: 'normal', color: COL.light, alpha: hk });
+  if (t >= tw) {
+    const k = easeOut(clamp((t - tw) / 0.3)) * alpha;
+    tag('BIGGEST LOSSES', RX, 830, { size: 36, bg: COL.red, alpha: k });
+    txt('Follow-through 0', RX, 890, { size: 28, font: F.hd, weight: 700, alpha: k });
+    txt('Quick release 15', RX, 930, { size: 28, font: F.hd, weight: 700, alpha: k });
+  }
+}
+
+function endSlate(t, t0, alpha) {
+  if (alpha <= 0) return;
+  veil(alpha * 0.85, COL.ink);
+  huazi(t, t0, 'AI SHOT SCORING SYSTEM', W / 2, 470, { size: 120, bg: COL.red, kicker: 'Frame-by-frame shot analysis' });
+  const k = easeOut(clamp((t - t0 - 0.25) / 0.4)) * alpha;
+  txt('MediaPipe pose estimation  ·  YOLOv8 ball detection  ·  10-category weighted score', W / 2, 640, { size: 34, font: F.hd, weight: 700, alpha: k, color: COL.light });
+  const kc = easeOut(clamp((t - t0 - 0.7) / 0.45)) * alpha;
+  if (kc <= 0) return;
+  const lh = 120, lw = lh * LOGO.width / LOGO.height;
+  ctx.font = `normal 64px ${F.numW}`;
+  const nw = ctx.measureText('NBA CHINA TECH TEAM').width;
+  const x0 = W / 2 - (lw + 28 + nw) / 2, cy = 820 + (1 - kc) * 24;
+  ctx.save(); ctx.globalAlpha = kc; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(LOGO, x0, cy - lh / 2, lw, lh); ctx.restore();
+  txt('PRESENTED BY', x0 + lw + 28, cy - 34, { size: 24, font: F.num, weight: 'normal', align: 'left', color: COL.grey, alpha: kc, spacing: 4 });
+  txt('NBA CHINA TECH TEAM', x0 + lw + 28, cy + 20, { size: 64, font: F.numW, weight: 'normal', align: 'left', alpha: kc });
+}
+
+function cornerLogo(alpha) {
+  if (alpha <= 0) return;
+  const lh = 104, lw = lh * LOGO.width / LOGO.height;
+  ctx.save(); ctx.globalAlpha = 0.95 * alpha; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 2;
+  ctx.imageSmoothingQuality = 'high'; ctx.drawImage(LOGO, 62, 48, lw * 0.92, lh * 0.92); ctx.restore();
+}
+
+// ---------- 主渲染 ----------
+window.renderFrame = async function (t) {
+  const b = beatAt(t);
+  const f = srcFrame(b, t);
+  cam = camAt(t);
+  const fi = Math.round(f);
+  const im = await frameImg(fi);
+  if (b.id === 'others') INSET_IMG = await frameImg(D.keys.wristPeak);
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  const isCard = b.id === 'card' || b.id === 'outro';
+  const cardIn = isCard ? easeOut(clamp((t - BEAT.card.t0) / 0.5)) : 0;
+  drawBase(im, cardIn > 0 ? `blur(${14 * cardIn}px) brightness(${1 - 0.6 * cardIn})` : b.id.startsWith('rew') && t < holdAt(b) ? 'saturate(0.4) contrast(1.1)' : 'none');
+  vignette(0.35 + 0.25 * cardIn);
+
+  // 开场与命中
+  const K = D.keys;
+  const tMake1 = BEAT.make.t0;
+  if (t < BEAT.rewind.t0 + 0.3) {
+    veil(decay(t, tMake1, 0.12) * 0.55, '#ffffff');
+    const fadeOut = 1 - prog(t, BEAT.rewind.t0, BEAT.rewind.t0 + 0.3);
+    huazi(t, tMake1 + 0.02, 'GOOD', 1270, 470, { size: 96, bg: COL.red, kicker: 'Bucket', anim: 'slam', hold: BEAT.rewind.t0 - tMake1 - 0.02 });
+    scoreSlam(t, voAt('L01', '54'), 1380, 760, fadeOut);
+  }
+  if (b.id === 'rewind' && t < holdAt(b) + 0.3) {
+    const k = 1 - prog(t, holdAt(b), holdAt(b) + 0.3);
+    tag('◀◀  REWIND', 200, 210, { size: 40, bg: COL.red, alpha: k });
+  }
+
+  sceneOverlays(t, b, f);
+
+  // 再看一次命中
+  if (b.id === 'makeAgain') {
+    const trailA = easeOut(clamp((t - b.t0 - 0.5) / 0.3));
+    ballTrail(f, trailA);
+    const tm = LOCK.make_result;
+    if (t >= tm) {
+      veil(decay(t, tm, 0.12) * 0.45, '#ffffff');
+      hoopBox(1, decay(t, tm, 0.4));
+      huazi(t, tm, 'MAKE +5', 1250, 470, { size: 84, bg: COL.red, kicker: 'Make · 100', anim: 'slam' });
+    }
+  }
+
+  // 面板：phases 进场，makeAgain 开头滑出
+  const tightOn = BEAT.phases.t0, tightOff = BEAT.makeAgain.t0;
+  const hudA = easeOut(clamp((t - tightOn - 0.3) / 0.5));
+  const slide = t < tightOff ? lerp(560, 0, hudA) : lerp(0, 600, easeInOut(prog(t, tightOff, tightOff + 0.6)));
+  if (t >= tightOn && t < BEAT.card.t0) hud(t, f, 1, slide);
+  if (b.id === 'makeAgain') {
+    const k = easeOut(clamp((t - tightOff - 0.3) / 0.4));
+    ctx.save(); ctx.globalAlpha = k * 0.9; slab(1520, 840, 330, 110, COL.blue); ctx.restore();
+    txt('AI SHOT SCORE', 1550, 868, { size: 22, font: F.num, weight: 'normal', align: 'left', color: COL.grey, alpha: k, spacing: 3 });
+    txt(liveTotal(t).toFixed(1), 1820, 912, { size: 62, font: F.numW, weight: 'normal', align: 'right', alpha: k });
+  }
+
+  if (!isCard) infoCard(t, f, b.id === 'rewind' ? 0.6 : 1);
+
+  if (isCard) scoreCard(t, BEAT.card, cardIn * (1 - prog(t, BEAT.outro.t1 - 3.0, BEAT.outro.t1 - 2.6)));
+  if (b.id === 'outro') endSlate(t, BEAT.outro.t1 - 2.8, easeOut(prog(t, BEAT.outro.t1 - 2.9, BEAT.outro.t1 - 2.5)));
+  cornerLogo(b.id === 'outro' ? 1 - prog(t, BEAT.outro.t1 - 2.9, BEAT.outro.t1 - 2.5) : 1);
+
+  const tight = (b.cam === 'tight' && b.id !== 'makeAgain');
+  subtitles(t, tight ? 680 : W / 2);
+  veil(1 - prog(t, 0, 0.25));
+  veil(prog(t, D.duration - 0.35, D.duration));
+};
+
+window.ready = (async () => {
+  D = await (await fetch('film_en.json')).json();
+  D.beats.forEach((b) => (BEAT[b.id] = b));
+  D.vo.forEach((v) => (VO[v.id] = v));
+  LOCK = lockTimes();
+  buildPush();
+  LOGO = await new Promise((ok, err) => { const im = new Image(); im.onload = () => ok(im); im.onerror = err; im.src = '../assets/brand/logoman.png'; });
+  const noto = new FontFace('NotoSansSC', 'url(../assets/fonts/NotoSansSC.ttf)', { weight: '100 900' });
+  document.fonts.add(await noto.load());
+  await Promise.all(['Action NBA', 'Action NBA Condensed'].map((n) => document.fonts.load(`80px "${n}"`)));
+  window.DURATION = D.duration;
+  window.FPS = FPS;
+})();
+</script>
+</body>
+</html>

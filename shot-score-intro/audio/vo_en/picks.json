@@ -1,0 +1,197 @@
+{
+ "L01": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 3.86,
+    "f0": 158.7,
+    "dyn": 5.1,
+    "bright": -11.0,
+    "seed": 1,
+    "heard": "This shot went in, but the shot scoring system only gives it a fifty-four.",
+    "ok": true
+   }
+  ]
+ },
+ "L02": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 4.1,
+    "f0": 146.8,
+    "dyn": 5.3,
+    "bright": -10.4,
+    "seed": 1,
+    "heard": "Let's break it down frame by frame and see where that number comes from.",
+    "ok": true
+   }
+  ]
+ },
+ "L03": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 5.84,
+    "f0": 145.1,
+    "dyn": 4.8,
+    "bright": -12.9,
+    "seed": 1,
+    "heard": "First, pose estimation finds thirty three landmarks on the body, and object detection tracks the ball and the rim.",
+    "ok": true
+   }
+  ]
+ },
+ "L04": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 6.86,
+    "f0": 145.1,
+    "dyn": 8.9,
+    "bright": -10.3,
+    "seed": 1,
+    "heard": "Each shot is split into three phases: the dip, the release, and the follow-through, and scored on ten categories.",
+    "ok": true
+   }
+  ]
+ },
+ "L05": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 8.43,
+    "f0": 149.4,
+    "dyn": 4.2,
+    "bright": -12.2,
+    "seed": 1,
+    "heard": "At the bottom of the dip, the knee only bends to about 130 degrees, not deep enough, so lower body load gets 40.",
+    "ok": false
+   }
+  ]
+ },
+ "L06": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 5.27,
+    "f0": 163.9,
+    "dyn": 5.3,
+    "bright": -10.6,
+    "seed": 1,
+    "heard": "On the way up, the elbow extends at over 1500 degrees per second. Extension speed gets full marks.",
+    "ok": false
+   }
+  ]
+ },
+ "L07": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 6.15,
+    "f0": 143.1,
+    "dyn": 4.9,
+    "bright": -10.4,
+    "seed": 1,
+    "heard": "At release, the elbow is at 152 degrees, close to the ideal 160, so release form scores 68.",
+    "ok": false
+   }
+  ]
+ },
+ "L08": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 6.11,
+    "f0": 146.8,
+    "dyn": 11.0,
+    "bright": -10.9,
+    "seed": 1,
+    "heard": "From dip to release takes zero point five five seconds. That's slow, so quick release gets just fifteen.",
+    "ok": false
+   }
+  ]
+ },
+ "L09": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 10.39,
+    "f0": 158.3,
+    "dyn": 5.2,
+    "bright": -12.4,
+    "seed": 1,
+    "heard": "On the follow through, the arm pulls back as soon as the ball is gone. The elbow drops from 164 degrees into the 50s, so follow through scores zero.",
+    "ok": false
+   }
+  ]
+ },
+ "L10": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 5.69,
+    "f0": 150.3,
+    "dyn": 4.8,
+    "bright": -11.1,
+    "seed": 1,
+    "heard": "Wrist loading, kinetic chain, torso control, and forward sway are all scored from the same data.",
+    "ok": true
+   }
+  ]
+ },
+ "L11": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 3.72,
+    "f0": 131.6,
+    "dyn": 5.7,
+    "bright": -12.2,
+    "seed": 1,
+    "heard": "Finally, the ball drops in, and Make gets full marks.",
+    "ok": true
+   }
+  ]
+ },
+ "L12": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 4.2,
+    "f0": 152.0,
+    "dyn": 7.4,
+    "bright": -10.7,
+    "seed": 1,
+    "heard": "Add up the ten weighted categories, and this shot's final score is fifty four.",
+    "ok": true
+   }
+  ]
+ },
+ "L13": {
+  "seed": 1,
+  "room": 12,
+  "takes": [
+   {
+    "dur": 6.05,
+    "f0": 137.0,
+    "dyn": 5.5,
+    "bright": -12.3,
+    "seed": 1,
+    "heard": "Most of the points were lost on the follow through and quick release, and every deduction traces back to a specific frame and angle.",
+    "ok": true
+   }
+  ]
+ }
+}
